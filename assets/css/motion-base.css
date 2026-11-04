@@ -1,0 +1,71 @@
+/* Pynora motion, the shared rules every page uses (with the arming script at the top of each page's head and
+   motion-core.js).
+
+   Gates on <html>, so a page without the motion scripts, or a visitor who asks for less motion, sees the still page:
+     .motion          armed before the first paint (the head's inline script); load start states live only under it
+     .motion-go       the load arrival plays (fonts and the first picture ready; at the latest 1.2 s after the page
+                      began to load)
+     .motion-scroll   the scroll system has measured (motion-core.js); scroll start states live only under it
+     .motion-jump     one frame after a jump: everything is set at once, no transition
+     .motion-released / .motion-settled   the strip and the ribbon may start / the opening has settled
+   On sections and rows, written by motion-core.js: --p (arrival 0 -> 1), --x (leaving), --v (passing, .5 = centred),
+   and the classes is-moving (values changing) and is-done (complete for a second). On word layers: is-up.
+
+   Channels, so nothing is moved twice:
+     transform        a layer's scroll-linked arrival, leaving and parallax in one expression; load keyframes
+     translate        mouse lean (script) and hover lifts (CSS)
+     scale            hover push-ins on pictures
+     transform on an inner img: settle, push-in, leaving push-in
+   Never put a scroll-linked transform on an element that has a transition on transform (it would lag the scroll). */
+
+/* ---------- Tokens ---------- */
+:root {
+  --m-rise: 1000ms;         /* a line rising on load */
+  --m-stagger: 90ms;        /* between rows of lines on load */
+  --m-cue: 900ms;           /* a line of words rising (or sinking) on cue */
+  --m-cue-panel: 700ms;     /* a panel or row of words arriving on cue */
+  --m-glide: 900ms;         /* the Decode lens between points */
+  --m-flip: 840ms;          /* the Product picture turning over */
+  --om: 1;                  /* offsets: phones move half as far */
+}
+@media (max-width: 760px) {
+  :root { --om: 0.5; }
+}
+
+/* ---------- How a scroll-linked layer reads its progress ----------
+   Each [data-layer] has a start share --d and a span --s (set per part, never inline):
+     --t  how far this layer has come (0 -> 1)
+     --e  the same, eased: 1 - (1 - t)^3, the scroll counterpart of --ease
+   Without the scripts --p is absent and every layer rests at 1 (finished). Children inherit --t and --e. */
+html.motion-scroll [data-layer] {
+  --t: clamp(0, (var(--p, 1) - var(--d, 0)) / var(--s, 1), 1);
+  --e: calc(1 - (1 - var(--t)) * (1 - var(--t)) * (1 - var(--t)));
+}
+html.motion-scroll .is-moving [data-layer] { will-change: transform; }
+
+/* ---------- Lines of words on cue ----------
+   A line rises in full, by time, when its moment in the scroll passes, and sinks back the same way, so a resting
+   page never shows half a line. It starts below its own clip: its height, plus the line's bottom room
+   (--line-room, written by motion-core.js from the wrapper's padding), plus 10 px (the clip reaches 8 px past the
+   wrapper). The wrapper carries all spacing; the moving inner part has none. */
+html.motion-scroll [data-assemble]:not(.m-load):not(.op) .line__in {
+  transition: transform var(--m-cue) var(--ease);
+}
+html.motion-scroll [data-assemble]:not(.m-load):not(.op) .line__in:not(.is-up) {
+  transform: translateY(calc(100% + var(--line-room, 0px) + 10px));
+}
+
+/* ---------- The first band's lines rise on load (the opening on Home; a page's first band elsewhere) ----------
+   --i is the line's visual row, numbered by motion-load.js from the measured layout. Held at their start until
+   motion-go, then each row rises 90 ms after the one above it. */
+@keyframes m-rise {
+  from { transform: translateY(calc(100% + var(--line-room, 0px) + 10px)); }
+}
+html.motion :is(.op, .m-load) .line__in {
+  animation: m-rise var(--m-rise) var(--ease) calc(150ms + var(--i, 0) * var(--m-stagger)) backwards paused;
+}
+html.motion.motion-go :is(.op, .m-load) .line__in { animation-play-state: running; }
+
+/* ---------- A jump sets everything at once ---------- */
+html.motion-jump [data-assemble] *,
+html.motion-jump .ftr * { transition: none !important; }

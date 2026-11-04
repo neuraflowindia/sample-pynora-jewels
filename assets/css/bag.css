@@ -1,0 +1,297 @@
+/* Bag and wishlist: the drawer bodies, lines, quantity steppers, gift note and empty states.
+   The drawer itself (paper, head, close button, slide, scrim) is drawer.css; bag.js and wishlist.js draw the
+   insides from the catalogue. */
+
+/* ---------- Free shipping line ---------- */
+.bag__ship {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: var(--c-sage-tint);
+  color: var(--c-sage-ink);
+  font: 600 15px/1.3 var(--font-text);
+  box-shadow: inset 0 0 0 1px rgba(33, 69, 58, 0.14);
+}
+.bag__ship .i { font-size: 18px; }
+
+/* ---------- Lines ---------- */
+.bag__lines { margin: 0; padding: 0; list-style: none; }
+.bag__line {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--c-line);
+}
+.bag__thumb {
+  display: block;
+  width: 76px;
+  height: 95px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--c-sand);
+  box-shadow: var(--sh-contact);
+}
+.bag__thumb img { width: 100%; height: 100%; object-fit: cover; }
+.bag__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 19px;
+  line-height: 1.25;
+  color: var(--c-ink);
+}
+.bag__name a { color: inherit; text-decoration: none; border-radius: 4px; }
+@media (hover: hover) {
+  .bag__name a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: rgba(125, 8, 35, 0.38); text-underline-offset: 4px; }
+}
+.bag__colour { margin: 4px 0 0; font: 400 15px/1.3 var(--font-text); color: var(--c-ink-2); }
+.bag__line .pill { margin-top: 8px; }
+.bag__end {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.bag__price {
+  font: 600 17.5px/1.2 var(--font-text);
+  letter-spacing: 0.01em;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--c-maroon);
+  white-space: nowrap;
+}
+
+/* the quantity stepper: 38 px on laptops, 44 px to the touch */
+.bag__qty {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: var(--c-paper);
+  box-shadow: var(--ring-gold);
+}
+.bag__step {
+  position: relative;
+  width: 34px;
+  height: 38px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--c-ink);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.bag__step .i { font-size: 15px; }
+.bag__step[aria-disabled="true"] { color: rgba(42, 26, 30, 0.3); cursor: default; }
+@media (hover: hover) {
+  .bag__step:not([aria-disabled="true"]):hover { background: var(--c-rose-50); }
+}
+/* at the stock limit, under the stepper: why "+" is off */
+.bag__stock { margin: 6px 0 0; font: 400 15px/1.3 var(--font-text); color: var(--c-ink-2); }
+.bag__qty output {
+  min-width: 18px;
+  text-align: center;
+  font: 600 16px/1 var(--font-text);
+  font-variant-numeric: lining-nums;
+}
+
+.bag__remove {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 400 15px/1 var(--font-text);
+  color: var(--c-ink-2);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.bag__remove::after { content: ""; position: absolute; inset: -15px -8px; }   /* 44 px to the touch */
+@media (hover: hover) { .bag__remove:hover { color: var(--c-maroon); } }
+
+/* ---------- Gift note ---------- */
+.bag__gift {
+  margin-top: 18px;
+  border-radius: 14px;
+  background: var(--c-champagne);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.4);
+}
+.bag__gift-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  font: 400 16px/1.35 var(--font-text);
+  color: var(--c-ink);
+  cursor: pointer;
+}
+.bag__gift-row > .i { font-size: 22px; color: var(--c-maroon); }
+.bag__tick {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 0 0 0 auto;
+  border-radius: 6px;
+  background: var(--c-paper) center / 16px 16px no-repeat;
+  box-shadow: inset 0 0 0 1.25px var(--c-gold-deep);
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.bag__tick:checked {
+  background-color: var(--c-maroon);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FBF2E6' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+  box-shadow: inset 0 0 0 1.25px var(--c-maroon);
+}
+.bag__tick:focus-visible { outline: 2px solid var(--c-maroon); outline-offset: 3px; }
+.bag__gift-field { padding: 0 16px 16px; }
+.bag__gift-field label { display: block; margin-bottom: 6px; font: 400 15px/1.3 var(--font-text); color: var(--c-ink-2); }
+.bag__gift-field textarea {
+  display: block;
+  width: 100%;
+  min-height: calc(3 * 1.45em + 22px);
+  margin: 0;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--c-paper);
+  box-shadow: var(--ring-gold-strong);
+  font: 400 16px/1.45 var(--font-text);
+  color: var(--c-ink);
+  resize: vertical;
+}
+.bag__gift-field textarea:focus-visible { outline: 2px solid var(--c-maroon); outline-offset: 2px; }
+.bag__count {
+  display: block;
+  margin-top: 6px;
+  text-align: right;
+  font: 400 14px/1.3 var(--font-text);
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--c-ink-2);
+}
+
+/* ---------- Foot: subtotal, terms, the WhatsApp order ---------- */
+.bag__sub {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0;
+  font: 400 17px/1 var(--font-text);
+  color: var(--c-ink);
+}
+.bag__sub b {
+  font: 600 22px/1 var(--font-text);
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--c-maroon);
+}
+.bag__terms { margin: 8px 0 16px; font: 400 14px/1.4 var(--font-text); color: var(--c-ink-2); }
+.bag__more {
+  display: flex;
+  justify-content: center;
+  margin: 14px auto 0;
+}
+
+/* ---------- Empty bag and empty wishlist ---------- */
+.bag__empty {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: clamp(36px, 8vh, 72px) 10px 24px;
+  text-align: center;
+}
+.bag__orb {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--c-rose-50);
+  color: var(--c-maroon);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.45);
+}
+.bag__orb .i { font-size: 28px; stroke-width: 1.4; }
+.bag__empty h3 { margin: 6px 0 0; font-size: 25px; line-height: 1.2; }
+.bag__empty p { margin: 0; max-width: 20em; font: 400 16px/1.5 var(--font-text); color: var(--c-ink-2); }
+.bag__empty .btn { margin-top: 8px; }
+.bag__empty .tlink { margin-top: 4px; }
+
+/* ---------- Wishlist: two columns of small cards ---------- */
+.wish__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 16px;
+  margin: 0;
+  padding: 4px 0 8px;
+  list-style: none;
+}
+.wish__card { position: relative; }
+.wish__pic {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--c-sand);
+  box-shadow: var(--sh-contact);
+}
+.wish__pic img { width: 100%; height: 100%; object-fit: cover; transition: transform 1200ms var(--ease); }
+.wish__name {
+  margin: 10px 0 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.25;
+  color: var(--c-ink);
+}
+.wish__name a { color: inherit; text-decoration: none; border-radius: 4px; }
+.wish__price {
+  display: block;
+  margin-top: 4px;
+  font: 600 16px/1.2 var(--font-text);
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--c-maroon);
+}
+.wish__card .card__wish { top: 8px; right: 8px; width: 36px; height: 36px; }
+.wish__card .card__wish::after { inset: -4px; }
+.wish__card .card__wish .i { font-size: 18px; }
+@media (hover: hover) and (pointer: fine) {
+  .wish__card:hover .wish__pic img { transform: scale(1.04); }
+  .wish__card:hover .wish__name a { text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: rgba(125, 8, 35, 0.38); text-underline-offset: 4px; }
+}
+
+/* ---------- Touch: steppers 44 px ---------- */
+@media (pointer: coarse) {
+  .bag__qty { height: 44px; }
+  .bag__step { width: 44px; height: 44px; }
+}
+
+/* ---------- Touch: a piece's name answers a tap 44 px tall (invisible room above and below its words) ---------- */
+@media (hover: none), (pointer: coarse) {
+  .bag__name, .wish__name { position: relative; }
+  .bag__name a::after, .wish__name a::after { content: ""; position: absolute; inset: -12px 0; }
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 760px) {
+  .bag__name { font-size: 17px; }
+  .bag__colour,
+  .bag__stock { font-size: 14px; }
+  .bag__price { font-size: 16px; }
+  .bag__line { gap: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bag__tick, .wish__pic img { transition: none; }
+  .wish__card:hover .wish__pic img { transform: none; }
+}

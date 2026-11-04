@@ -1,0 +1,175 @@
+/* Pynora search (#search): laptops and tablets get a paper sheet from the top (a wipe, 280 ms) with an 840 px
+   column, at most 80% of the window high, the strong double edge along its foot; phones get the whole screen.
+   The field, then the pieces found (or the new pieces before typing) beside the popular searches (below them on
+   phones). overlay.js adds .is-open; the sheet stays hidden without it. */
+
+.search {
+  --c-maroon-text: var(--c-maroon);
+  --c-focus: var(--c-maroon);
+  position: fixed;
+  z-index: var(--z-drawer);
+  top: 0;
+  left: 0;
+  right: 0;
+  max-height: 80vh;
+  max-height: 80dvh;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--c-paper);           /* solid: nothing behind shows through */
+  box-shadow: var(--border-double-strong-bottom), var(--sh-float);
+  color: var(--c-ink);
+  outline: none;
+  clip-path: inset(0 0 100% 0);
+  visibility: hidden;
+  transition: clip-path 200ms var(--ease), visibility 0s linear 200ms;
+}
+.search.is-open {
+  clip-path: inset(0 0 -64px 0);
+  visibility: visible;
+  transition: clip-path 280ms var(--ease), visibility 0s;
+}
+.search[hidden] { display: none; }
+
+.search__in {
+  max-width: calc(840px + 48px);
+  margin: 0 auto;
+  padding: 28px 24px 34px;
+}
+
+/* ---------- The field ---------- */
+.search__field {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 60px;
+  padding: 0 8px 0 22px;
+  border-radius: 999px;
+  background: var(--c-paper);
+  box-shadow: var(--ring-gold-strong), var(--sh-contact);
+  transition: box-shadow var(--dur-fast) var(--ease);
+}
+.search__field > .i { font-size: 22px; color: var(--c-gold-deep); }
+.search__input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-family: var(--font-text);
+  font-weight: 400;
+  font-size: 1.3125rem;            /* 21 px */
+  line-height: 1.2;
+  color: var(--c-ink);
+  text-overflow: ellipsis;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.search__input::placeholder { color: var(--c-ink-2); opacity: 1; }
+.search__input::-webkit-search-cancel-button,
+.search__input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
+/* the pill carries the field's focus ring */
+@supports selector(:has(*)) {
+  .search__input:focus { outline: none; }
+  .search__field:has(.search__input:focus) { box-shadow: inset 0 0 0 2px var(--c-maroon), var(--sh-contact); }
+}
+.search__close { flex: none; }
+
+/* ---------- Results and popular searches ---------- */
+.search__cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 40px;
+  margin-top: 24px;
+}
+.search__k {
+  margin: 0 0 10px;
+  font-family: var(--font-text);
+  font-weight: var(--fw-strong);
+  font-size: 0.875rem;             /* 14 px */
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-gold-deep);
+}
+.search__res { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.search__hit {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 14px;
+  color: var(--c-ink);
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.search__hit:hover,
+.search__hit:focus-visible { background: var(--c-rose-50); }
+.search__hit img {
+  width: 56px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 9px;
+  background: var(--c-sand);
+  box-shadow: var(--sh-contact);
+}
+.search__name { display: block; font-family: var(--font-display); font-weight: 400; font-size: 1.1875rem; line-height: 1.2; color: var(--c-ink); }   /* 19 px */
+.search__cap { display: block; margin-top: 3px; font-family: var(--font-text); font-style: italic; font-size: 0.9375rem; line-height: 1.3; color: var(--c-ink-2); }
+.search__price { font-family: var(--font-text); font-weight: var(--fw-strong); font-size: 1.03125rem; line-height: 1; color: var(--c-maroon); font-variant-numeric: lining-nums; white-space: nowrap; }   /* 16.5 px */
+
+.search__chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.search__chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  margin: 0;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--c-paper);
+  box-shadow: var(--ring-gold);
+  cursor: pointer;
+  font-family: var(--font-text);
+  font-weight: 400;
+  font-size: 0.9375rem;            /* 15 px */
+  line-height: 1;
+  color: var(--c-ink);
+  text-decoration: none;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.search__chip::after { content: ""; position: absolute; inset: -3px 0; border-radius: 999px; }   /* 44 px to the touch */
+.search__chip:hover { background: var(--c-rose-50); box-shadow: inset 0 0 0 1px rgba(125, 8, 35, 0.45); }
+.search__chip:active { background: var(--c-rose-100); }
+
+.search__none {
+  margin: 0;
+  max-width: 30em;
+  font-family: var(--font-text);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--c-ink-2);
+}
+.search__none .tlink { font-size: 1rem; }
+/* "earrings" and "bridal" in the line: words that search when pressed, like the popular chips */
+.search__try { display: inline; line-height: inherit; cursor: pointer; border-radius: 4px; }
+
+/* ---------- Phones: the whole screen ---------- */
+@media (max-width: 760px) {
+  .search { bottom: 0; max-height: none; box-shadow: none; }
+  .search.is-open { clip-path: inset(0); }
+  .search__in { padding: 16px 16px calc(28px + env(safe-area-inset-bottom, 0px)); }
+  .search__field { height: 52px; gap: 10px; padding-left: 16px; padding-right: 5px; }
+  .search__input { font-size: 1.1875rem; }      /* 19 px */
+  .search__cols { grid-template-columns: minmax(0, 1fr); gap: 22px; margin-top: 18px; }
+  .search__hit { padding-right: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search, .search.is-open, .search__field, .search__hit, .search__chip { transition: none; }
+}

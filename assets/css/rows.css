@@ -1,0 +1,87 @@
+/* Sideways rows: a plain list of cards that scrolls by hand and snaps to each card, with 16 px at each side.
+   <div class="row row--reviews">
+     <div class="row__bar">                                    row arrows: fine pointers only, shown by rows.js
+       <div class="ib-arrows" hidden>                          only while the row can scroll
+         <button class="ib ib--ring" type="button" data-row-prev aria-label="Previous reviews">left</button>
+         <button class="ib ib--ring" type="button" data-row-next aria-label="Next reviews">right</button>
+       </div>
+     </div>
+     <div class="row__scroller">
+       <ul class="track" role="list"><li class="row__item">…</li>…</ul>
+     </div>
+   </div>
+   The row reaches 16 px past its column on each side (on phones: to the screen’s edges), so the first card lines
+   up with the column. --row-item sets a card’s width and --row-gap the space between cards. The .track is the
+   one element that moves when the row is set in motion later; keep it as the scroller’s only child. */
+
+.row {
+  --row-item: 260px;
+  --row-gap: 24px;
+  --row-bleed: 16px;
+  --row-pad-top: 8px;                     /* room for a card’s lift */
+  --row-pad-bottom: 30px;                 /* room for a card’s shadow (the scroller clips what lies outside it) */
+  position: relative;
+  min-width: 0;
+}
+
+.row__bar { display: flex; justify-content: flex-end; }
+.row__bar .ib-arrows { margin: 0 0 14px; }
+
+.row__scroller {
+  position: relative;
+  margin: calc(-1 * var(--row-pad-top)) calc(-1 * var(--row-bleed)) calc(-1 * var(--row-pad-bottom));
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--row-bleed);
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.row__scroller::-webkit-scrollbar { display: none; }
+
+.track {
+  display: flex;
+  gap: var(--row-gap);
+  width: max-content;
+  min-width: 100%;
+  margin: 0;
+  padding: var(--row-pad-top) var(--row-bleed) var(--row-pad-bottom);
+  list-style: none;
+}
+
+.row__item {
+  display: flex;
+  flex: 0 0 var(--row-item);
+  width: var(--row-item);
+  scroll-snap-align: start;
+}
+.row__item > * { flex: 1 1 auto; min-width: 0; }
+/* the last card snaps by its end, so the row's far end is a resting place too (a start snap there cannot be
+   reached, and the row would spring back with the last card half out of sight) */
+.row__item:last-child { scroll-snap-align: end; }
+
+/* Arrows that cannot move further stay in place and keep focus, drawn like a switched-off button */
+.row .ib[aria-disabled="true"] { cursor: default; color: rgba(42, 26, 30, 0.3); }
+@media (hover: hover) {
+  .row .ib--ring[aria-disabled="true"]:hover { background: rgba(252, 248, 241, 0.42); box-shadow: var(--ring-gold); }
+}
+
+/* ---------- Kinds of row ---------- */
+.row--reviews { --row-item: 400px; }
+
+/* ---------- Tablets ---------- */
+@media (min-width: 761px) and (max-width: 1079px) {
+  .row--cards { --row-item: 280px; }
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 760px) {
+  .row { --row-gap: 12px; }
+  .row--cards { --row-item: 200px; }
+  .row--reviews { --row-item: 300px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row__scroller { scroll-behavior: auto; }
+}

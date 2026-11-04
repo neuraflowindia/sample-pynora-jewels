@@ -1,0 +1,55 @@
+/* The product page's reviews block (what clients say about one piece), on her rose wall.
+   A paper panel with the double gold edge: the average beside a bar for each star, then the reviews, newest
+   first, each with its stars, name, city and date, "Verified buyer", an optional title, the words and Team
+   Pynora's reply in a champagne panel; "Show all N reviews" under the first five. Drawn by pdp-reviews.js. */
+
+.rvb { max-width: 820px; margin: 0 auto; padding: 28px clamp(18px, 3vw, 36px) 24px; border-radius: var(--r-panel); background: var(--c-paper);
+  box-shadow: var(--border-double), 0 1px 2px rgba(63, 10, 22, .16), 0 26px 46px -28px rgba(63, 10, 22, .58);
+  --c-maroon-text: var(--c-maroon); }
+.rvb:empty { display: none; }
+
+/* ---------- the average and the bars ---------- */
+.rvb__top { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 18px 44px; padding: 4px 4px 24px; border-bottom: 1px solid var(--c-line); }
+.rvb__avg { position: relative; display: grid; justify-items: center; gap: 8px; min-width: 132px; text-align: center; }
+/* a fine gold rule between the average and the bars */
+.rvb__avg::after { content: ""; position: absolute; top: 2px; bottom: 2px; right: -22px; width: 1px;
+  background: linear-gradient(180deg, rgba(171, 142, 98, 0), rgba(171, 142, 98, .62) 22%, rgba(171, 142, 98, .62) 78%, rgba(171, 142, 98, 0)); }
+.rvb__avg-n { margin: 0; font: 400 44px/1 var(--font-display); color: var(--c-ink); font-variant-numeric: lining-nums; }
+.rvb__avg .stars .i { font-size: 17px; }
+.rvb__avg-c { margin: 0; font: 400 14px/1.3 var(--font-text); color: var(--c-ink-2); }
+.rvb__bars { display: grid; gap: 7px; max-width: 440px; margin: 0; padding: 0; list-style: none; }
+.rvb__bar { display: grid; grid-template-columns: 32px minmax(0, 1fr) 24px; align-items: center; gap: 12px; font: 400 13.5px/1 var(--font-text); color: var(--c-ink-2); font-variant-numeric: lining-nums tabular-nums; }
+.rvb__bar-k { display: inline-flex; align-items: center; gap: 3px; font-weight: 600; color: var(--c-ink); }
+.rvb__bar-k .i { font-size: 13px; color: var(--c-gold-antique); }
+.rvb__bar-t { height: 6px; overflow: hidden; border-radius: 99px; background: rgba(171, 142, 98, .2); }
+.rvb__bar-t i { display: block; height: 100%; border-radius: 99px; background: var(--c-gold-antique); }
+.rvb__bar-n { text-align: right; }
+
+/* ---------- the reviews ---------- */
+.rvb__list { margin: 0; padding: 0; list-style: none; }
+.rvb__item { padding: 22px 4px; border-bottom: 1px solid var(--c-line); border-radius: 4px; }
+.rvb__item:last-child { padding-bottom: 6px; border-bottom: 0; }
+.rvb__who { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font: 400 15px/1.3 var(--font-text); color: var(--c-ink-2); }
+.rvb__who .stars .i { font-size: 14px; }
+.rvb__name { font-weight: 600; color: var(--c-ink); }
+.rvb__when { font-size: 14px; font-variant-numeric: lining-nums; }
+.rvb__ver { display: inline-flex; align-items: center; gap: 5px; font: 600 14px/1 var(--font-text); color: var(--c-sage-ink); }
+.rvb__ver .i { font-size: 15px; stroke-width: 1.8; }
+.rvb__title { margin: 12px 0 0; font: 400 19px/1.3 var(--font-display); color: var(--c-ink); text-wrap: balance; }
+.rvb__text { max-width: 40em; margin: 8px 0 0; font: 400 17px/1.55 var(--font-text); color: var(--c-ink); text-wrap: pretty; }
+.rvb__reply { max-width: 40em; margin: 14px 0 0; padding: 12px 16px 12px 18px; border-radius: 12px; background: var(--c-champagne);
+  font: 400 16px/1.5 var(--font-text); color: var(--c-ink-2); box-shadow: inset 0 0 0 1px rgba(171, 142, 98, .32); }
+.rvb__reply b { font-weight: 600; color: var(--c-ink); }
+.rvb__more { display: flex; justify-content: center; margin-top: 20px; }
+
+/* ---------- phones: the average above the bars ---------- */
+@media (max-width: 560px) {
+  .rvb__top { grid-template-columns: minmax(0, 1fr); gap: 18px; padding-inline: 0; }
+  .rvb__avg::after { display: none; }
+  .rvb__avg-n { font-size: 38px; }
+  .rvb__bars { max-width: none; }
+  .rvb__item { padding-inline: 0; }
+  .rvb__title { font-size: 17px; }
+  .rvb__text { font-size: 16px; }
+  .rvb__reply { font-size: 15px; }
+}

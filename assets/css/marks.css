@@ -1,0 +1,188 @@
+/* Pynora small marks: line icons, status pills, tags, stars, colour dots and the count badge.
+   Icons come from the inline sprite at the top of every page:
+   <svg class="i" aria-hidden="true"><use href="#i-heart"/></svg>  (add i--fill for a solid mark such as the star). */
+
+/* ---------- Icons: 1em square, a fine line in the current colour ---------- */
+.i {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  flex: none;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: middle;
+}
+.i--fill { fill: currentColor; stroke: none; }
+/* sizes used across the site */
+.i--13 { font-size: 13px; }
+.i--15 { font-size: 15px; }
+.i--16 { font-size: 16px; }
+.i--17 { font-size: 17px; }
+.i--18 { font-size: 18px; }
+.i--19 { font-size: 19px; }
+.i--20 { font-size: 20px; }
+.i--22 { font-size: 22px; }
+
+/* ---------- Status pills: "Ships in 48 hrs" (sage) and "Made to order · 2–3 wks" (dusty rose) ---------- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 11px 0 9px;
+  border-radius: 999px;
+  font-family: var(--font-text);
+  font-weight: var(--fw-strong);
+  font-size: var(--fs-pill);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.pill .i { font-size: 14px; stroke-width: 1.8; }
+.pill--ready { background: var(--c-sage-tint); color: var(--c-sage-ink); box-shadow: inset 0 0 0 1px rgba(33, 69, 58, 0.14); }
+.pill--mto { background: var(--c-dusty-rose-tint); color: var(--c-mto-ink); box-shadow: inset 0 0 0 1px rgba(94, 42, 48, 0.14); }
+
+/* ---------- Tags: at most one per piece, "New" or "Founder’s pick" ---------- */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 25px;
+  padding: 0 10px 0 8px;
+  border-radius: 999px;
+  font-family: var(--font-text);
+  font-weight: var(--fw-strong);
+  font-size: 0.8125rem;          /* 13 px */
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  color: var(--c-bronze);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.tag .i { font-size: 13px; stroke-width: 1.9; color: var(--c-gold-antique); }
+.tag--new { background: rgba(243, 231, 207, 0.95); box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.35), var(--sh-chip); }
+.tag--founders-pick { background: rgba(252, 248, 241, 0.95); box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.75), var(--sh-chip); }
+.tag--founders-pick .i { color: var(--c-maroon); }
+
+/* ---------- Stars ----------
+   Five stars filled to the rating (the rest gold at 30%):
+   <span class="stars" aria-hidden="true">5 × star<span class="stars__fill" style="width:96%">5 × star</span></span>
+   One star with the average and the count:
+   <span class="stars-avg">star 4.9 <span class="stars-avg__n">(7)</span></span> */
+.stars { position: relative; display: inline-flex; gap: 2px; color: rgba(156, 124, 76, 0.3); }
+.stars__fill { position: absolute; inset: 0 auto 0 0; display: inline-flex; gap: 2px; overflow: hidden; color: var(--c-gold-antique); white-space: nowrap; }
+.stars .i { font-size: 15px; }
+.stars-avg {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-text);
+  font-weight: var(--fw-strong);
+  font-size: 0.90625rem;         /* 14.5 px */
+  line-height: 1;
+  color: var(--c-ink);
+  font-variant-numeric: lining-nums;
+  white-space: nowrap;
+}
+.stars-avg .i { font-size: 13px; color: var(--c-gold-antique); }
+.stars-avg__n { font-weight: var(--fw-text); color: var(--c-ink-2); }
+
+/* ---------- Colour dots: named buttons with aria-pressed ("Sindoori"); --cdot sets the colour ---------- */
+.cdots { display: inline-flex; align-items: center; gap: 6px; }
+.cdot {
+  position: relative;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--cdot, var(--c-sand));
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(42, 26, 30, 0.2), 0 0 0 2.5px var(--c-paper);
+  transition: box-shadow var(--dur-fast) var(--ease);
+}
+.cdot::after { content: ""; position: absolute; inset: -7px; border-radius: 50%; }   /* 29 px tap area */
+.cdot[aria-pressed="true"] { box-shadow: inset 0 0 0 1px rgba(42, 26, 30, 0.2), 0 0 0 2.5px var(--c-paper), 0 0 0 3.75px var(--c-ink); }
+@media (hover: hover) {
+  .cdot[aria-pressed="false"]:hover,
+  .cdot:not([aria-pressed]):hover { box-shadow: inset 0 0 0 1px rgba(42, 26, 30, 0.2), 0 0 0 2.5px var(--c-paper), 0 0 0 3.75px rgba(42, 26, 30, 0.45); }
+}
+
+/* ---------- Count badge on the wishlist and bag buttons: shown only above 0 ---------- */
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -5px;
+  display: grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  font-family: var(--font-text);
+  font-weight: var(--fw-strong);
+  font-size: 0.8125rem;          /* 13 px */
+  line-height: 1;
+  font-variant-numeric: lining-nums;
+  color: var(--c-on-maroon);
+  background: var(--c-maroon);
+  box-shadow: 0 0 0 2px var(--c-paper);
+  pointer-events: none;
+}
+.badge:empty { display: none; }
+.badge.is-bump { animation: badge-bump var(--dur) var(--ease); }
+@keyframes badge-bump {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 760px) {
+  .pill { height: 24px; padding: 0 9px 0 7px; gap: 5px; }
+  .pill .i { font-size: 13px; }
+  .pill__more { display: none; }       /* " · 2–3 wks" waits for the product page */
+  .tag--icon-on-phone { width: 30px; height: 30px; padding: 0; justify-content: center; gap: 0; }
+  .tag--icon-on-phone .i { font-size: 14px; }
+  /* the word stays for screen readers, at its own size, out of sight */
+  .tag--icon-on-phone .tag__word {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .cdots { gap: 5px; }
+  .cdot { width: 13px; height: 13px; }
+  .cdot::after { inset: -8px; }
+  .badge { top: -3px; right: -2px; }  /* inside the bar on phones */
+}
+
+/* ---------- Colour dots on touch screens ----------
+   Each dot's tap area is at least 24 px wide and 44 px tall. The gap between dots widens so the
+   areas sit side by side without overlapping (15 px dots 9 px apart, 13 px dots 11 px apart on phones); the two
+   end dots reach a little further out. Laptops keep the spacing above. */
+@media (hover: none), (pointer: coarse) {
+  .cdots { gap: 9px; }
+  .cdot::after { inset: -14.5px -4.5px; border-radius: 0; }
+  .cdot:first-child::after { left: -10px; }
+  .cdot:last-child::after { right: -10px; }
+}
+@media (hover: none) and (max-width: 760px), (pointer: coarse) and (max-width: 760px) {
+  .cdots { gap: 11px; }
+  .cdot::after { inset: -15.5px -5.5px; }
+  .cdot:first-child::after { left: -10px; }
+  .cdot:last-child::after { right: -10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cdot { transition: none; }
+  .badge.is-bump { animation: none; }
+}

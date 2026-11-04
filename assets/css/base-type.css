@@ -1,0 +1,114 @@
+/* Pynora base typography: applies tokens-type.css to the text roles.
+   Load order: fonts.css, tokens-colour.css, tokens-type.css, base-type.css (then ornament.css, textures.css, backgrounds.css).
+   Role classes (.t-*) can sit on any element, so the look never depends on which heading level is used. */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-synthesis: none;            /* never fake a bold or an italic: Tiro has one weight */
+  font-kerning: normal;
+  font-optical-sizing: auto;
+}
+
+body {
+  font-family: var(--font-text);
+  font-weight: var(--fw-text);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--c-ink);
+  background: var(--c-ground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- Headings: Tiro upright, one weight; hierarchy from size, colour and space ---------- */
+h1, h2, h3, h4,
+.t-hero, .t-section, .t-sub, .t-card {
+  font-family: var(--font-display);
+  font-weight: var(--fw-display);
+  font-style: normal;
+  letter-spacing: var(--ls-display);
+  color: var(--c-ink);
+  text-wrap: balance;
+  margin: 0;
+}
+h1, .t-hero { font-size: var(--fs-hero); line-height: var(--lh-hero); }
+h2, .t-section { font-size: var(--fs-section); line-height: var(--lh-section); }
+h3, .t-sub { font-size: var(--fs-sub); line-height: var(--lh-sub); }
+h4, .t-card { font-size: var(--fs-card); line-height: var(--lh-card); }
+
+/* ---------- Hindi ----------
+   Hindi is always Tiro italic (the owner's pick). Only the italic Devanagari file ships, so anything marked
+   lang="hi" is italic too, including a Hindi word inside an English sentence; set upright, it would fall
+   back to a system font (Nirmala UI, Kohinoor and so on). */
+:lang(hi) { font-family: var(--font-hindi); font-style: italic; }
+.t-hindi, .t-hindi-lead {
+  font-family: var(--font-hindi);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--fs-hindi);
+  line-height: var(--lh-hindi);
+  letter-spacing: 0;
+  color: var(--c-maroon);
+  margin: 0;
+}
+.t-hindi-lead { font-size: var(--fs-hindi-lead); }
+
+/* ---------- Running text ---------- */
+p { margin: 0; text-wrap: pretty; }
+.t-body { font-size: var(--fs-body); line-height: var(--lh-body); max-width: var(--measure); }
+.t-lead { font-size: var(--fs-lead); line-height: var(--lh-lead); color: var(--c-ink-2); max-width: var(--measure-lead); }
+.t-lead-italic { font-style: italic; }
+.t-secondary { color: var(--c-ink-2); }
+.t-small { font-size: var(--fs-small); line-height: var(--lh-small); color: var(--c-ink-2); }
+strong, b { font-weight: var(--fw-strong); }
+em, i { font-style: italic; }
+
+/* ---------- Labels (capitals) ---------- */
+.t-label {
+  font-family: var(--font-text);
+  font-weight: var(--fw-strong);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-gold-deep);
+}
+
+/* ---------- Prices ---------- */
+.t-price {
+  font-family: var(--font-text);
+  font-weight: var(--fw-strong);
+  font-size: var(--fs-price);
+  line-height: var(--lh-price);
+  letter-spacing: var(--ls-price);
+  font-variant-numeric: var(--num-price);
+  color: var(--c-maroon-text);
+}
+.t-price s, .t-price del { font-weight: var(--fw-text); color: var(--c-ink-2); }
+
+/* ---------- Buttons and menu (type only; shapes and states belong to the components) ---------- */
+button, input, select, textarea { font: inherit; }
+.t-button {
+  font-family: var(--font-text);
+  font-weight: var(--fw-strong);
+  font-size: var(--fs-button);
+  line-height: var(--lh-button);
+  letter-spacing: var(--ls-button);
+}
+.t-menu {
+  font-family: var(--font-text);
+  font-weight: var(--fw-text);
+  font-size: var(--fs-menu);
+  line-height: var(--lh-button);
+  letter-spacing: var(--ls-button);
+}
+
+/* ---------- Product names: never more than two lines ---------- */
+.t-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}

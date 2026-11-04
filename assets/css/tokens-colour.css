@@ -1,0 +1,77 @@
+/* Pynora colour, shadow and motion tokens.
+   Load order: fonts.css, tokens-colour.css, tokens-type.css, base-type.css, ornament.css, textures.css, backgrounds.css.
+   Contrast figures are WCAG ratios against the ground named beside them. Reading text stays at 7:1 or better;
+   anything marked "lines" or "marks" never carries words. */
+
+:root {
+  /* ---------- Sandstone (the light grounds) ---------- */
+  --c-paper: #FCF8F1;        /* cards, panels: ink 15.7:1 */
+  --c-ground: #F7F0E6;       /* main page ground: ink 14.7:1 */
+  --c-sand: #EFE5D4;         /* alternate sections, the palm wall: ink 13.3:1 */
+  --c-sand-shade: #E3D3BB;   /* wall edges; short labels only: ink 11.3:1 */
+
+  /* ---------- Light maroon (rose plaster) ---------- */
+  --c-rose-50: #F5EAE5;      /* blush sections, hover tints: ink 14.1:1 */
+  --c-rose-100: #EDDBD2;     /* the rose plaster wall: ink 12.4:1 */
+  --c-rose-200: #DFC4BA;     /* wall shade only: ink 10.1:1 */
+  --c-rose-line: #B06E78;    /* fine lines on rose; never words */
+
+  /* ---------- Light gold and gold ---------- */
+  --c-champagne: #F3E7CF;    /* silk sections, gift notes, "New" label: ink 13.6:1 */
+  --c-gold-light: #E4CFA3;   /* logo and headings on dark grounds: 7.1:1 on maroon */
+  --c-gold-bright: #C9AC78;  /* lines on dark grounds */
+  --c-gold: #AB8E62;         /* hairlines, beads, borders on light grounds (2.7:1: never words) */
+  --c-gold-antique: #9C7C4C; /* the fan and ornaments on light grounds (marks only) */
+  --c-gold-deep: #574024;    /* gold-coloured words: labels (8.6:1 on ground) */
+  --c-bronze: #574024;       /* the logo's script line on light grounds (8.6:1) */
+
+  /* ---------- Maroon (the logo's) ---------- */
+  --c-maroon-hi: #93162F;    /* top of buttons, hover: cream 7.9:1 */
+  --c-maroon: #7D0823;       /* the only "press here" colour: buttons, links, prices; Hindi lines; logo. 9.6:1 as text */
+  --c-maroon-deep: #5C0619;  /* pressed: cream 12.7:1 */
+  --c-maroon-ink: #4F0515;   /* Hindi lines under 24 px on the rose wall (phones): 7:1 in the plaster's shadows */
+  --c-maroon-text: var(--c-maroon); /* maroon words (links, prices). The rose, palm and silk walls set it to
+                                       --c-maroon-deep (backgrounds.css), because her maroon falls below 7:1 in
+                                       their shadows; paper cards and panels set it back to her maroon */
+  --c-band-deep: #7D0823;    /* the deep brand band and the footer (the same maroon) */
+  --c-oxblood: #3F0A16;      /* shadow tint only */
+
+  /* ---------- Text ---------- */
+  --c-ink: #2A1A1E;          /* text: 14.7:1 on ground */
+  --c-ink-2: #4F3B40;        /* second text: 9.1:1 on ground */
+  --c-on-maroon: #FBF2E6;    /* words on every dark ground (cream): 9.8:1 on maroon */
+  --c-line: rgba(171, 142, 98, 0.42); /* hairlines */
+
+  /* ---------- Accents: each only in its listed places ---------- */
+  --c-emerald: #0A2A1B;      /* her brand slide's emerald (#062415), a touch lifted: one emerald band per page at most */
+  --c-emerald-deep: #05190F;
+  --c-emerald-mid: #1D5A3D;  /* the WhatsApp button's dot */
+  --c-emerald-tint: #DCEBE2;
+  --c-sage: #BCD8CF;         /* "Ready to ship", delivery good news, behind bags in category tiles */
+  --c-sage-tint: #DDEBE5;
+  --c-sage-ink: #21453A;     /* words on sage tint: 8.6:1 */
+  --c-dusty-rose: #D3A9A6;   /* "Made to order", gift-note tints, the filled wishlist heart */
+  --c-dusty-rose-tint: #F1DEDA;
+  --c-crimson: #A52E38;      /* once on Home (the store wall) and the gift box; never buttons, links or prices */
+  --c-crimson-deep: #8A2330;
+
+  /* ---------- Shadows: tinted oxblood, never grey ---------- */
+  --sh-contact: 0 1px 2px rgba(63, 10, 22, 0.13);
+  --sh-card: var(--sh-contact), 0 18px 34px -22px rgba(63, 10, 22, 0.49);
+  --sh-lift: 0 2px 3px rgba(63, 10, 22, 0.23), 0 34px 60px -30px rgba(63, 10, 22, 0.72);  /* pictures on grounds */
+  --sh-button: 0 1px 2px rgba(63, 10, 22, 0.2), 0 10px 24px -14px rgba(125, 8, 35, 1);
+  --sh-chip: 0 1px 2px rgba(63, 10, 22, 0.18), 0 8px 18px -10px rgba(63, 10, 22, 0.52);   /* small floating pieces */
+
+  /* ---------- Fine gold borders ---------- */
+  --border-double: inset 0 0 0 1px rgba(171, 142, 98, 0.62), inset 0 0 0 5px var(--c-paper), inset 0 0 0 6px rgba(171, 142, 98, 0.3);
+  --border-mount: rgba(240, 222, 182, 0.78);
+  --r-panel: 24px;
+  --r-card: 22px;
+  --r-photo: 16px;
+
+  /* ---------- Motion ---------- */
+  --ease-io: cubic-bezier(0.45, 0.05, 0.55, 0.95); /* background loops: in and out, alternate */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);       /* everything that arrives */
+  --motion-speed: 1;  /* multiplies every loop's duration (smaller = faster) */
+  --motion-amp: 1;    /* multiplies every loop's travel */
+}

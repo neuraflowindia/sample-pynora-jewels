@@ -1,0 +1,165 @@
+/* Pynora page layout: the page's own resets, the content column, band spacing, the skip link, the focus
+   ring, visually hidden words and the section heading set.
+   Load order: after backgrounds.css; before buttons.css and every part's own file. */
+
+/* ---------- Page ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html {
+  scroll-padding-top: 76px;      /* anchors such as #visit and #reviews land clear of the scrolled header */
+  scrollbar-gutter: stable;      /* nothing jumps when a drawer locks the page */
+}
+body { margin: 0; background: var(--c-ground); }
+img { display: block; max-width: 100%; }
+a { color: inherit; }
+button { color: inherit; }
+[hidden] { display: none !important; }
+
+@media (max-width: 1079px) {
+  html { scroll-padding-top: 72px; }
+}
+
+/* ---------- Content column ----------
+   1,440 px -> 1,240; 1,366 -> 1,177; 1,280 -> 1,103; 1,080 -> 931; 1,024 -> 883; 820 -> 707; phones: 16 px sides. */
+.wrap {
+  width: 100%;
+  max-width: calc(var(--wrap) + 2 * var(--gut));
+  margin-inline: auto;
+  padding-inline: var(--gut);
+}
+/* a band's own content box (.bg__content) holding a .wrap: the column sets the width */
+.bg__content.full { width: 100%; padding: 0; }
+
+/* ---------- Band spacing ---------- */
+.band-pad { padding-block: clamp(64px, 8vw, 116px); }
+
+/* a section's own button, under its content */
+.sec-foot { display: flex; justify-content: center; margin-top: 42px; }
+.sec-foot--start { justify-content: flex-start; }
+@media (max-width: 760px) {
+  .sec-foot { margin-top: 26px; }
+}
+
+/* ---------- Surfaces: which colours focus rings and text links take ----------
+   Light walls: her maroon. Dark bands (emerald, crimson, her maroon, the footer): light gold.
+   Paper inside a dark band (cards, the store card, the edit card): her maroon again. */
+:root { --c-focus: var(--c-maroon); }
+/* text links on dark bands in champagne: light gold fell to 6.3:1 where the emerald's sheen passes (7:1 needed) */
+.on-dark { --c-focus: var(--c-gold-light); --c-tlink: var(--c-champagne); }
+/* on her maroon with the flowers (the footer wall) text links take the footer's cream: champagne fell to 6.9:1
+   where the lamp turns the flowers gold */
+.bg--lattice { --c-tlink: var(--c-on-maroon); }
+.on-paper { --c-focus: var(--c-maroon); --c-tlink: var(--c-maroon); --c-maroon-text: var(--c-maroon); }
+
+/* ---------- Focus ring: 2 px solid, 3 px clear, following the shape ---------- */
+:focus-visible { outline: 2px solid var(--c-focus); outline-offset: 3px; }
+:focus:not(:focus-visible) { outline: none; }
+
+/* ---------- Skip link: the first tab stop ---------- */
+.skip {
+  position: fixed;
+  z-index: calc(var(--z-toast) + 10);
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: var(--c-paper);
+  box-shadow: inset 0 0 0 1.25px var(--c-maroon), var(--sh-chip);
+  color: var(--c-maroon);
+  font-family: var(--font-text);
+  font-weight: var(--fw-strong);
+  font-size: 1rem;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transform: translateY(calc(-100% - 60px));   /* fully out of sight, its shadow too */
+}
+.skip:focus { transform: none; }
+.skip:focus-visible { outline-color: var(--c-maroon); }
+main[tabindex="-1"]:focus { outline: none; }   /* the skip link's target takes focus without a ring */
+
+/* ---------- Lines of words that rise into view (.line > .line__in) ----------
+   The wrapper clips its line so the inner part can rise from below it; the clip reaches 8 px past the wrapper's
+   box: room for a focus ring (2 px, 3 px away) and for letters that pass a tight line height (about 6 px at 56 px).
+   Zero specificity: a section sets its own display, padding or room (a button's lift) on top. */
+:where(.line) { display: block; overflow: clip; overflow-clip-margin: 8px; }
+:where(.line__in) { display: block; }
+
+/* ---------- Visually hidden (still read aloud) ---------- */
+.vh {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Section heading set ----------
+   <div class="hs">
+     <p class="t-hindi-lead" lang="hi">…</p>          optional: t-hindi-lead when it leads the section, else t-hindi
+     <h2 class="t-section">…</h2>
+     <span class="orn-rule"><span class="orn-fan"></span></span>   or orn-rule--leaf with orn-leaf orn-fan
+     <p class="t-lead">…</p>                            optional, at most 20 words
+   </div>
+   Centred over grids; .hs--start for split layouts (the divider then starts with the fan and runs right). */
+.hs {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  margin: 0 auto 46px;
+}
+.hs > .t-hindi,
+.hs > .t-hindi-lead { margin: 0 0 6px; color: var(--c-maroon-text); }
+.hs > .t-section { margin: 0; }
+.hs > .orn-rule { width: 168px; margin-top: 14px; }
+.hs > .orn-rule--leaf { width: 196px; }
+.hs > .t-lead { margin-top: 14px; max-width: var(--measure-lead); }
+.hs--start { justify-items: start; text-align: left; margin-inline: 0; }
+.hs--start > .orn-rule { justify-content: flex-start; }
+.hs--start > .orn-rule::before { display: none; }
+.hs--flush { margin-bottom: 0; }
+
+/* light gold on the emerald and her maroon */
+.on-dark .hs > .t-section,
+.on-dark .hs > .t-hindi,
+.on-dark .hs > .t-hindi-lead,
+.hs--emerald > .t-section,
+.hs--emerald > .t-hindi,
+.hs--emerald > .t-hindi-lead { color: var(--c-gold-light); }
+.on-dark .hs > .t-lead,
+.hs--emerald > .t-lead { color: var(--c-on-maroon); }
+
+/* champagne on the crimson store wall; the Hindi line 26 / 24 px there (large text) */
+.bg--crimson .hs > .t-section,
+.bg--crimson .hs > .t-hindi,
+.bg--crimson .hs > .t-hindi-lead,
+.hs--crimson > .t-section,
+.hs--crimson > .t-hindi,
+.hs--crimson > .t-hindi-lead { color: var(--c-champagne); }
+.bg--crimson .hs > .t-hindi,
+.bg--crimson .hs > .t-hindi-lead,
+.hs--crimson > .t-hindi,
+.hs--crimson > .t-hindi-lead { font-size: clamp(1.5rem, 1.4536rem + 0.1905vw, 1.625rem); }
+.hs--crimson > .t-lead { color: var(--c-on-maroon); }
+
+/* back to the light-wall colours on paper inside a dark band */
+.hs.hs--light > .t-section { color: var(--c-ink); }
+.hs.hs--light > .t-hindi,
+.hs.hs--light > .t-hindi-lead { color: var(--c-maroon); }
+.hs.hs--light > .t-hindi { font-size: var(--fs-hindi); }
+.hs.hs--light > .t-hindi-lead { font-size: var(--fs-hindi-lead); }
+.hs.hs--light > .t-lead { color: var(--c-ink-2); }
+
+@media (max-width: 760px) {
+  .hs { margin-bottom: 30px; }
+  .hs > .orn-rule { margin-top: 12px; }
+  .hs > .t-lead { margin-top: 12px; }
+  .hs--flush { margin-bottom: 0; }
+}

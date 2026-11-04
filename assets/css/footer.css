@@ -1,0 +1,346 @@
+/* Footer: on her maroon with the flower pattern and the lamp (the wall itself is backgrounds.css’s
+   .bg--lattice.bg--footer). Three parts: the sign-up row, four columns (Shop, Client care, The house, Visit) and
+   the bottom line with her fan in gold leaf.
+   Laptops: sign-up words and box side by side (1 : 1.15), four columns.
+   Tablets (761-1079 px): the sign-up stacked, the columns two by two.
+   Phones (760 px and under): the field and button stacked, full width; Shop, Client care and The house fold
+   (“+” turning to “×”); Visit stays open; the bottom line centred.
+   Without scripts nothing folds. */
+
+.ftr__in { padding-block: 104px 34px; }   /* the wall’s row of gold flowers fills the top 74 px; the words start below it */
+/* where the column reaches under the floating WhatsApp button, the last row ends above it (24 + 56 + 12 px) */
+@media (max-width: 1219px) { .ftr__in { padding-bottom: 92px; } }
+
+/* ---------- Sign-up row ---------- */
+.ftr__news {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 40px;
+  align-items: center;
+  padding-bottom: 46px;
+  border-bottom: 1px solid rgba(201, 172, 120, 0.35);
+}
+
+.nl__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.875rem;                       /* 30 px */
+  line-height: 1.2;
+  color: var(--c-gold-light);
+}
+.nl__lead {
+  margin: 8px 0 0;
+  font: 400 1.0625rem/1.5 var(--font-text);  /* 17 px */
+  color: var(--c-on-maroon);
+}
+
+/* The box: the form and the thank-you line share one place, so the row keeps its height when it changes */
+.nl__box { display: grid; grid-template-columns: minmax(0, 1fr); }
+.nl__form,
+.nl__ok { grid-area: 1 / 1; }
+
+/* the field and the button side by side; the error line under both (on phones between the two) */
+.nl__form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin: 0;
+}
+.nl__form > .nl__field { grid-column: 1; grid-row: 1; }
+.nl__form > .btn { grid-column: 2; grid-row: 1; }
+.nl__form > .nl__err { grid-column: 1 / -1; grid-row: 2; }
+.nl__field {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 54px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: rgba(251, 242, 230, 0.08);
+  box-shadow: inset 0 0 0 1.25px rgba(228, 207, 163, 0.6);
+  cursor: text;
+}
+.nl__field > .i { flex: none; font-size: 19px; color: var(--c-gold-light); }
+.nl__field.is-err { box-shadow: inset 0 0 0 2px var(--c-gold-light); }
+.nl__field:focus-within { outline: 2px solid var(--c-focus); outline-offset: 3px; }
+.nl__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  outline: none;
+  font: 400 1.0625rem/1.2 var(--font-text);  /* 17 px */
+  color: var(--c-on-maroon);
+  caret-color: var(--c-gold-light);
+}
+.nl__input:focus-visible { outline: none; }   /* the ring sits on the whole field */
+.nl__input::placeholder { color: #E9DCCB; opacity: 1; }
+.nl__form .btn { flex: none; }
+
+.nl__err {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font: 400 0.9375rem/1.4 var(--font-text);  /* 15 px */
+  color: var(--c-on-maroon);
+}
+.nl__err .i { flex: none; font-size: 18px; color: var(--c-gold-light); }
+
+.nl__ok {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 54px;
+  margin: 0;
+  font: 400 1.0625rem/1.4 var(--font-text);  /* 17 px */
+  color: var(--c-on-maroon);
+  visibility: hidden;
+  clip-path: inset(0 100% 0 0);
+}
+.nl__ok:focus { outline: none; }               /* focus is moved here only so the line is read aloud */
+.nl__orb {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(228, 207, 163, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(228, 207, 163, 0.6);
+  color: var(--c-gold-light);
+}
+.nl__orb .i { font-size: 20px; stroke-width: 2; }
+
+/* Accepted: the form wipes away to the right and the thank-you line wipes in behind it */
+.nl__form { transition: clip-path 360ms cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s; }
+.nl__box.is-done .nl__form {
+  visibility: hidden;
+  clip-path: inset(0 0 0 100%);
+  transition: clip-path 360ms cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 360ms;
+}
+.nl__box.is-done .nl__err { display: none; }
+.nl__box.is-done .nl__ok {
+  visibility: visible;
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 520ms cubic-bezier(0.2, 0.7, 0.2, 1) 160ms, visibility 0s 0s;
+}
+.nl__box.no-wipe .nl__form,
+.nl__box.no-wipe .nl__ok { transition: none; }
+
+/* ---------- Columns ---------- */
+.ftr__cols {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
+  padding: 44px 0 40px;
+}
+.ftr__label {
+  margin: 0 0 16px;
+  font: 600 0.9375rem/1.3 var(--font-text);  /* 15 px */
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-wrap: wrap;
+  color: var(--c-champagne);                 /* light gold measured 6.1:1 on the patterned wall; champagne keeps 7:1 */
+}
+.ftr__fold { display: none; }
+.ftr__list { display: grid; gap: 11px; margin: 0; padding: 0; list-style: none; }
+.ftr__list li,
+.ftr__list a {
+  font: 400 1.03125rem/1.4 var(--font-text);  /* 16.5 px */
+  color: var(--c-on-maroon);
+}
+.ftr__list a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: text-decoration-color var(--dur-fast) ease;
+}
+@media (hover: hover) {
+  .ftr__list a:hover { text-decoration-color: var(--c-gold-light); }
+}
+.ftr__list .ftr__addr { font-style: normal; }
+.ftr__keep { white-space: nowrap; }                 /* opening hours never split across lines */
+
+/* ---------- Bottom line ---------- */
+.ftr__base {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 26px;
+  border-top: 1px solid rgba(201, 172, 120, 0.35);
+  font: 400 0.9375rem/1.4 var(--font-text);  /* 15 px */
+  color: var(--c-on-maroon);
+}
+.ftr__base p { margin: 0; text-wrap: balance; }   /* on phones the tagline breaks into two even lines, never one word alone */
+.ftr__fan { width: 30px; height: 30px; }
+
+/* ---------- Narrow laptops: the box takes more room, so the field shows its whole hint ---------- */
+@media (min-width: 1080px) and (max-width: 1279px) {
+  .ftr__news { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); }
+}
+
+/* ---------- Touch screens: every link at least 44 px tall and 44 px wide (short words such as “Bags”) ---------- */
+@media (pointer: coarse) {
+  .ftr__list { gap: 0; }
+  .ftr__list li { display: flex; align-items: center; min-height: 44px; }
+  .ftr__list a { display: flex; align-items: center; min-height: 44px; min-width: 44px; }
+}
+
+/* ---------- Tablets ---------- */
+@media (min-width: 761px) and (max-width: 1079px) {
+  .ftr__news { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  .ftr__cols { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 32px; }
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 760px) {
+  /* a compact rhythm: the words start just under the row of gold flowers (it ends 77 px down); the centred last
+     line is short enough to clear the floating WhatsApp button beside it, so only a small foot is kept */
+  .ftr__in { padding-block: 88px 32px; }
+  .ftr__news { grid-template-columns: minmax(0, 1fr); gap: 14px; padding-bottom: 22px; }
+  .nl__title { font-size: 1.5625rem; }       /* 25 px */
+  .nl__lead { margin-top: 6px; font-size: 1rem; }   /* 16 px */
+  .nl__form { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .nl__form > .nl__field,
+  .nl__form > .nl__err,
+  .nl__form > .btn { grid-column: 1; grid-row: auto; }
+  .nl__field { flex: none; height: 52px; padding: 0 18px; }
+  .nl__form .btn { width: 100%; }
+  .nl__ok { min-height: 52px; font-size: 1rem; }
+
+  .ftr__cols { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 14px 0 18px; }
+  .ftr__list li,
+  .ftr__list a { font-size: 1rem; }          /* 16 px */
+  .ftr__list { gap: 0; }
+  .ftr__list li { display: flex; align-items: center; min-height: 44px; }
+  .ftr__list a { display: flex; align-items: center; min-height: 44px; }
+  /* Visit stays open, tight: the address and the hours as plain lines, WhatsApp and the call link side by side
+     (each still 44 px to the touch), wrapping when the width is short */
+  .ftr__visit { padding-top: 16px; }
+  .ftr__visit .ftr__label { margin-bottom: 6px; }
+  .ftr__visit .ftr__list { display: flex; flex-wrap: wrap; column-gap: 24px; }
+  .ftr__visit .ftr__list li:nth-child(-n+2) { flex: 0 0 100%; min-height: 0; padding-block: 1px; }
+  .ftr__visit .ftr__list li:nth-child(2) { padding-bottom: 4px; }
+
+  /* the three lists that fold, ruled by fine gold lines on a quietly deeper ground that runs edge to edge and
+     fades out above and below (no rounded rows), so the labels and links keep 7:1 when the lamp turns the
+     flowers gold. The ground is one layer behind the three rows (a grid item of the columns). */
+  .js .ftr__cols { padding-top: 0; isolation: isolate; }
+  .js .ftr__cols > * { grid-column: 1; }
+  .js .ftr__cols > :nth-child(1) { grid-row: 1; }
+  .js .ftr__cols > :nth-child(2) { grid-row: 2; }
+  .js .ftr__cols > :nth-child(3) { grid-row: 3; }
+  .js .ftr__cols > :nth-child(4) { grid-row: 4; }
+  .js .ftr__cols::before {
+    content: "";
+    grid-row: 1 / 4;
+    grid-column: 1;
+    z-index: -1;
+    margin: -20px calc(50% - 50vw);
+    background: linear-gradient(to bottom,
+      rgba(46, 4, 15, 0) 0, rgba(46, 4, 15, 0.3) 28px,
+      rgba(46, 4, 15, 0.3) calc(100% - 28px), rgba(46, 4, 15, 0) 100%);
+    pointer-events: none;
+  }
+  .js .ftr__col[data-fold] { border-bottom: 1px solid rgba(201, 172, 120, 0.3); }
+  .js .ftr__col[data-fold] .ftr__label { margin: 0; }
+  .js .ftr__col[data-fold] .ftr__label-text { display: none; }
+  .js .ftr__fold {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 48px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ftr__sign {
+    position: relative;
+    flex: none;
+    width: 14px;
+    height: 14px;
+    margin-right: 4px;
+    transition: transform 240ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .ftr__sign::before,
+  .ftr__sign::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: calc(50% - 0.75px);
+    width: 100%;
+    height: 1.5px;
+    border-radius: 1px;
+    background: var(--c-gold-light);
+  }
+  .ftr__sign::after { transform: rotate(90deg); }
+  .ftr__col.is-open .ftr__sign { transform: rotate(45deg); }
+
+  .js .ftr__col[data-fold] .ftr__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition: grid-template-rows 240ms cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 240ms;
+  }
+  .js .ftr__col[data-fold].is-open .ftr__panel {
+    grid-template-rows: 1fr;
+    visibility: visible;
+    transition: grid-template-rows 240ms cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0s;
+  }
+  .js .ftr__col[data-fold] .ftr__panel-in {
+    min-height: 0;
+    overflow: hidden;
+    margin: 0 -6px;                           /* room for the focus ring inside the folding box */
+    padding: 0 6px;
+  }
+  .js .ftr__col[data-fold] .ftr__list { padding-bottom: 10px; }
+
+  /* the bottom line: her fan set into the middle of the gold line above it, the words centred under it */
+  .ftr__base {
+    position: relative;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 24px;
+    border-top: 0;
+    background: linear-gradient(90deg,
+      rgba(201, 172, 120, 0.35) calc(50% - 24px), transparent calc(50% - 24px),
+      transparent calc(50% + 24px), rgba(201, 172, 120, 0.35) calc(50% + 24px)) top / 100% 1px no-repeat;
+    text-align: center;
+    font-size: 0.875rem;                       /* 14 px */
+  }
+  .ftr__fan { position: absolute; top: -13px; left: calc(50% - 13px); width: 26px; height: 26px; }
+}
+
+/* very narrow phones: the bottom words wrap wider than the floating WhatsApp button's clear room, so the last row
+   ends above it (16 + 52 + 12 px) */
+@media (max-width: 359px) {
+  .ftr__in { padding-bottom: 80px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nl__form,
+  .nl__box.is-done .nl__form,
+  .nl__box.is-done .nl__ok,
+  .ftr__sign,
+  .ftr__list a,
+  .js .ftr__col[data-fold] .ftr__panel,
+  .js .ftr__col[data-fold].is-open .ftr__panel { transition: none; }
+}

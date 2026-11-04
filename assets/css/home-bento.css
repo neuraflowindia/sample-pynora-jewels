@@ -1,0 +1,396 @@
+/* Home: shop by category, the picture tiles.
+   Laptops: four columns; Necklaces two by two, Earrings and Décor in the third column, Bags tall in the fourth,
+   Vantara and Ready to ship along the bottom. Tablets and phones: two columns in the order Necklaces;
+   Earrings | Décor; Bags | Ready to ship; Vantara.
+   A tile's name plate never sits on jewellery. Where every plate has clear ground (1,440 px and wider, and
+   tablets) it rests in its picture's measured corner; elsewhere (phones, and laptops from 1,080 to 1,439 px)
+   all four picture tiles carry the name on a paper ledge under the picture instead.
+   Hovers use the separate translate and scale properties, so transform stays free for the page's arrival. */
+
+.bento {
+  --p: 1;
+  --bento-gap: 20px;
+  --bento-row: clamp(200px, 19.4vw, 280px);          /* the picture rows on laptops */
+  --bento-low: clamp(210px, 16.7vw, 240px);          /* the Vantara and Ready to ship row, at least */
+  --bento-ledge: 46px;
+  --bento-r: 22px;
+  --bento-mount: 9px;
+  --van-w: clamp(120px, 11vw, 160px);                /* each Vantara picture, 4:5 */
+}
+
+/* ---------- Grid ---------- */
+.bento__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: var(--bento-row) var(--bento-row) minmax(var(--bento-low), auto);
+  grid-template-areas:
+    "nk nk ea bg"
+    "nk nk de bg"
+    "va va va rd";
+  gap: var(--bento-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bento__cell { display: flex; min-width: 0; }
+.bento__cell > .bento__tile { flex: 1 1 auto; min-width: 0; }
+.bento__cell--necklaces { grid-area: nk; }
+.bento__cell--earrings { grid-area: ea; }
+.bento__cell--decor { grid-area: de; }
+.bento__cell--bags { grid-area: bg; }
+.bento__cell--vantara { grid-area: va; }
+.bento__cell--ready { grid-area: rd; }
+
+/* ---------- Picture tiles ---------- */
+.bento__tile {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--bento-r);
+  color: var(--c-ink);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.bento__tile--pic {
+  background: var(--c-sand);
+  box-shadow: var(--sh-card);
+}
+.bento__tile--pic::before {                           /* a fine gold edge round the whole tile */
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.55);
+  pointer-events: none;
+}
+.bento__pic {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  overflow: hidden;
+  background: var(--c-sand);
+}
+.bento__pic > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: scale 1200ms var(--ease);
+}
+.bento__tile--big .bento__pic > img { object-position: 50% 70%; }
+.bento__cell--earrings .bento__pic > img { object-position: 50% 0%; }
+.bento__cell--decor .bento__pic > img { object-position: 50% 100%; }
+.bento__cell--bags .bento__pic > img { object-position: 50% 50%; }
+
+/* the light-gold mount line inside the picture */
+.bento__tile--pic::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: var(--bento-mount);
+  border-radius: calc(var(--bento-r) - var(--bento-mount) + 2px);
+  box-shadow: inset 0 0 0 1px var(--border-mount);
+  pointer-events: none;
+}
+
+/* ---------- Name plates (laid over the picture, in its clear corner) ---------- */
+.bento__plate {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 14px;
+  border-radius: var(--r-plate);
+  background: rgba(252, 248, 241, 0.95);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.62), inset 0 0 0 3px rgba(252, 248, 241, 0.95), inset 0 0 0 4px rgba(171, 142, 98, 0.26), var(--sh-lift);
+  transition: translate var(--dur) var(--ease);
+}
+.bento__plate--bl { left: 14px; bottom: 14px; padding: 10px 10px 10px 16px; gap: 12px; }
+.bento__plate--tr { top: 10px; right: 10px; }
+.bento__plate--br { right: 10px; bottom: 10px; }
+.bento__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-card);                         /* 22 px laptops, 20 px phones */
+  line-height: 1.15;
+  color: var(--c-ink);
+  white-space: nowrap;
+}
+.bento__tile--big .bento__name { font-size: var(--fs-sub); line-height: 1.1; }   /* 30 / 25 px */
+.bento__count {
+  font-family: var(--font-text);
+  font-size: var(--fs-small);                        /* 15 / 14 px */
+  line-height: 1;
+  color: var(--c-ink-2);
+  white-space: nowrap;
+}
+.bento__go {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 30%, var(--c-maroon-hi), var(--c-maroon) 70%);
+  color: var(--c-on-maroon);
+  box-shadow: inset 0 0 0 1px rgba(228, 207, 163, 0.32), 0 1px 2px rgba(63, 10, 22, 0.25);
+  transition: translate var(--dur) var(--ease);
+}
+.bento__go .i { font-size: 15px; stroke-width: 2; }
+
+/* ---------- Ledges: the name on paper under the picture (phones; laptops 1,080-1,439 px) ---------- */
+@media (max-width: 760px), (min-width: 1080px) and (max-width: 1439px) {
+  .bento__tile--pic { display: flex; flex-direction: column; }
+  .bento__pic { position: relative; inset: auto; z-index: auto; flex: 1 1 auto; min-height: 0; }
+  .bento__tile--pic::after { bottom: calc(var(--bento-ledge) + var(--bento-mount)); }
+  .bento__plate,
+  .bento__plate--bl,
+  .bento__plate--tr,
+  .bento__plate--br {
+    position: relative;
+    inset: auto;
+    flex: none;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    height: var(--bento-ledge);
+    padding: 8px 10px 8px 16px;
+    border-radius: 0;
+    background: var(--c-paper);
+    box-shadow: inset 0 1px 0 rgba(171, 142, 98, 0.62), inset 0 3px 0 var(--c-paper), inset 0 4px 0 rgba(171, 142, 98, 0.22);
+  }
+  .bento__plate .bento__name { flex: 0 1 auto; min-width: 0; }
+  .bento__plate .bento__count { margin-left: auto; }
+}
+
+/* ---------- Vantara: paper with the double border, three pieces with their labels under them ---------- */
+.bento__tile--van {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px 28px;
+  padding: 22px 22px 22px 32px;
+  background: var(--c-paper);
+  box-shadow: var(--border-double), var(--sh-card);
+}
+.bento__vwords { min-width: 0; }
+.bento__vtitle { font-size: var(--fs-sub); line-height: 1.15; }
+.bento__vline {
+  max-width: 22em;
+  margin: 8px 0 10px;
+  font-size: var(--fs-compact);
+  line-height: 1.5;
+  color: var(--c-ink-2);
+}
+.bento__vlink { min-height: 44px; }
+.bento__trio {
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-height: calc(var(--van-w) * 1.25 + 28px);      /* keeps its size before the pieces arrive */
+}
+.bento__v { display: flex; }
+.bento__vitem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: var(--van-w);
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--c-paper);
+  color: var(--c-ink);
+  text-decoration: none;
+  box-shadow: var(--sh-chip);
+  -webkit-tap-highlight-color: transparent;
+}
+.bento__vitem::after {                                /* a fine gold ring over the picture and its label */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.62);
+  pointer-events: none;
+}
+.bento__vpic {
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--c-sand);
+}
+.bento__vpic > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: scale 1200ms var(--ease);
+}
+.bento__vcap {
+  display: grid;
+  place-items: center;
+  height: 28px;
+  padding: 0 6px;
+  font-family: var(--font-text);
+  font-weight: var(--fw-strong);
+  font-size: 0.8125rem;                              /* 13 px */
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  color: var(--c-ink);
+  box-shadow: inset 0 1px 0 rgba(171, 142, 98, 0.55);
+}
+
+/* ---------- Ready to ship: her shelf sage ---------- */
+/* the truck in a small sage medallion over the words, the group centred in the tile, so the tile reads full at
+   every height of its row; the arrow keeps the bottom right corner, as on the picture tiles */
+.bento__tile--ready {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 24px 64px 24px 28px;
+  background: var(--c-sage-tint);
+  color: var(--c-sage-ink);
+  box-shadow: inset 0 0 0 1px rgba(33, 69, 58, 0.22), var(--sh-card);
+}
+.bento__tile--ready::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: calc(var(--bento-r) - 6px);
+  box-shadow: inset 0 0 0 1px rgba(33, 69, 58, 0.16);
+  pointer-events: none;
+}
+.bento__truck {
+  box-sizing: content-box;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 12px;
+  padding: 13px;
+  border-radius: 50%;
+  font-size: 30px;
+  stroke-width: 1.5;
+  background: rgba(252, 248, 241, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(33, 69, 58, 0.22), 0 0 0 5px rgba(252, 248, 241, 0.28);
+  transition: translate 600ms var(--ease);
+}
+.bento__rtitle {
+  font-family: var(--font-display);
+  font-size: var(--fs-sub);
+  line-height: 1.1;
+  color: var(--c-sage-ink);
+}
+.bento__rline {
+  font-size: var(--fs-compact);
+  line-height: 1.4;
+  color: var(--c-sage-ink);
+}
+.bento__go--sage {
+  position: absolute;
+  right: 20px;
+  bottom: 22px;
+  background: var(--c-sage-ink);
+  color: var(--c-sage-tint);
+  box-shadow: 0 1px 2px rgba(20, 45, 37, 0.3);
+}
+
+/* ---------- Hover (fine pointers) and focus ---------- */
+.bento__tile:focus-visible,
+.bento__vitem:focus-visible { outline-offset: 4px; }
+@media (hover: hover) and (pointer: fine) {
+  .bento__tile--pic:hover .bento__pic > img,
+  .bento__vitem:hover .bento__vpic > img { scale: 1.04; }
+  .bento__tile--pic:hover .bento__plate { translate: 0 -4px; }
+  .bento__tile:hover .bento__go { translate: 4px 0; }
+  .bento__tile--ready:hover .bento__truck { translate: 7px 0; }
+}
+@media (hover: hover) and (pointer: fine) and (max-width: 1439px) {
+  .bento__tile--pic:hover .bento__plate { translate: none; }      /* a ledge stays on the tile's foot */
+}
+
+/* ---------- Narrow laptops: 1,080-1,439 px (ledges add their height to each picture row) ---------- */
+@media (min-width: 1080px) and (max-width: 1439px) {
+  .bento { --bento-ledge: 52px; }                    /* room round the 29 px Necklaces title, as the phone's 46 px gives its 25 px */
+  .bento__grid { grid-template-rows: calc(var(--bento-row) + var(--bento-ledge)) calc(var(--bento-row) + var(--bento-ledge)) minmax(var(--bento-low), auto); }
+}
+
+/* ---------- Tablets: 761-1,079 px ---------- */
+@media (min-width: 761px) and (max-width: 1079px) {
+  .bento { --van-w: clamp(118px, 15vw, 150px); }
+  .bento__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: auto;
+    grid-template-areas:
+      "nk nk"
+      "ea de"
+      "bg rd"
+      "va va";
+  }
+  .bento__tile--pic,
+  .bento__tile--ready { aspect-ratio: 6 / 5; }                  /* the whole chandbali shows */
+  .bento__tile--big { aspect-ratio: 10 / 7; }                   /* tall enough for the plate to sit below the hasli */
+  .bento__cell--earrings .bento__pic > img { object-position: 50% 54%; }
+  .bento__tile--van { padding: 22px 24px 22px 28px; gap: 16px 22px; }
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 760px) {
+  .bento {
+    --bento-gap: 12px;
+    --bento-r: 18px;
+    --bento-mount: 7px;
+  }
+  .bento__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: 280px 200px 200px auto;
+    grid-template-areas:
+      "nk nk"
+      "ea de"
+      "bg rd"
+      "va va";
+  }
+  .bento__plate,
+  .bento__plate--bl,
+  .bento__plate--tr,
+  .bento__plate--br { gap: 8px; padding: 8px 8px 8px 12px; }
+  .bento__go { width: 26px; height: 26px; }
+  .bento__go .i { font-size: 14px; }
+  .bento__tile--big .bento__count { font-size: 14px; }
+
+  .bento__tile--van {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 20px 16px 16px;
+  }
+  .bento__vtitle { font-size: var(--fs-sub); }
+  .bento__vline { margin: 6px 0 4px; }
+  .bento__trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; min-height: 130px; }
+  .bento__v { min-width: 0; }
+  .bento__vitem { flex: 1 1 auto; width: auto; min-width: 0; }
+  .bento__vpic { aspect-ratio: auto; height: 130px; }
+  .bento__vcap { display: none; }
+
+  /* the 173 x 200 px phone tile has no spare height: the truck rests in the top corner, the words on the foot */
+  .bento__tile--ready { justify-content: flex-end; padding: 16px; }
+  .bento__truck { position: absolute; top: 16px; left: 16px; width: 26px; height: 26px; margin: 0; padding: 0; font-size: 26px; background: none; box-shadow: none; }
+  .bento__go--sage { display: none; }
+}
+
+/* ---------- Less motion: no push-ins, lifts or slides ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .bento__pic > img,
+  .bento__vpic > img,
+  .bento__plate,
+  .bento__go,
+  .bento__truck { transition: none; }
+  .bento__tile--pic:hover .bento__pic > img,
+  .bento__vitem:hover .bento__vpic > img { scale: none; }
+  .bento__tile--pic:hover .bento__plate,
+  .bento__tile:hover .bento__go,
+  .bento__tile--ready:hover .bento__truck { translate: none; }
+}

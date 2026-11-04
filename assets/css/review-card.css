@@ -1,0 +1,119 @@
+/* Review card: paper with the double border; five stars and “Verified buyer” on top, the review (24 words at
+   most), and a foot with the piece’s picture, the name and city, and a link to the piece’s reviews.
+   400 x 240 px on laptops and tablets, 300 x 260 px on phones; the card grows rather than cut a word.
+   Built by reviews.js:
+   <article class="rcard">
+     <div class="rcard__top"><span class="stars">…</span><span class="vh">Rated 5 out of 5.</span>
+       <span class="rcard__ver">badge icon Verified buyer</span></div>
+     <blockquote class="rcard__text"><p>…</p></blockquote>
+     <footer class="rcard__by"><img class="rcard__pic" alt="">
+       <div class="rcard__who"><p class="rcard__name">Name<span class="rcard__city"> · City</span></p>
+       <a class="rcard__piece" href="product.html?p=…#reviews">Piece</a></div></footer>
+   </article> */
+
+.rcard {
+  --c-focus: var(--c-maroon);                 /* paper, even inside a dark band */
+  --c-maroon-text: var(--c-maroon);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px;
+  height: 100%;
+  min-height: 240px;
+  padding: 24px 26px 22px;
+  border-radius: var(--r-card);
+  background: var(--c-paper);
+  box-shadow: var(--border-double), var(--sh-card);
+  color: var(--c-ink);
+  text-align: left;
+}
+
+.rcard__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.rcard__top .stars .i { font-size: 15px; }
+.rcard__ver {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: 400 0.875rem/1 var(--font-text);     /* 14 px */
+  color: var(--c-sage-ink);
+  white-space: nowrap;
+}
+.rcard__ver .i { font-size: 15px; }
+
+.rcard__text { margin: 14px 0 16px; padding: 0; }   /* 16 px kept above the foot’s line when the words run long */
+.rcard__text p {
+  margin: 0;
+  font: 400 1.0625rem/1.55 var(--font-text);  /* 17 px */
+  color: var(--c-ink);
+  overflow-wrap: break-word;
+}
+
+.rcard__by {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--c-line);
+}
+.rcard__pic {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--c-sand);
+  box-shadow: 0 0 0 2px var(--c-paper), 0 0 0 3px rgba(171, 142, 98, 0.55);
+}
+.rcard__who { min-width: 0; }
+.rcard__name {
+  margin: 0;
+  font: 600 0.9375rem/1.25 var(--font-text);  /* 15 px */
+  color: var(--c-ink);
+}
+.rcard__city { font-weight: 400; color: var(--c-ink-2); }
+.rcard__piece {
+  position: relative;
+  display: inline-block;
+  margin-top: 6px;                            /* clear of the name line above */
+  font: 400 0.9375rem/1.25 var(--font-text);
+  color: var(--c-maroon);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(125, 8, 35, 0.38);
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--dur-fast) ease;
+}
+.rcard__piece::after {                        /* a 44 px tall tap area around the one-line link */
+  content: "";
+  position: absolute;
+  inset: -14px -6px;
+}
+@media (hover: hover) {
+  .rcard__piece:hover { text-decoration-color: currentColor; }
+}
+
+/* an unseen card shape: holds a list's room when the catalogue cannot load (reviews.js) */
+.rcard--slot { visibility: hidden; }
+
+/* a reviews list keeps one card's height before it is filled */
+[data-reviews]:not([data-reviews-filled]) { min-height: 240px; }
+.track[data-reviews]:not([data-reviews-filled]) { min-height: calc(240px + var(--row-pad-top, 0px) + var(--row-pad-bottom, 0px)); }
+
+/* ---------- Phones ---------- */
+@media (max-width: 760px) {
+  [data-reviews]:not([data-reviews-filled]) { min-height: 260px; }
+  .track[data-reviews]:not([data-reviews-filled]) { min-height: calc(260px + var(--row-pad-top, 0px) + var(--row-pad-bottom, 0px)); }
+  .rcard { max-width: 300px; min-height: 260px; padding: 20px; }
+  .rcard__text p { font-size: 1rem; }         /* 16 px */
+  .rcard__name, .rcard__piece { font-size: 0.875rem; }   /* 14 px */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rcard__piece { transition: none; }
+}

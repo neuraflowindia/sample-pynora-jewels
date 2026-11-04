@@ -1,0 +1,384 @@
+/* Pynora backgrounds: six bands, the footer and the quiet ground.
+
+   Every band uses the same layers:
+     <section class="bg bg--rose" data-bg>   (also bg--palm, bg--silk, bg--lattice, bg--lattice bg--footer, bg--velvet, bg--crimson, bg--quiet)
+       <div class="bg__tex"></div>    the photographed surface, painted by textures.css; drifts a little with scrolling
+       <div class="bg__a"></div>      moving light (rose, palm, velvet, crimson) or her flower pattern (maroon band, footer)
+       <div class="bg__b"></div>      second layer: wall drawing, palm shade, silk sheen, or the lamp (<div class="bg__lamp"></div> inside)
+       <div class="bg__scrim"></div>  static shade where words need it
+       <div class="bg__content">…</div>   words marked data-bg-words set the clear zone on the maroon band and the footer
+     </section>
+   The first band of a page also carries class="is-near" so its surface paints at once.
+
+   backgrounds.js adds .is-near (within 1.5 screens: textures load) and .is-live (on screen: loops run); the motion
+   scripts add .is-held, which pauses a band's loops while more than three things would move on their own.
+   Loops animate transform and opacity only; the script moves layers with the separate `translate` property,
+   so scroll drift, mouse lean and the lamp add to the loops instead of replacing them. The script also adds three
+   elements of its own (.bg__drift, the rose wall's drawing; .bg__lamp-gold, the gold pattern under the lamp;
+   .bg__glow, the lamp's warm light), so that moving them never repaints anything.
+   Without the script, or when the visitor asks for less motion, every band rests in its still state. */
+
+/* ---------- The band ---------- */
+.bg {
+  --bg-gutter: clamp(16px, 4.4vw, 64px);
+  --clear-depth: 1;
+  --clear-fx: 220px;
+  --clear-fy: 150px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  overflow: clip;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);  /* content wider than the screen can never widen (and clip) the band */
+  align-items: center;
+  min-height: clamp(560px, 84vh, 780px);
+  background-color: var(--c-ground);
+  color: var(--c-ink);
+}
+.bg__tex,
+.bg__a,
+.bg__b,
+.bg__scrim {
+  position: absolute;
+  pointer-events: none;
+}
+.bg__tex { inset: -48px 0; z-index: -5; }  /* 48 px spare above and below for the scroll drift (at most 36 px) */
+.bg__a { inset: 0; z-index: -4; }
+.bg__b { inset: 0; z-index: -3; }
+.bg__scrim { inset: 0; z-index: -2; }
+.bg__content {
+  position: relative;
+  width: min(1240px, 100% - 2 * var(--bg-gutter));
+  margin-inline: auto;
+  padding-block: clamp(72px, 8vw, 116px);
+}
+
+/* Loops run only while the band is on screen and the tab is visible */
+.bg.is-live .bg__tex,
+.bg.is-live .bg__a,
+.bg.is-live .bg__b,
+.bg.is-live .bg__drift,
+.bg.is-live .bg__lamp,
+.bg.is-live .bg__lamp-gold,
+.bg.is-live .bg__glow { will-change: transform; }
+.bg:not(.is-live) .bg__tex,
+.bg:not(.is-live) .bg__a,
+.bg:not(.is-live) .bg__b,
+html.bg-asleep .bg__tex,
+html.bg-asleep .bg__a,
+html.bg-asleep .bg__b,
+.bg.is-held .bg__tex,                       /* held by the motion scripts: at most three things move on their own */
+.bg.is-held .bg__a,
+.bg.is-held .bg__b { animation-play-state: paused; }
+
+/* ---------- Clear zone: a soft-edged hole around the words (box + 24 px, then a gradual fade) ----------
+   Measured from the words by the script (--clear-l, -r, -t, -b in px); the fallbacks below suit centred words.
+   Mask = everything, minus (fade across) x (fade down) x depth. Eased stops, so there is never an edge. */
+.bg {
+  --clear-l: calc(50% - 240px);
+  --clear-r: calc(50% + 240px);
+  --clear-t: calc(50% - 150px);
+  --clear-b: calc(50% + 150px);
+  --clear-x: linear-gradient(90deg,
+    transparent calc(var(--clear-l) - var(--clear-fx)),
+    rgba(0, 0, 0, 0.1) calc(var(--clear-l) - var(--clear-fx) * 0.8),
+    rgba(0, 0, 0, 0.35) calc(var(--clear-l) - var(--clear-fx) * 0.6),
+    rgba(0, 0, 0, 0.65) calc(var(--clear-l) - var(--clear-fx) * 0.4),
+    rgba(0, 0, 0, 0.9) calc(var(--clear-l) - var(--clear-fx) * 0.2),
+    #000 var(--clear-l),
+    #000 var(--clear-r),
+    rgba(0, 0, 0, 0.9) calc(var(--clear-r) + var(--clear-fx) * 0.2),
+    rgba(0, 0, 0, 0.65) calc(var(--clear-r) + var(--clear-fx) * 0.4),
+    rgba(0, 0, 0, 0.35) calc(var(--clear-r) + var(--clear-fx) * 0.6),
+    rgba(0, 0, 0, 0.1) calc(var(--clear-r) + var(--clear-fx) * 0.8),
+    transparent calc(var(--clear-r) + var(--clear-fx)));
+  --clear-y: linear-gradient(180deg,
+    transparent calc(var(--clear-t) - var(--clear-fy)),
+    rgba(0, 0, 0, 0.1) calc(var(--clear-t) - var(--clear-fy) * 0.8),
+    rgba(0, 0, 0, 0.35) calc(var(--clear-t) - var(--clear-fy) * 0.6),
+    rgba(0, 0, 0, 0.65) calc(var(--clear-t) - var(--clear-fy) * 0.4),
+    rgba(0, 0, 0, 0.9) calc(var(--clear-t) - var(--clear-fy) * 0.2),
+    #000 var(--clear-t),
+    #000 var(--clear-b),
+    rgba(0, 0, 0, 0.9) calc(var(--clear-b) + var(--clear-fy) * 0.2),
+    rgba(0, 0, 0, 0.65) calc(var(--clear-b) + var(--clear-fy) * 0.4),
+    rgba(0, 0, 0, 0.35) calc(var(--clear-b) + var(--clear-fy) * 0.6),
+    rgba(0, 0, 0, 0.1) calc(var(--clear-b) + var(--clear-fy) * 0.8),
+    transparent calc(var(--clear-b) + var(--clear-fy)));
+}
+.bg--lattice .bg__b { --clear-depth: 1; }                 /* gold thread never shows behind the words */
+.bg--rose .bg__b,
+.bg--lattice:not(.bg--footer) .bg__a,
+.bg--lattice .bg__b {
+  -webkit-mask-image: linear-gradient(#000, #000), linear-gradient(rgba(0, 0, 0, var(--clear-depth)), rgba(0, 0, 0, var(--clear-depth))), var(--clear-x), var(--clear-y);
+  -webkit-mask-composite: xor, source-in, source-in;
+  mask-image: linear-gradient(#000, #000), linear-gradient(rgba(0, 0, 0, var(--clear-depth)), rgba(0, 0, 0, var(--clear-depth))), var(--clear-x), var(--clear-y);
+  mask-composite: exclude, intersect, intersect;
+}
+
+/* Maroon words (links, prices) straight on a light textured wall take the deeper maroon, so they stay at 7:1 in
+   the wall's shadows. Paper cards and panels set it back (ornament.css). */
+.bg--rose,
+.bg--palm,
+.bg--silk { --c-maroon-text: var(--c-maroon-deep); }
+
+/* ---------- 1. Rose plaster wall: daylight drifting across a hand-drawn wall ---------- */
+.bg--rose {
+  --clear-depth: 0.4;          /* the drawing eases from 13% to about 8% behind the words */
+  --clear-fx: 300px;
+  --clear-fy: 260px;
+  --clear-l: 0%;
+  --clear-r: 52%;
+  --clear-t: 18%;
+  --clear-b: 82%;
+  --c-ink-2: #3E2D33;          /* second text and labels a step darker: the plaster's shadows would take */
+  --c-gold-deep: #46321B;      /* soft ink (7.7:1 on flat rose) and bronze (7.2:1) below 7:1 at the worst 2% */
+  background-color: var(--c-rose-100);
+}
+.bg--rose .bg__b { z-index: -4; opacity: 0.13; }          /* the wall drawing sits on the plaster, under the light */
+.bg--rose .bg__b::before,
+.bg--rose .bg__drift {                                       /* the drawing; the script moves it with the scroll */
+  content: "";
+  position: absolute;
+  inset: -96px 0;
+  background: url("../img/ornament/wall-damask-fan.svg") 50% 0 / 120px 168px repeat;
+}
+.bg--rose .bg__b:not(:empty)::before { content: none; }
+.bg--rose .bg__a {                                           /* afternoon daylight: a warm pool with the wall in */
+  inset: auto;                                               /* comparative shade around it, both soft-light, so */
+  left: -55%;                                                /* the plaster's grain stays visible in light and shade */
+  top: -70%;
+  width: 210%;
+  height: 240%;
+  z-index: -3;
+  background:
+    radial-gradient(22% 24% at 50% 50%, rgba(255, 251, 244, 1) 0%, rgba(255, 249, 240, 0.7) 38%, rgba(255, 247, 238, 0.28) 70%, rgba(255, 247, 238, 0) 100%),
+    radial-gradient(48% 46% at 50% 50%, rgba(70, 30, 30, 0) 42%, rgba(70, 30, 30, 0.38) 100%);
+  mix-blend-mode: soft-light;
+  transform: translate(9%, -2%);                              /* still: the light rests over the picture */
+  animation: bg-rose-light calc(14s * var(--motion-speed)) var(--ease-io) infinite alternate;
+}
+.bg--rose .bg__scrim {                                       /* soft shade towards the edges of the wall */
+  background: radial-gradient(125% 100% at 58% 40%, rgba(150, 92, 84, 0) 52%, rgba(150, 92, 84, 0.2) 100%);
+}
+@keyframes bg-rose-light {                                  /* the pool travels about 400 px across and 330 px down */
+  from { transform: translate(calc(-7% * var(--motion-amp)), calc(-4% * var(--motion-amp))) scale(1); opacity: 0.8; }
+  to { transform: translate(calc(6% * var(--motion-amp)), calc(4% * var(--motion-amp))) scale(1.08); opacity: 1; }
+}
+
+/* ---------- 2. Sandstone with a palm shade: fronds swaying in the sun ---------- */
+.bg--palm {
+  --c-ink-2: #3E2D33;          /* as on the rose wall: second text and labels a step darker, because the palm */
+  --c-gold-deep: #46321B;      /* shade can sit behind them (on phones it reaches the words column) */
+  background-color: var(--c-sand);
+}
+.bg--palm .bg__a {                                           /* sun wash */
+  inset: -10% -10% -10% auto;
+  width: 72%;
+  background: radial-gradient(55% 65% at 72% 28%, rgba(255, 247, 230, 0.62), rgba(255, 247, 230, 0) 72%);
+  mix-blend-mode: screen;
+  opacity: 0.75;
+  animation: bg-palm-sun calc(9s * var(--motion-speed)) var(--ease-io) infinite alternate;
+}
+.bg--palm .bg__b {                                           /* palm shade from the right edge, clear on the left */
+  inset: -16% -9% auto auto;
+  width: 74%;
+  height: 138%;
+  background: var(--tex-palm, none) 100% 0 / cover no-repeat;
+  opacity: 0.24;
+  transform-origin: 100% 0;
+  -webkit-mask: linear-gradient(270deg, #000 34%, transparent 86%);
+  mask: linear-gradient(270deg, #000 34%, transparent 86%);
+  animation: bg-palm-sway calc(8s * var(--motion-speed)) var(--ease-io) infinite alternate;
+}
+@keyframes bg-palm-sun {
+  from { transform: translate(calc(-1.5% * var(--motion-amp)), calc(1% * var(--motion-amp))); opacity: 0.45; }
+  to { transform: translate(calc(1.5% * var(--motion-amp)), calc(-1% * var(--motion-amp))); opacity: 1; }
+}
+@keyframes bg-palm-sway {
+  0% { transform: rotate(calc(-1.2deg * var(--motion-amp))); }
+  30% { transform: rotate(calc(0.8deg * var(--motion-amp))) translate(calc(-1.2% * var(--motion-amp)), calc(0.6% * var(--motion-amp))); }
+  62% { transform: rotate(calc(-0.5deg * var(--motion-amp))) translate(calc(0.9% * var(--motion-amp)), 0); }
+  100% { transform: rotate(calc(1.3deg * var(--motion-amp))) translate(calc(-0.7% * var(--motion-amp)), calc(1.1% * var(--motion-amp))); }
+}
+
+/* ---------- 3. Champagne silk: the cloth breathes, a sheen passes over it ---------- */
+.bg--silk { background-color: var(--c-champagne); }
+.bg--silk .bg__tex {
+  transform: scale(1.08);
+  animation: bg-silk-breathe calc(16s * var(--motion-speed)) var(--ease-io) infinite alternate;
+}
+.bg--silk .bg__b {                                           /* sheen band across the folds */
+  inset: -20% -60%;
+  background: linear-gradient(112deg, rgba(255, 251, 240, 0) 38%, rgba(255, 251, 240, 0.7) 48%, rgba(255, 251, 240, 0) 60%);
+  mix-blend-mode: soft-light;
+  animation: bg-silk-sheen calc(7s * var(--motion-speed)) var(--ease-io) infinite alternate;
+}
+.bg--silk .bg__scrim { background: radial-gradient(48% 70% at 70% 50%, rgba(250, 243, 228, 0.55), rgba(250, 243, 228, 0) 75%); }
+@keyframes bg-silk-breathe {                                /* the cloth must still cover the band at each end: */
+  from { transform: scale(1.06) translate(calc(-2.5% * var(--motion-amp)), calc(-1.6% * var(--motion-amp))); }  /* scale >= .5 / (.5 - shift) */
+  to { transform: scale(1.12) translate(calc(2.8% * var(--motion-amp)), calc(2% * var(--motion-amp))); }
+}
+@keyframes bg-silk-sheen {
+  from { transform: translateX(calc(-24% * var(--motion-amp))); opacity: 0.75; }
+  to { transform: translateX(calc(24% * var(--motion-amp))); opacity: 1; }
+}
+
+/* ---------- 4. Her maroon with her flower pattern, and a lamp that turns the flowers to gold ---------- */
+.bg--lattice {
+  --lattice: 132px;            /* one pattern tile */
+  --lattice-y: 0px;
+  --lamp: 900px;
+  --lamp-near: 0.45;           /* the warm light's strength when it sits on the words (the script eases it there) */
+  background-color: var(--c-band-deep);
+  color: var(--c-on-maroon);
+}
+.bg--lattice .bg__a {                                        /* the flowers, tone on tone */
+  background: url("../img/ornament/lattice-flower-tone.svg") 0 var(--lattice-y) / var(--lattice) var(--lattice) repeat;
+}
+.bg--lattice .bg__lamp,                                      /* a window of gold thread (kept out of the clear zone) */
+.bg--lattice .bg__glow {                                     /* and its warm light (never cut: it only grows fainter */
+  position: absolute;                                        /* over the words), both moved by the script */
+  left: calc(24% - var(--lamp) / 2);                         /* rest: 24% across, 36% down */
+  top: calc(36% - var(--lamp) / 2);
+  width: var(--lamp);
+  height: var(--lamp);
+}
+.bg--lattice .bg__lamp {
+  -webkit-mask: radial-gradient(closest-side, #000 18%, transparent 100%);
+  mask: radial-gradient(closest-side, #000 18%, transparent 100%);
+}
+.bg--lattice .bg__glow {                                     /* the light, already shaped by the lamp's soft edge */
+  z-index: -3;                                               /* (no mask: one plain layer); over the flowers, under the gold */
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255, 214, 168, 0.24), rgba(255, 209, 162, 0.184) 18%, rgba(255, 206, 158, 0.126) 30%, rgba(255, 203, 154, 0.078) 42%, rgba(255, 200, 150, 0.038) 55%, rgba(255, 200, 150, 0.017) 70%, rgba(255, 200, 150, 0.004) 85%, rgba(255, 200, 150, 0) 100%);
+}
+.bg--lattice .bg__lamp-gold {                              /* the same pattern in gold (added and kept in register */
+  position: absolute;                                        /* with the wall's pattern by the script) */
+  left: 0;
+  top: 0;
+  width: calc(var(--lamp) + var(--lattice));
+  height: calc(var(--lamp) + var(--lattice));
+  background: url("../img/ornament/lattice-flower-gold.svg") 0 var(--lattice-y) / var(--lattice) var(--lattice) repeat;
+  opacity: 0.75;
+}
+html:not(.js) .bg--lattice .bg__lamp { display: none; }
+.bg--lattice .bg__scrim { background: radial-gradient(110% 90% at 50% 45%, rgba(58, 6, 20, 0) 40%, rgba(58, 6, 20, 0.5) 100%); }
+
+/* The footer: the pattern over the whole footer, a row of gold flowers along the top, a softer lamp */
+.bg--footer {
+  --lattice: 112px;
+  --lattice-y: 48px;
+  --lamp: 760px;
+  --lamp-near: 0.15;           /* the footer's words fill most of it */
+  --clear-fx: 90px;
+  --clear-fy: 70px;
+  --clear-l: 4%;
+  --clear-r: 96%;
+  --clear-t: 96px;
+  --clear-b: calc(100% - 24px);
+  min-height: 0;
+  align-items: stretch;
+}
+.bg--footer .bg__a { opacity: 0.62; }                         /* tone on tone, so cream and champagne words stay at 7:1 */
+.bg--footer .bg__a::after {                                  /* the whole row of flowers centred --lattice-y down, in gold; */
+  content: "";                                               /* the window ends in the empty gaps between rows (a flower */
+  position: absolute;                                        /* reaches 0.235 tiles from its centre, the next row 0.265) */
+  inset: 0;
+  background: url("../img/ornament/lattice-flower-gold.svg") 0 var(--lattice-y) / var(--lattice) var(--lattice) repeat;
+  opacity: 0.8;                                              /* with the layer's .62: about .5 */
+  -webkit-mask: linear-gradient(180deg, transparent calc(var(--lattice-y) - var(--lattice) * 0.26), #000 calc(var(--lattice-y) - var(--lattice) * 0.24), #000 calc(var(--lattice-y) + var(--lattice) * 0.24), transparent calc(var(--lattice-y) + var(--lattice) * 0.26));
+  mask: linear-gradient(180deg, transparent calc(var(--lattice-y) - var(--lattice) * 0.26), #000 calc(var(--lattice-y) - var(--lattice) * 0.24), #000 calc(var(--lattice-y) + var(--lattice) * 0.24), transparent calc(var(--lattice-y) + var(--lattice) * 0.26));
+}
+.bg--footer .bg__glow { background: radial-gradient(closest-side, rgba(255, 214, 168, 0.18), rgba(255, 209, 162, 0.138) 18%, rgba(255, 206, 158, 0.093) 30%, rgba(255, 203, 154, 0.057) 42%, rgba(255, 200, 150, 0.027) 55%, rgba(255, 200, 150, 0.012) 70%, rgba(255, 200, 150, 0.003) 85%, rgba(255, 200, 150, 0) 100%); }
+.bg--footer .bg__lamp-gold { opacity: 0.6; }
+.bg--footer .bg__scrim { background: radial-gradient(120% 120% at 50% 30%, rgba(58, 6, 20, 0) 45%, rgba(58, 6, 20, 0.42) 100%); }
+.bg--footer .bg__content { padding-block: 112px 40px; }
+
+/* ---------- 5. Emerald: light sliding across the pile ---------- */
+.bg--velvet {
+  background-color: var(--c-emerald);
+  color: var(--c-on-maroon);
+}
+.bg--velvet .bg__a {                                         /* soft-light: the pile catches the light and stays */
+  inset: -10%;                                               /* a jewel emerald instead of a green haze */
+  background: radial-gradient(36% 44% at 50% 50%, rgba(190, 240, 210, 0.95) 0%, rgba(160, 225, 190, 0.5) 40%, rgba(150, 220, 185, 0.16) 72%, rgba(150, 220, 185, 0) 100%);
+  mix-blend-mode: soft-light;
+  animation: bg-velvet-sheen calc(10s * var(--motion-speed)) var(--ease-io) infinite alternate;
+}
+.bg--velvet .bg__scrim {
+  background:
+    linear-gradient(90deg, rgba(3, 18, 10, 0.66) 0%, rgba(3, 18, 10, 0.42) 46%, rgba(3, 18, 10, 0.08) 74%),
+    radial-gradient(120% 100% at 50% 50%, rgba(2, 14, 8, 0) 55%, rgba(2, 14, 8, 0.45) 100%);
+}
+@keyframes bg-velvet-sheen {
+  from { transform: translate(calc(-22% * var(--motion-amp)), calc(-12% * var(--motion-amp))); }
+  to { transform: translate(calc(22% * var(--motion-amp)), calc(14% * var(--motion-amp))); }
+}
+
+/* ---------- 6. Crimson store wall: a spotlight drifting over the plaster ---------- */
+.bg--crimson {
+  background-color: var(--c-crimson);
+  color: var(--c-on-maroon);
+}
+.bg--crimson .bg__a {                                        /* a spotlight raking over the plaster, with the wall */
+  inset: auto;                                               /* darkening around it (soft-light: the grain shows) */
+  left: -20%;
+  top: -95%;
+  width: 160%;
+  height: 270%;
+  background:
+    radial-gradient(24% 22% at 62% 50%, rgba(255, 228, 200, 1) 0%, rgba(255, 224, 194, 0.55) 42%, rgba(255, 222, 190, 0.18) 72%, rgba(255, 222, 190, 0) 100%),
+    radial-gradient(50% 46% at 62% 50%, rgba(40, 0, 10, 0) 40%, rgba(40, 0, 10, 0.42) 100%);
+  mix-blend-mode: soft-light;
+  transform: translate(2%, -3%);                              /* still: the spotlight rests top right */
+  animation: bg-crimson-light calc(12s * var(--motion-speed)) var(--ease-io) infinite alternate;
+}
+.bg--crimson .bg__scrim { background: linear-gradient(90deg, rgba(74, 10, 20, 0.8) 0%, rgba(74, 10, 20, 0.6) 42%, rgba(74, 10, 20, 0.08) 72%); }
+@keyframes bg-crimson-light {                               /* rests top right when still */
+  from { transform: translate(calc(-7% * var(--motion-amp)), calc(-4% * var(--motion-amp))) scale(1); opacity: 0.85; }
+  to { transform: translate(calc(6% * var(--motion-amp)), calc(4% * var(--motion-amp))) scale(1.1); opacity: 1; }
+}
+
+/* ---------- Quiet sandstone: product grids, the Collection page, product details (drift only) ---------- */
+.bg--quiet {
+  min-height: 0;
+  align-items: start;
+  background-color: var(--c-ground);
+}
+
+/* ---------- Still states: no script, or the visitor asks for less motion ---------- */
+html:not(.js) .bg__tex,
+html:not(.js) .bg__a,
+html:not(.js) .bg__b { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .bg__tex,
+  .bg__a,
+  .bg__b { animation: none !important; }
+}
+
+/* ---------- Phones and narrow screens ---------- */
+@media (max-width: 760px) {
+  .bg { min-height: 0; }
+  .bg__content { padding-block: 64px; }
+  .bg--rose .bg__b { opacity: 0.11; }
+  .bg--palm .bg__b {
+    opacity: 0.17;
+    width: 150%;
+    right: -45%;
+    -webkit-mask: linear-gradient(212deg, #000 18%, transparent 60%);
+    mask: linear-gradient(212deg, #000 18%, transparent 60%);
+  }
+  .bg--palm .bg__a { width: 120%; }
+  .bg--lattice { --lamp: 640px; }
+  .bg--lattice:not(.bg--footer) {                            /* the words fill a phone's width: a full clearing would */
+    --clear-depth: 0.7;                                      /* empty the band, so the flowers stay at 30% behind them */
+    --clear-fx: 120px;
+    --clear-fy: 90px;
+    --lamp-near: 0.35;
+  }
+  .bg--footer { --lamp: 560px; --clear-r: 96%; }
+  .bg--footer .bg__content { padding-block: 104px 32px; }
+  .bg--velvet .bg__scrim { background: linear-gradient(180deg, rgba(3, 18, 10, 0.62) 0%, rgba(3, 18, 10, 0.44) 55%, rgba(3, 18, 10, 0.2) 100%); }
+  .bg--crimson .bg__scrim { background: linear-gradient(180deg, rgba(74, 10, 20, 0.72) 0%, rgba(74, 10, 20, 0.5) 60%, rgba(74, 10, 20, 0.3) 100%); }
+}

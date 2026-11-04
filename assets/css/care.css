@@ -1,0 +1,146 @@
+/* Client care: the 560 px drawer with its six tabs (Shipping & delivery, Exchanges, Made to order, Care guide,
+   FAQs, Our story). care.js writes each tab’s words from the catalogue. */
+
+/* ---------- Tabs: 40 px pills under the head ---------- */
+.care__bar {
+  flex: none;
+  padding: 16px 26px 14px;
+  border-bottom: 1px solid var(--c-line);
+}
+.care__tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.care__tab {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  margin: 0;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--c-paper);
+  box-shadow: var(--ring-gold);
+  font: 400 15.5px/1.1 var(--font-text);
+  color: var(--c-ink);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+/* the chosen tab’s bolder words take no extra room, so the row never shifts */
+.care__tab::after {
+  content: attr(data-text);
+  display: block;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  font-weight: 600;
+}
+.care__tab::before { content: ""; position: absolute; inset: -2px -1px; border-radius: 999px; }   /* 44 px to the touch */
+.care__tab[aria-selected="true"] { font-weight: 600; box-shadow: inset 0 0 0 1.5px var(--c-maroon); }
+@media (hover: hover) {
+  .care__tab[aria-selected="false"]:hover { background: var(--c-rose-50); box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.8); }
+}
+.care__tab:focus-visible { outline: 2px solid var(--c-maroon); outline-offset: 3px; }
+
+/* ---------- Panels ---------- */
+.care__body { padding-top: 24px; padding-bottom: 32px; }
+.care__panel { max-width: 34em; outline: none; font: 400 17.5px/1.6 var(--font-text); color: var(--c-ink); }
+.care__panel:focus-visible { outline: 2px solid var(--c-maroon); outline-offset: 6px; border-radius: 6px; }
+.care__panel h3 {
+  margin: 28px 0 8px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.25;
+  color: var(--c-ink);
+}
+.care__panel > h3:first-child { margin-top: 0; }
+.care__panel p { margin: 0; }
+.care__panel p + p { margin-top: 12px; }
+.care__lead { color: var(--c-ink-2); }
+
+/* made to order: the three steps */
+.care__steps { margin: 0 0 22px; padding: 0; list-style: none; counter-reset: care-step; }
+.care__steps li {
+  position: relative;
+  counter-increment: care-step;
+  padding: 0 0 14px 46px;
+  min-height: 32px;
+}
+.care__steps li::before {
+  content: counter(care-step);
+  position: absolute;
+  left: 0;
+  top: -2px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--c-champagne);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.55);
+  font: 600 15px/1 var(--font-text);
+  font-variant-numeric: lining-nums;
+  color: var(--c-gold-deep);
+}
+.care__steps li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 15.5px;
+  top: 34px;
+  bottom: 0;
+  width: 1px;
+  background: var(--c-line);
+}
+
+/* FAQs: 56 px folding rows */
+.care__faq { border-top: 1px solid var(--c-line); }
+.care__faq details { border-bottom: 1px solid var(--c-line); }
+.care__faq summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 56px;
+  padding: 8px 0;
+  cursor: pointer;
+  font: 600 16px/1.3 var(--font-text);
+  color: var(--c-ink);
+  border-radius: 4px;
+}
+.care__faq summary::-webkit-details-marker { display: none; }
+.care__faq summary .i { flex: none; font-size: 18px; color: var(--c-gold-deep); transition: transform 300ms var(--ease); }
+.care__faq details[open] summary .i { transform: rotate(180deg); }
+.care__faq summary:focus-visible { outline: 2px solid var(--c-maroon); outline-offset: 3px; }
+.care__faq .care__answer { padding: 0 0 18px; font: 400 16.5px/1.6 var(--font-text); color: var(--c-ink); }
+
+/* Our story: her own words */
+.care__quote {
+  margin: 26px 0 0;
+  padding: 18px 0 0 22px;
+  border-left: 1px solid rgba(171, 142, 98, 0.7);
+}
+.care__quote p { font: italic 400 22px/1.4 var(--font-display); color: var(--c-maroon); }
+.care__quote footer { margin-top: 8px; font: 400 15px/1.4 var(--font-text); color: var(--c-ink-2); }
+
+/* ---------- Foot ---------- */
+.care__foot { padding-top: 16px; padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
+.care__foot .tlink .i { font-size: 20px; }
+
+/* ---------- Phones ---------- */
+/* the tabs, the words and the foot keep the drawer's own 26 px side, in line with its title */
+@media (max-width: 760px) {
+  .care__bar { padding: 14px 26px 12px; }
+  .care__tabs { gap: 8px 6px; }
+  .care__tab { padding: 0 14px; font-size: 15px; }
+  .care__body { padding-top: 20px; padding-bottom: 28px; }
+  .care__panel { font-size: 16.5px; }
+  .care__panel h3 { font-size: 21px; }
+  .care__quote p { font-size: 21px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .care__tab, .care__faq summary .i { transition: none; }
+}

@@ -1,0 +1,428 @@
+/* Pynora header: the maroon strip, the header ("the house") and the Jewellery panel.
+
+   <div class="strip on-dark" data-strip> … three lines in a list …</div>        in the page flow; scrolls away
+   <div class="hdr-mark" data-hdr-mark></div>                                     marks the strip's foot
+   <header class="hdr" data-hdr>                                                  sticky, zero height
+     <div class="hdr__bar"><div class="hdr__in">
+       <div class="hdr__top">   visit · logo · search, wishlist, bag   (phones: menu, search · logo · wishlist, bag)
+       <div class="hdr__row">   the collections between two gold lines (after scrolling: logo · collections · icons)
+   </header>
+
+   The header takes no room in the page: its bar sits over the top of the first band, which keeps the bar's
+   height free (--hdr-h). Laptops (from 1,080 px): two tiers, 52 + 36 px, transparent; after scrolling one paper
+   bar of 60 px with the strong double edge. Tablets and phones: one row of 64 / 60 px; after scrolling 56 px.
+   header.js adds .is-scrolled once the strip has left the screen. */
+
+:root { --hdr-h: 88px; }
+@media (max-width: 1079px) { :root { --hdr-h: 64px; } }
+@media (max-width: 760px)  { :root { --hdr-h: 60px; } }
+
+/* =====================================================================
+   The strip: her maroon, three lines that take turns
+   ===================================================================== */
+.strip {
+  position: relative;
+  height: 36px;
+  padding: 0 16px;
+  overflow: hidden;
+  overflow: clip;                  /* never scrolled by the browser when a hidden line's link takes focus */
+  background: var(--c-band-deep);
+  color: var(--c-on-maroon);
+  box-shadow: inset 0 -1px 0 rgba(201, 172, 120, 0.4);
+}
+.strip__list {
+  position: relative;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.strip__line {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-family: var(--font-text);
+  font-weight: 400;
+  font-size: 0.9375rem;            /* 15 px */
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transform: translateY(100%);
+}
+.strip__line:first-child { transform: none; }            /* before the script runs: the first line */
+.strip__line .i { font-size: 16px; color: var(--c-gold-light); stroke-width: 1.6; }
+.strip a {
+  align-self: stretch;             /* the whole height of the strip answers a tap */
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(228, 207, 163, 0.55);
+  text-underline-offset: 4px;
+  transition: text-decoration-color var(--dur-fast) var(--ease);
+}
+.strip a:hover { text-decoration-color: var(--c-gold-light); }
+.strip a:focus-visible { outline-offset: -3px; }   /* the ring stays inside the strip */
+
+/* with the script: one line in view; the next slides up into its place */
+.strip.is-live .strip__line { transform: translateY(100%); }
+.strip.is-live .strip__line.is-on { transform: none; transition: transform 560ms var(--ease); }
+.strip.is-live .strip__line.is-out { transform: translateY(-100%); transition: transform 560ms var(--ease); }
+.strip.is-still .strip__line { transition: none !important; }
+
+/* =====================================================================
+   The header
+   ===================================================================== */
+.hdr-mark { height: 1px; margin-top: -1px; visibility: hidden; pointer-events: none; }
+
+.hdr {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  height: 0;
+}
+.hdr__bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 88px;
+  color: var(--c-ink);
+  --c-focus: var(--c-maroon);
+  --c-tlink: var(--c-maroon);
+  --hdr-press: var(--c-maroon-deep);      /* hover words over the walls (7:1 on the rose plaster) */
+}
+.hdr__in {
+  height: 100%;
+  max-width: calc(var(--wrap) + 2 * var(--gut));
+  margin-inline: auto;
+  padding-inline: var(--gut);
+  display: grid;
+  grid-template-rows: 52px 36px;
+}
+
+/* ---------- Tier 1: visit · logo · icons ---------- */
+.hdr__top {
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
+  align-items: center;
+  column-gap: 24px;
+  min-width: 0;
+}
+.hdr__start { justify-self: start; display: flex; align-items: center; gap: 4px; }
+.hdr__tools { justify-self: end; display: flex; align-items: center; gap: 6px; }
+.hdr__logo { justify-self: center; display: flex; align-items: center; min-height: 44px; line-height: 0; border-radius: 6px; }
+.hdr__logo img { width: auto; height: 40px; max-width: none; }
+
+.hdr__visit {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  font-family: var(--font-text);
+  font-weight: 400;
+  font-size: 1rem;                 /* 16 px */
+  line-height: 1;
+  color: var(--c-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: transparent;
+  text-underline-offset: 5px;
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease), text-decoration-color var(--dur-fast) var(--ease);
+}
+.hdr__visit .i { font-size: 17px; color: var(--c-gold-deep); }
+.hdr__visit:hover { color: var(--hdr-press); text-decoration-color: rgba(171, 142, 98, 0.8); }
+
+/* icon buttons: 40 px circles, no rings; 44 px to the touch */
+.hdr .ib { width: 40px; height: 40px; }
+.hdr__small { display: none; }
+
+/* ---------- Tier 2: the collections between two gold lines ---------- */
+.hdr__row {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+  background:
+    linear-gradient(90deg, rgba(171, 142, 98, 0), rgba(171, 142, 98, 0.34) 12%, rgba(171, 142, 98, 0.34) 88%, rgba(171, 142, 98, 0)) top / 100% 1px no-repeat,
+    linear-gradient(90deg, rgba(171, 142, 98, 0), rgba(171, 142, 98, 0.62) 12%, rgba(171, 142, 98, 0.62) 88%, rgba(171, 142, 98, 0)) bottom / 100% 1px no-repeat;
+}
+.hdr__logo--bar,
+.hdr__tools--bar { display: none; }
+.hdr__nav { display: flex; }
+.hdr__menu {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hdr__item { display: flex; align-items: center; }
+/* her flower between the words */
+.hdr__item + .hdr__item::before {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin: 0 14px;
+  background-color: var(--c-gold-antique);
+  -webkit-mask: var(--mask-flower) center / contain no-repeat;
+  mask: var(--mask-flower) center / contain no-repeat;
+}
+.hdr__link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  padding: 8px 6px;
+  border: 0;
+  border-radius: 4px;              /* the focus ring matches the other rings */
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-text);
+  font-weight: 400;
+  font-size: 1.0625rem;            /* 17 px */
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--c-ink);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease);
+}
+.hdr__link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 3px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(171, 142, 98, 0), var(--c-gold) 30%, var(--c-gold) 70%, rgba(171, 142, 98, 0));
+  transform: scaleX(0);
+  transition: transform 260ms var(--ease);
+}
+.hdr__link .i { font-size: 15px; stroke-width: 1.8; color: var(--c-gold-deep); transition: transform 260ms var(--ease); }
+.hdr__link:hover,
+.hdr__link:focus-visible,
+.hdr__link[aria-expanded="true"] { color: var(--hdr-press); }
+.hdr__link:hover::after,
+.hdr__link:focus-visible::after,
+.hdr__link[aria-expanded="true"]::after { transform: scaleX(1); }
+.hdr__link[aria-expanded="true"] .i { transform: rotate(180deg); }
+/* the page the visitor is on (a collection page marks its link, or the Jewellery button for necklaces and
+   earrings): the words in the pressed colour over a fine maroon underline that stays drawn */
+.hdr__link[aria-current="page"],
+.hdr__link.is-current { color: var(--hdr-press); }
+.hdr__link[aria-current="page"]::after,
+.hdr__link.is-current::after {
+  transform: scaleX(1);
+  background: linear-gradient(90deg, rgba(125, 8, 35, 0), var(--c-maroon) 22%, var(--c-maroon) 78%, rgba(125, 8, 35, 0));
+}
+
+/* =====================================================================
+   After scrolling: one paper bar, the strong double edge along its foot
+   ===================================================================== */
+.hdr.is-scrolled .hdr__bar {
+  height: 60px;
+  --hdr-press: var(--c-maroon);
+  background: rgba(252, 248, 241, 0.96);
+  box-shadow: var(--border-double-strong-bottom), var(--sh-float);
+}
+@media (hover: hover) and (pointer: fine) {
+  .hdr.is-scrolled .hdr__bar {
+    -webkit-backdrop-filter: blur(12px) saturate(1.1);
+    backdrop-filter: blur(12px) saturate(1.1);
+  }
+}
+/* touch screens: solid paper, so nothing shows through */
+@media not all and (hover: hover) and (pointer: fine) {
+  .hdr.is-scrolled .hdr__bar { background: var(--c-paper); }
+}
+.hdr.is-scrolled .hdr__in { grid-template-rows: 60px; }
+.hdr.is-scrolled .hdr__top { display: none; }
+.hdr.is-scrolled .hdr__row {
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
+  column-gap: 24px;
+  background: none;
+}
+.hdr.is-scrolled .hdr__logo--bar { display: flex; justify-self: start; align-self: center; }
+.hdr.is-scrolled .hdr__logo--bar img { height: 38px; }
+.hdr.is-scrolled .hdr__tools--bar { display: flex; justify-self: end; align-self: center; }
+@media (hover: hover) {
+  .hdr.is-scrolled .ib:not(:disabled):hover { background: var(--c-rose-50); }
+}
+/* narrow laptops: the words and flowers sit a little closer, so logo, collections and icons keep 24 px or more
+   between them (also beside a 15 px scroll bar) */
+@media (max-width: 1179px) {
+  .hdr.is-scrolled .hdr__item + .hdr__item::before { margin: 0 10px; }
+  .hdr.is-scrolled .hdr__link { padding-inline: 4px; }
+  .hdr.is-scrolled .hdr__tools--bar { gap: 4px; }
+}
+
+/* the bar arrives from above when it changes (not with less motion) */
+@keyframes hdr-arrive {
+  from { transform: translateY(-100%); }
+  to { transform: none; }
+}
+.hdr.is-arriving .hdr__bar { animation: hdr-arrive var(--dur) var(--ease); }
+
+/* =====================================================================
+   The Jewellery panel (laptops)
+   ===================================================================== */
+.hdr__item--dd { position: relative; }
+.jpanel {
+  --c-maroon-text: var(--c-maroon);
+  --c-focus: var(--c-maroon);
+  --c-tlink: var(--c-maroon);
+  position: absolute;
+  z-index: var(--z-panel);
+  top: calc(100% + 16px);              /* the item fills the bar's height: 16 px below the bar */
+  left: -36px;
+  width: 640px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 200px;
+  gap: 22px;
+  padding: 22px;
+  border-radius: 22px;
+  background: var(--c-paper);
+  box-shadow: var(--border-double-strong), var(--sh-lift);
+  color: var(--c-ink);
+  text-align: left;
+  cursor: auto;
+}
+/* the caret above "Jewellery" */
+.jpanel::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 66px;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px 0 0 0;
+  background: var(--c-paper);
+  box-shadow: -1px -1px 0 rgba(171, 142, 98, 0.78);
+  transform: rotate(45deg);
+}
+/* keeps the pointer "inside" while it crosses the gap from the word to the panel */
+.jpanel::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 22px;
+}
+.jpanel__k {
+  margin: 2px 0 10px;
+  font-family: var(--font-text);
+  font-weight: var(--fw-strong);
+  font-size: 0.875rem;             /* 14 px */
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-gold-deep);
+}
+.jpanel__rows { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.jpanel__row {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 10px 8px 8px;
+  border-radius: 14px;
+  color: var(--c-ink);
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.jpanel__row img {
+  width: 52px;
+  height: 65px;
+  object-fit: cover;
+  border-radius: 9px;
+  background: var(--c-sand);
+  box-shadow: var(--sh-contact);
+}
+.jpanel__name { display: block; font-family: var(--font-display); font-weight: 400; font-size: 1.375rem; line-height: 1.2; color: var(--c-ink); }
+.jpanel__meta { display: block; margin-top: 3px; font-family: var(--font-text); font-size: 0.9375rem; line-height: 1.3; color: var(--c-ink-2); font-variant-numeric: lining-nums; }
+.jpanel__row > .i { font-size: 18px; color: var(--c-maroon); transition: transform var(--dur-fast) var(--ease); }
+.jpanel__row:hover { background: var(--c-rose-50); }
+/* the collection the visitor is on: its row rests tinted, its name in maroon */
+.jpanel__row[aria-current="page"] { background: var(--c-rose-50); box-shadow: inset 0 0 0 1px rgba(125, 8, 35, 0.22); }
+.jpanel__row[aria-current="page"] .jpanel__name { color: var(--c-maroon); }
+.jpanel__row:hover > .i { transform: translateX(3px); }
+.jpanel__more { margin: 12px 0 0 10px; }
+
+.jpanel__feat {
+  position: relative;
+  display: block;
+  border-radius: 16px;
+  color: var(--c-ink);
+  text-decoration: none;
+  box-shadow: var(--sh-card);
+}
+.jpanel__feat img {
+  width: 200px;
+  height: 210px;
+  object-fit: cover;
+  border-radius: 16px;
+  background: var(--c-sand);
+}
+.jpanel__plate {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  padding: 8px 10px 9px;
+  border-radius: var(--r-plate);
+  background: rgba(252, 248, 241, 0.95);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.55), var(--sh-chip);
+  transition: transform var(--dur-fast) var(--ease);
+}
+.jpanel__pick-name { display: block; font-family: var(--font-display); font-weight: 400; font-size: 1.0625rem; line-height: 1.2; }
+.jpanel__pick-price { display: block; margin-top: 4px; font-family: var(--font-text); font-weight: var(--fw-strong); font-size: 1rem; line-height: 1; color: var(--c-maroon); font-variant-numeric: lining-nums; }
+.jpanel__feat:hover .jpanel__plate { transform: translateY(-3px); }
+
+/* =====================================================================
+   Tablets and phones: one row (menu and search · logo · wishlist and bag)
+   ===================================================================== */
+@media (max-width: 1079px) {
+  .hdr__bar { height: 64px; }
+  .hdr__in { grid-template-rows: 64px; }
+  .hdr__row { display: none !important; }
+  .hdr__small { display: inline-grid; }
+  .hdr__wide { display: none; }
+  .hdr__top { column-gap: 8px; }
+  .hdr__start, .hdr__tools { gap: 4px; }
+  .hdr .badge { top: -3px; right: -2px; }    /* inside the bar */
+
+  .hdr.is-scrolled .hdr__bar { height: 56px; background: var(--c-paper); }
+  .hdr.is-scrolled .hdr__in { grid-template-rows: 56px; }
+  .hdr.is-scrolled .hdr__top { display: grid; }
+  .hdr.is-scrolled .hdr__logo img { height: 36px; }
+}
+@media (max-width: 1079px) and (hover: hover) and (pointer: fine) {
+  .hdr.is-scrolled .hdr__bar { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@media (max-width: 760px) {
+  .strip { height: 32px; }
+  .strip__line { font-size: 0.875rem; }          /* 14 px */
+  .hdr__bar { height: 60px; }
+  .hdr__in { grid-template-rows: 60px; }
+}
+
+/* =====================================================================
+   Less motion: nothing slides, grows or turns; states change at once
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .strip .strip__line, .strip a { transition: none !important; }
+  .hdr.is-arriving .hdr__bar { animation: none; }
+  .hdr__link, .hdr__link::after, .hdr__link .i, .hdr__visit,
+  .jpanel__row, .jpanel__row > .i, .jpanel__plate { transition: none; }
+  .jpanel__row:hover > .i, .jpanel__feat:hover .jpanel__plate { transform: none; }
+}

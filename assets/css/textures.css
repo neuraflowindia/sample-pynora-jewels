@@ -1,0 +1,149 @@
+/* Pynora textures: the photographed surfaces under every background band.
+
+   THE ONLY FILE THAT NAMES TEXTURE PICTURES (url(...)). Built by 0005-website/00004-build-tools/textures/
+   (sources, licences, colours, sizes and the rebuild steps are in its README.md).
+
+   Contract with backgrounds.css / backgrounds.js (the layer contract in the header of backgrounds.css):
+   - A band is <section class="bg bg--rose|bg--palm|bg--silk|bg--lattice|bg--velvet|bg--crimson|bg--quiet">
+     (the footer is "bg bg--lattice bg--footer") holding .bg__tex, then the moving layers .bg__a and .bg__b.
+   - This file paints .bg__tex only. It always gets a solid colour; the pictures come only once the band has
+     .is-near (backgrounds.js, within 1.5 screens) or when there is no script (html:not(.js)). Nothing here
+     moves, masks or shades: edge shades, vignettes, light, scrims and motion belong to backgrounds.css.
+   - .bg__tex may be any size and may move (48 px spare top and bottom, scroll drift up to +-36 px, the silk
+     band's breathing up to scale 1.12). The plaster pictures are seamless in both directions and repeat at
+     their real size, so a band of any height shows no seam, edge or enlargement; silk and emerald are single
+     photographs laid with `cover`, sized for bands up to 780 CSS px tall (the laptop maximum in backgrounds.css).
+   - Pictures for moving layers are custom properties, so backgrounds.css and ornament.css never write url():
+       --tex-palm            on .bg--palm     the palm-frond shade, warm brown and transparent; lay it with
+                                              `cover`, anchored right top (AVIF, with a half-size WebP fallback)
+       --tex-silk            on .bg--silk     the champagne silk (already on .bg__tex; for any extra silk layer)
+       --tex-maroon-plaster  on .bg--lattice  light grey plaster for a multiply blend at about .3. The maroon
+                                              band's and the footer's .bg__tex ALREADY show the plaster at
+                                              that strength: never multiply it over them a second time.
+       --tex-gold-leaf       on :root         gold leaf (400 px) for ornaments 56 px and under and the 2 px gold
+                                              lines and edge; lay it about 240 px wide behind marks, 420 px behind lines
+     Chromium resolves a url() inside a custom property against the stylesheet that USES the var(), so use
+     these only from stylesheets in this folder (assets/css/), never from inline styles or other folders.
+   - Sharpness: no fine detail is enlarged on screens up to 1920 x 1080 and 1440 x 900 at 2x.
+     Plaster walls = a seamless fine-detail tile at its real density (1024 px shown at 512 CSS px = one photo
+     pixel per screen pixel at 2x; phones 640 px at 320) blended with `overlay` over a seamless "structure"
+     picture of the whole wall in that wall's colours (3000 px shown 1920 CSS px wide; it holds nothing finer
+     than about 3 screen pixels). Silk: 4300 px wide (one photo pixel per screen pixel at the 1.12 breathing
+     peak); emerald: 3840 px wide.
+   - Phones (max-width: 760px, the same breakpoint as backgrounds.css) get their own, smaller files. */
+
+:root {
+  --tex-gold-leaf: url("../img/textures/gold-leaf-400.webp");
+}
+
+/* ---------- Solid colours: always there, before and without the pictures ---------- */
+.bg__tex { background-color: var(--c-ground, #F7F0E6); }
+.bg--rose .bg__tex { background-color: var(--c-rose-100, #EDDBD2); }
+.bg--palm .bg__tex { background-color: var(--c-sand, #EFE5D4); }
+.bg--silk .bg__tex { background-color: var(--c-champagne, #F3E7CF); }
+.bg--lattice .bg__tex { background-color: var(--c-band-deep, #7D0823); }
+.bg--velvet .bg__tex { background-color: #082819; }   /* the emerald surface's own average (her emerald slide: #062415) */
+.bg--crimson .bg__tex { background-color: var(--c-crimson, #A52E38); }
+.bg--quiet .bg__tex { background-color: var(--c-ground, #F7F0E6); }
+
+/* ---------- Which files: laptops and larger ---------- */
+.bg {
+  --tex-grain: url("../img/textures/plaster-grain-tile-1024.webp");
+  --tex-grain-size: 512px 512px;           /* 2 photo pixels per CSS pixel */
+  --tex-wall-size: 1920px auto;            /* the whole-wall structure, 3000 x 1369 px */
+  --tex-rose: url("../img/textures/plaster-rose-structure.webp");
+  --tex-sandstone: url("../img/textures/plaster-sandstone-structure.webp");
+  --tex-quiet: url("../img/textures/plaster-quiet-structure.webp");
+  --tex-crimson: url("../img/textures/plaster-crimson-structure.webp");
+  --tex-maroon: url("../img/textures/plaster-maroon-structure.webp");
+  --tex-silk-file: url("../img/textures/silk-champagne.webp");
+  --tex-emerald: url("../img/textures/emerald-velvet-drape.webp");
+  --tex-palm-file: image-set(url("../img/textures/palm-frond-shade.avif") type("image/avif"), url("../img/textures/palm-frond-shade-fallback.webp") type("image/webp"));
+  --tex-maroon-plaster-file: url("../img/textures/plaster-light-multiply.webp");
+}
+
+/* ---------- Plaster walls: fine detail (overlay) over the whole-wall structure, both seamless ---------- */
+.bg--palm.is-near .bg__tex,
+html:not(.js) .bg--palm .bg__tex,
+.bg--crimson.is-near .bg__tex,
+html:not(.js) .bg--crimson .bg__tex {
+  background-size: var(--tex-grain-size), var(--tex-wall-size);
+  background-repeat: repeat;
+  background-position: 0 0, 50% 50%;
+  background-blend-mode: overlay, normal;
+}
+/* The rose wall also carries a 25% veil of its own middle tone (#ECD9D0): a calm plaster in afternoon light.
+   Without it the relief read lumpy on 1x screens. The veil lowers the relief only; no edge is softened. */
+.bg--rose.is-near .bg__tex,
+html:not(.js) .bg--rose .bg__tex {
+  background-image: linear-gradient(rgba(236, 217, 208, 0.25), rgba(236, 217, 208, 0.25)), var(--tex-grain), var(--tex-rose);
+  background-size: 100% 100%, var(--tex-grain-size), var(--tex-wall-size);
+  background-repeat: no-repeat, repeat, repeat;
+  background-position: 0 0, 0 0, 50% 50%;
+  background-blend-mode: normal, overlay, normal;
+}
+.bg--palm.is-near .bg__tex,
+html:not(.js) .bg--palm .bg__tex { background-image: var(--tex-grain), var(--tex-sandstone); }
+.bg--crimson.is-near .bg__tex,
+html:not(.js) .bg--crimson .bg__tex { background-image: var(--tex-grain), var(--tex-crimson); }
+
+/* Her maroon (deep band and footer): the plaster at the strength of a .3 multiply. The structure picture is
+   already her maroon x plaster; the flat maroon veil on top keeps 25% of the fine detail's strength. */
+.bg--lattice.is-near .bg__tex,
+html:not(.js) .bg--lattice .bg__tex {
+  background-image: linear-gradient(rgba(125, 8, 35, 0.75), rgba(125, 8, 35, 0.75)), var(--tex-grain), var(--tex-maroon);
+  background-size: 100% 100%, var(--tex-grain-size), var(--tex-wall-size);
+  background-repeat: no-repeat, repeat, repeat;
+  background-position: 0 0, 0 0, 50% 50%;
+  background-blend-mode: normal, overlay, normal;
+}
+
+/* Quiet sandstone: #F7F0E6 with the sandstone plaster under a 60% veil */
+.bg--quiet.is-near .bg__tex,
+html:not(.js) .bg--quiet .bg__tex {
+  background-image: linear-gradient(rgba(247, 240, 230, 0.6), rgba(247, 240, 230, 0.6)), var(--tex-grain), var(--tex-quiet);
+  background-size: 100% 100%, var(--tex-grain-size), var(--tex-wall-size);
+  background-repeat: no-repeat, repeat, repeat;
+  background-position: 0 0, 0 0, 50% 50%;
+  background-blend-mode: normal, overlay, normal;
+}
+
+/* ---------- Champagne silk and the emerald surface: one photograph each ---------- */
+.bg--silk.is-near .bg__tex,
+html:not(.js) .bg--silk .bg__tex,
+.bg--velvet.is-near .bg__tex,
+html:not(.js) .bg--velvet .bg__tex {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+}
+.bg--silk.is-near .bg__tex,
+html:not(.js) .bg--silk .bg__tex { background-image: var(--tex-silk-file); }
+.bg--velvet.is-near .bg__tex,
+html:not(.js) .bg--velvet .bg__tex { background-image: var(--tex-emerald); }
+
+/* ---------- Pictures for moving layers (set only when near, so they load only then) ---------- */
+.bg--palm.is-near,
+html:not(.js) .bg--palm { --tex-palm: var(--tex-palm-file); }
+.bg--silk.is-near,
+html:not(.js) .bg--silk { --tex-silk: var(--tex-silk-file); }
+.bg--lattice.is-near,
+html:not(.js) .bg--lattice { --tex-maroon-plaster: var(--tex-maroon-plaster-file); }
+
+/* ---------- Phones: their own, smaller files ---------- */
+@media (max-width: 760px) {
+  .bg {
+    --tex-grain: url("../img/textures/plaster-grain-tile-640-phone.webp");
+    --tex-grain-size: 320px 320px;         /* 2 photo pixels per CSS pixel, as on laptops */
+    --tex-wall-size: 400px auto;           /* 640 x 1280 px */
+    --tex-rose: url("../img/textures/plaster-rose-structure-phone.webp");
+    --tex-sandstone: url("../img/textures/plaster-sandstone-structure-phone.webp");
+    --tex-quiet: url("../img/textures/plaster-quiet-structure-phone.webp");
+    --tex-crimson: url("../img/textures/plaster-crimson-structure-phone.webp");
+    --tex-maroon: url("../img/textures/plaster-maroon-structure-phone.webp");
+    --tex-silk-file: url("../img/textures/silk-champagne-phone.webp");
+    --tex-emerald: url("../img/textures/emerald-velvet-drape-phone.webp");
+    --tex-palm-file: image-set(url("../img/textures/palm-frond-shade-phone.avif") type("image/avif"), url("../img/textures/palm-frond-shade-phone-fallback.webp") type("image/webp"));
+    --tex-maroon-plaster-file: url("../img/textures/plaster-light-multiply-phone.webp");
+  }
+}

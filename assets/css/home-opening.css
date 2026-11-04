@@ -1,0 +1,320 @@
+/* Home: the opening screen. Her rose wall, the dressing-table picture with its gold mount line and the crest on its
+   top edge, the words, and the price chip, which never covers the jewellery.
+
+   <section class="op bg bg--rose is-near" data-bg data-assemble="op">
+     .op__in (the content column; its top padding keeps the header's height free)
+       .op__media               the picture's box: 760 : 748 on laptops and tablets, 358 : 340 on phones
+         .op__pic [data-layer=pic] > .op__clip > picture + .op__light (an empty layer for the window light)
+         .op__crest             her fan in gold leaf, centred on the picture's top edge (laptops)
+         .op__chip [data-layer=chip]
+       .op__words               Hindi line, title, lead, buttons, the reviews line (phones: .op__more)
+   Every line of words sits in .line > .line__in: the wrapper carries the spacing, the inner part none.
+   Nothing here moves: the still page is the resting state. */
+
+.op {
+  min-height: 0;
+  align-items: start;
+}
+
+/* ---------- Laptops (from 1,080 px): words left, the picture fills the rest at 760 : 748 ---------- */
+.op__in {
+  --op-words: clamp(360px, 31vw, 440px);
+  display: grid;
+  grid-template-columns: var(--op-words) minmax(0, 1fr);
+  grid-template-areas: "words media";
+  column-gap: 40px;
+  align-items: center;
+  padding-top: calc(var(--hdr-h) + 12px);   /* the header sits over the wall; the picture starts 12 px below it */
+  padding-bottom: 30px;                     /* 22 px of wall under the gilt frame; the ribbon starts below a 1,440 x 900 screen */
+}
+
+.op__media {
+  grid-area: media;
+  position: relative;
+  aspect-ratio: 760 / 748;
+}
+
+/* the gilt frame every feature picture on the page shares: a gold edge, an ivory reveal, a fainter gold line, then
+   the lift (5 px reveal on phones) */
+.op__pic {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  box-shadow: 0 0 0 1px rgba(171, 142, 98, 0.55), 0 0 0 7px rgba(252, 248, 241, 0.62), 0 0 0 8px rgba(171, 142, 98, 0.42), var(--sh-lift);
+}
+.op__clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  isolation: isolate;
+  background: var(--c-sand);
+}
+.op__clip picture { display: block; width: 100%; height: 100%; }
+.op__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  color: var(--c-ink-2);
+  font: italic 400 15px/1.5 var(--font-text);
+}
+.op__light {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.op__pic::after {                       /* the light-gold mount line, 9 px inside the frame */
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 9px;
+  border-radius: 11px;
+  box-shadow: inset 0 0 0 1px var(--border-mount);
+  pointer-events: none;
+}
+
+/* the crest: her fan in gold leaf on the picture's top edge, like a clasp on the frame */
+.op__crest {
+  position: absolute;
+  z-index: 3;
+  top: -13px;
+  left: calc(50% - 13px);
+  display: block;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  pointer-events: none;
+}
+.op__crest > .orn-leaf { display: block; width: 26px; height: 26px; }
+
+/* ---------- The price chip: its own link, over the warm reflections at the picture's top right ----------
+   Its top sits 20 px below the frame's inner gold line (the line is 9-10 px down), never on it. */
+.op__chip {
+  position: absolute;
+  z-index: 4;
+  top: 30px;
+  right: -18px;                         /* 10 px past the frame's outer gold line */
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 62px;
+  padding: 10px 12px 10px 10px;
+  border-radius: 16px;
+  color: var(--c-ink);
+  text-decoration: none;
+  background: rgba(252, 248, 241, 0.94);  /* no backdrop blur: the picture behind it moves for as long as the page is open */
+  box-shadow: var(--border-double-strong), var(--sh-lift);
+  --c-maroon-text: var(--c-maroon);
+  --c-focus: var(--c-maroon);
+  transition: translate var(--dur) var(--ease);
+}
+.op__chip-ic {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--c-champagne);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.55);
+  color: var(--c-maroon);
+}
+.op__chip-ic .i { font-size: 19px; }
+.op__chip-words { display: block; min-width: 0; }
+.op__chip-name {
+  display: block;
+  font: 400 19px/1.2 var(--font-display);
+  color: var(--c-ink);
+  white-space: nowrap;
+}
+.op__chip-line {
+  display: block;
+  margin-top: 4px;
+  font: 400 14.5px/1 var(--font-text);
+  color: var(--c-ink-2);
+  white-space: nowrap;
+}
+.op__chip-price { font-size: 16px; font-weight: var(--fw-strong); color: var(--c-maroon); }
+.op__chip-go { font-size: 18px; color: var(--c-maroon); transition: translate var(--dur-fast) var(--ease); }
+@media (hover: hover) and (pointer: fine) {
+  .op__chip:hover { translate: 0 -2px; }
+  .op__chip:hover .op__chip-go { translate: 3px 0; }
+}
+
+/* ---------- Words ---------- */
+.op__words {
+  grid-area: words;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+.op__hindi { color: var(--c-maroon-text); }
+.op__title { margin-top: 4px; }
+.op__lead { margin-top: 22px; max-width: 24em; }
+.op__lead .line--flow { display: inline-block; }   /* the last two phrases share a line where the column allows */
+
+/* The line wrappers clip what they hold (layout.css), so the button row, the reviews line and the phone row keep
+   room inside them for the lift, the shadow and the tap area, and give it back with negative margins: the visible
+   gaps are --gap. */
+.op__btns { --gap: 40px; padding: 8px 20px 30px; margin: calc(var(--gap) - 8px) -20px -30px; }
+.op__btn-row { display: flex; flex-wrap: wrap; gap: 12px; }
+
+.op__rate-line { --gap: 24px; padding: 14px 10px; margin: calc(var(--gap) - 14px) -10px -14px; }
+.op__rate {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 400 15px/1.2 var(--font-text);
+  color: var(--c-ink-2);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  transition: text-decoration-color var(--dur-fast) var(--ease);
+}
+.op__rate::after {                      /* a 44 px tall tap area without moving anything */
+  content: "";
+  position: absolute;
+  inset: -14px -6px;
+}
+.op__rate b { color: var(--c-ink); font-weight: var(--fw-strong); }
+.op__star { font-size: 15px; color: var(--c-gold-antique); }
+.op__rate:hover { text-decoration-color: currentColor; }
+
+.op__more {                             /* phones: "Visit us in Karnal" as a text link beside the reviews line */
+  display: none;
+  --gap: 18px;
+  padding: 14px 10px;
+  margin: calc(var(--gap) - 14px) -10px -14px;
+}
+.op__more-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; }
+.op__more-visit { position: relative; }
+.op__more-visit::after { content: ""; position: absolute; inset: -14px -6px; }
+
+/* ---------- Narrow laptops: the words stay readable, the picture keeps its shape ---------- */
+@media (min-width: 1080px) and (max-width: 1279px) {
+  .op__lead { margin-top: 18px; }
+  .op__btns { --gap: 32px; }
+  .op__rate-line { --gap: 20px; }
+  .op__btn-row .btn { padding-inline: 20px; }   /* both buttons on one row in a 360-397 px column */
+}
+
+/* 1,080-1,365 px: the lead in two balanced lines. Its last two phrases share the second line: the words column is at
+   least 384 px and the lead's size follows the column (19.2 px at 1,080-1,239 up to its own 20.9 px at 1,365), so
+   "handcrafted for those with exceptional taste." (19.6 em) always fits. */
+@media (min-width: 1080px) and (max-width: 1365px) {
+  .op__in { --op-words: clamp(384px, 31vw, 440px); }
+  .op__lead { font-size: min(var(--fs-lead), calc((var(--op-words) - 6px) / 19.7)); }
+}
+
+/* 1,080-1,179 px: the picture is about 507-590 px wide, so the chip is drawn a size smaller to stay clear of the cord */
+@media (min-width: 1080px) and (max-width: 1179px) {
+  /* 10 px above and below, as the larger chip: with 8 px the price's text box reached the chip's inner gold line */
+  .op__chip { right: -40px; gap: 10px; min-height: 58px; padding: 10px 10px 10px 8px; border-radius: 14px; }   /* further out: clear of the cord's knot */
+  .op__chip-ic { width: 34px; height: 34px; }
+  .op__chip-ic .i { font-size: 17px; }
+  .op__chip-name { font-size: 17px; }
+  .op__chip-line { margin-top: 3px; font-size: 13.5px; }
+  .op__chip-price { font-size: 15px; }
+  .op__chip-go { font-size: 16px; }
+}
+
+/* ---------- Tablets (761-1,079 px): the picture first, centred, then the words ---------- */
+@media (min-width: 761px) and (max-width: 1079px) {
+  .op__in {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "media" "words";
+    justify-items: center;
+    padding-bottom: 56px;
+  }
+  .op__media { width: min(100%, 620px); }
+  .op__crest { display: none; }
+  .op__words { width: min(100%, 620px); margin-top: 30px; align-items: center; text-align: center; }
+  .op__lead { margin-top: 18px; }
+  .op__btns { --gap: 30px; }
+  .op__btn-row { justify-content: center; }
+  .op__rate-line { --gap: 22px; }
+}
+
+/* ---------- Phones (up to 760 px): the picture across the column, then the words; the main button above the fold ---------- */
+@media (max-width: 760px) {
+  .op__in {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "media" "words";
+    padding-bottom: 44px;
+  }
+  .op__media { aspect-ratio: 358 / 340; }
+  .op__pic {
+    border-radius: 12px;
+    box-shadow: 0 0 0 1px rgba(171, 142, 98, 0.55), 0 0 0 5px rgba(252, 248, 241, 0.62), 0 0 0 6px rgba(171, 142, 98, 0.42), var(--sh-lift);
+  }
+  .op__pic::after { inset: 7px; border-radius: 8px; }
+  .op__crest { display: none; }
+
+  .op__chip {                            /* 12 px below the inner gold line (7-8 px down); its right edge on the frame's */
+    top: 20px;                          /* outer gilt line, 14 px past the inner one */
+    right: -6px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    min-height: 0;
+    padding: 7px 12px 8px;
+    border-radius: 12px;
+  }
+  .op__chip-ic,
+  .op__chip-go { display: none; }
+  .op__chip-name { font-size: 15px; }
+  .op__chip-line { margin-top: 3px; font-size: 13.5px; }
+  .op__chip-price { font-size: 14.5px; }
+
+  .op__words { margin-top: 16px; }        /* 10 px clear of the frame's 6 px gilt edge */
+  .op__title { margin-top: 0; }           /* (the fold: "Shop all pieces" still ends by y 644 at 390 x 664) */
+
+  /* the words a size quieter on phones, across the whole column: the Hindi line 20 px at 360, 21 at 390, 22 from
+     420; the title 30 px at 360, 32 at 390, 33 from 405 (two balanced lines); the lead 17 px at 360, 18 from 390 */
+  .op__hindi {                          /* under 24 px it is small text (7:1): a step deeper than the wall's maroon */
+    font-size: clamp(1.25rem, 0.5rem + 3.333vw, 1.375rem);
+    color: var(--c-maroon-ink);
+  }
+  .op__title { font-size: clamp(1.875rem, 0.375rem + 6.667vw, 2.0625rem); line-height: 1.12; }
+  .op__title .line__in { text-wrap: balance; }
+  .op__lead { max-width: none; font-size: clamp(1.0625rem, 0.3125rem + 3.333vw, 1.125rem); }
+  .op__lead .line__in { text-wrap: pretty; }
+  .op__btns { order: 1; --gap: 16px; padding-inline: 12px; margin-inline: -12px; align-self: stretch; }
+  .op__btn-row { display: block; }
+  .op__shop { width: 100%; min-height: 52px; }
+  .op__visit,
+  .op__rate-line { display: none; }
+  .op__lead { order: 2; margin-top: 20px; }
+  .op__more { order: 3; display: block; }
+}
+
+/* Below 430 px the chip keeps one line, the price and the pick (her name is still read aloud), so it stays clear of the
+   cord's knot below it; from 430 px it shows her full name over the price. */
+@media (max-width: 429px) {
+  .op__chip-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .op__chip { padding-block: 10px; }    /* the price's text box clear of the chip's inner gold line */
+  .op__chip-line { margin-top: 0; }
+  .op__chip::after { content: ""; position: absolute; inset: -6px -2px; }   /* a 44 px tall tap area */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .op__chip,
+  .op__chip-go,
+  .op__rate { transition: none; }
+  .op__chip:hover,
+  .op__chip:hover .op__chip-go { translate: none; }
+}

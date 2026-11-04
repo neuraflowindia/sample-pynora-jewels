@@ -1,0 +1,177 @@
+/* Pynora drawer shell and scrim (the bodies of the menu, bag, wishlist and client care have their own files).
+
+   <aside class="drawer" data-overlay="bag" aria-labelledby="bag-title" hidden>      right, 440 px
+     (drawer--wide: client care, 560 px · drawer--left: the menu, from the left)
+     <header class="drawer__head">
+       <h2 class="drawer__title" id="bag-title">Your bag <small>(2)</small></h2>
+       <button class="drawer__close" type="button" data-close aria-label="Close the bag">
+         <svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+     </header>
+     <div class="drawer__body">…</div>
+     <footer class="drawer__foot">…</footer>                                          optional, stays at the foot
+   </aside>
+
+   overlay.js adds .is-open, removes [hidden] while open, and shows the shared .scrim behind.
+   Full width on phones; slides in over 380 ms and out over 280 ms; at once when the visitor asks for less motion. */
+
+/* The page keeps its scroll bar's room, so locking the scroll never moves anything */
+html { scrollbar-gutter: stable; }
+html.is-locked { overflow: hidden; }
+
+/* Fixed layers cannot paint into that kept room (classic scroll bars on laptops), so while a state is open the room
+   takes the colour of what lies beside it: the scrim over the ground, paper beside a right-hand drawer, and the
+   search sheet's paper down to its foot (search.js keeps --search-h). The page's own ground stays on body. */
+html.is-locked {
+  background: color-mix(in srgb, rgb(42, 26, 30) 46%, var(--c-ground));
+}
+html.is-locked:is([data-overlay-open="bag"], [data-overlay-open="wishlist"], [data-overlay-open="care"]) {
+  background: var(--c-paper);
+}
+html.is-locked[data-overlay-open="search"] {
+  background: linear-gradient(var(--c-paper) var(--search-h, 0px), color-mix(in srgb, rgb(42, 26, 30) 46%, var(--c-ground)) 0) fixed;
+}
+
+/* every part sizes by its outer edge, whatever the page's own rule */
+.drawer, .drawer *, .drawer *::before, .drawer *::after, .scrim { box-sizing: border-box; }
+
+/* ---------- Scrim ---------- */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-scrim, 80);
+  background: var(--scrim, rgba(42, 26, 30, 0.46));
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 280ms var(--ease), visibility 0s linear 280ms;
+}
+.scrim.is-open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--dur-drawer, 380ms) var(--ease), visibility 0s;
+}
+@media (hover: hover) and (pointer: fine) {
+  .scrim {
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+  }
+}
+
+/* ---------- Drawer ---------- */
+.drawer {
+  --drawer-w: 440px;
+  --c-maroon-text: var(--c-maroon);
+  position: fixed;
+  z-index: var(--z-drawer, 90);
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: min(var(--drawer-w), 100%);
+  display: flex;
+  flex-direction: column;
+  background: var(--c-paper);
+  color: var(--c-ink);
+  box-shadow: inset 1px 0 0 rgba(171, 142, 98, 0.6), -30px 0 60px -30px rgba(63, 10, 22, 0.55);
+  transform: translateX(100%);
+  visibility: hidden;
+  transition: transform 280ms var(--ease), visibility 0s linear 280ms;
+  outline: none;
+  overscroll-behavior: contain;
+}
+.drawer.is-open {
+  transform: none;
+  visibility: visible;
+  transition: transform var(--dur-drawer, 380ms) var(--ease), visibility 0s;
+}
+.drawer[hidden] { display: none; }
+
+.drawer--wide { --drawer-w: 560px; }
+
+.drawer--left {
+  right: auto;
+  left: 0;
+  box-shadow: inset -1px 0 0 rgba(171, 142, 98, 0.6), 30px 0 60px -30px rgba(63, 10, 22, 0.6);
+  transform: translateX(-100%);
+}
+.drawer--left.is-open { transform: none; }
+
+/* ---------- Head ---------- */
+.drawer__head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 76px;
+  padding: 14px 20px 14px 26px;
+  border-bottom: 1px solid var(--c-line);
+}
+.drawer__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--fw-display, 400);
+  font-size: var(--fs-sub);              /* 25 -> 30 px */
+  line-height: var(--lh-sub, 1.2);
+  color: var(--c-ink);
+}
+.drawer__title small {
+  margin-left: 6px;
+  font: 400 17px/1 var(--font-text);
+  font-variant-numeric: lining-nums;
+  color: var(--c-ink-2);
+}
+
+/* the close button: a 42 px paper circle with a gold ring, 44 px to the touch */
+.drawer__close {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--c-paper);
+  box-shadow: var(--ring-gold, inset 0 0 0 1px rgba(171, 142, 98, 0.55));
+  color: var(--c-ink);
+  cursor: pointer;
+  transition: background-color var(--dur-fast, 200ms) var(--ease), box-shadow var(--dur-fast, 200ms) var(--ease);
+}
+.drawer__close::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+}
+.drawer__close .i { width: 20px; height: 20px; stroke-width: 1.6; }
+.drawer__close:hover { background: var(--c-rose-50); box-shadow: inset 0 0 0 1px rgba(125, 8, 35, 0.45); }
+.drawer__close:active { background: var(--c-rose-100); }
+.drawer__close:focus-visible { outline: 2px solid var(--c-maroon); outline-offset: 3px; }
+
+/* ---------- Body and foot ---------- */
+.drawer__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 18px 26px;
+}
+.drawer__foot {
+  flex: none;
+  padding: 18px 26px 22px;
+  padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--c-line);
+  box-shadow: 0 -14px 24px -18px rgba(63, 10, 22, 0.35);
+}
+
+/* ---------- Phones: full width ---------- */
+@media (max-width: 760px) {
+  .drawer, .drawer--wide { width: 100%; }
+  .drawer:not(.drawer--left) { box-shadow: none; }   /* edge to edge: no gold edge line against the screen's side */
+}
+
+/* ---------- Less motion: open and close at once ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .scrim, .scrim.is-open, .drawer, .drawer.is-open, .drawer__close { transition: none; }
+}

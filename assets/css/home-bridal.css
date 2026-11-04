@@ -1,0 +1,254 @@
+/* Home: The Bridal Edit on the emerald band.
+   Laptops: the words and the button on the left; on the right the portrait, with the paper edit card overlapping
+   its left edge by 80 px. Tablets: the words on top; the portrait with the edit card overlapping its right side,
+   centred. Phones: the words, the square portrait, a sideways row of five small cards, then the button.
+   The edit card is paper inside a dark band, so it carries .on-paper (maroon focus rings and links again). */
+
+.brd {
+  --p: 1;
+  --brd-words: clamp(330px, 30.5vw, 440px);
+  --brd-pw: clamp(360px, 32vw, 460px);               /* portrait width; 4:5 */
+  --brd-ew: clamp(270px, 21vw, 300px);               /* edit card width */
+  --brd-gap: clamp(30px, 3vw, 60px);
+  --brd-over: 80px;                                  /* how far the edit card overlaps the portrait */
+}
+
+/* lines of words keep their spacing on the wrapper, so a rising line starts fully hidden (the clip itself is
+   layout.css's); the room above and below keeps matras and descenders whole */
+.brd .line { padding: 0.14em 0 0.2em; margin: -0.14em 0 -0.2em; }
+.brd .line--btn { padding: 8px 12px 30px; margin: -8px -12px -30px; }   /* room for the button's lift and shadow */
+.brd .line--btn > .line__in { display: inline-block; }
+
+/* ---------- Laptops ---------- */
+.brd__grid {
+  display: grid;
+  grid-template-columns: var(--brd-words) minmax(0, 1fr);
+  grid-template-rows: 1fr auto auto 1fr;
+  grid-template-areas:
+    ".    pics"
+    "hs   pics"
+    "foot pics"
+    ".    pics";
+  column-gap: var(--brd-gap);
+}
+.brd__hs { grid-area: hs; margin-bottom: 0; }
+.brd__foot { grid-area: foot; margin-top: 30px; }
+.brd__pics {
+  grid-area: pics;
+  justify-self: start;
+  display: grid;
+  grid-template-columns: calc(var(--brd-ew) - var(--brd-over)) var(--brd-over) calc(var(--brd-pw) - var(--brd-over));
+  grid-template-rows: auto;
+  align-items: end;
+}
+
+/* the portrait: 4:5, the light-gold mount line, a deep lift */
+.brd__portrait {
+  position: relative;
+  grid-column: 2 / 4;
+  grid-row: 1;
+  width: var(--brd-pw);
+  aspect-ratio: 4 / 5;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--r-photo);
+  background: #06170E;
+  /* the page's gilt frame, on the emerald: a light-gold edge, a band of the velvet's shade, a fainter line, a deep lift */
+  box-shadow: 0 0 0 1px rgba(228, 207, 163, 0.62), 0 0 0 7px rgba(2, 16, 9, 0.38), 0 0 0 8px rgba(228, 207, 163, 0.4), 0 2px 3px rgba(0, 0, 0, 0.35), 0 40px 70px -34px rgba(0, 0, 0, 0.8);
+}
+.brd__portrait > img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+.brd__portrait::after {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border-radius: 11px;
+  box-shadow: inset 0 0 0 1px var(--border-mount);
+  pointer-events: none;
+}
+
+/* ---------- The edit card ---------- */
+.brd__edit {
+  position: relative;
+  z-index: 2;
+  grid-column: 1 / 3;
+  grid-row: 1;
+  align-self: end;
+  width: var(--brd-ew);
+  min-height: 440px;
+  margin-bottom: -28px;                              /* it hangs a little below the portrait's foot */
+  padding: 0 18px 12px;
+  border-radius: var(--r-card);
+  background: var(--c-paper);
+  color: var(--c-ink);
+  box-shadow: var(--border-double), var(--sh-lift), 0 30px 60px -34px rgba(0, 0, 0, 0.8);
+}
+.brd__edit-head {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  margin: 0;
+  border-bottom: 1px solid var(--c-line);
+  background: var(--c-paper);                        /* bronze words only ever on paper (9.2:1) */
+  font-family: var(--font-text);
+  font-weight: var(--fw-strong);
+  font-size: var(--fs-label);                        /* 15 px capitals */
+  line-height: 1;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-gold-deep);
+}
+.brd__rows {
+  margin: 0;
+  padding: 6px 0 0;
+  list-style: none;
+  min-height: 420px;                                 /* five rows of 82 px and their lines, before the pieces arrive */
+}
+.brd__rows > li + li { border-top: 1px solid rgba(171, 142, 98, 0.2); }
+.brd__row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  grid-template-areas: "i n" "i p";
+  align-content: center;
+  column-gap: 12px;
+  min-height: 82px;                                  /* every row as tall as one with a two-line name */
+  margin: 0 -8px;
+  padding: 7px 8px;
+  border-radius: 12px;
+  color: var(--c-ink);
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+.brd__thumb {
+  grid-area: i;
+  align-self: center;
+  width: 48px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: var(--c-sand);
+  box-shadow: 0 0 0 1px rgba(171, 142, 98, 0.45), var(--sh-contact);
+  transition: scale 600ms var(--ease);
+}
+.brd__name {
+  grid-area: n;
+  align-self: end;
+  font-family: var(--font-display);
+  font-size: var(--fs-card-name);                    /* 19 / 17 px */
+  line-height: 1.2;
+  color: var(--c-ink);
+}
+.brd__price {
+  grid-area: p;
+  align-self: start;
+  margin-top: 4px;
+  font-family: var(--font-text);
+  font-weight: var(--fw-strong);
+  font-size: 1rem;                                   /* 16 px */
+  line-height: 1.1;
+  font-variant-numeric: var(--num-price);
+  color: var(--c-maroon);
+}
+@media (hover: hover) and (pointer: fine) {
+  .brd__row:hover { background: var(--c-rose-50); }
+  .brd__row:hover .brd__thumb { scale: 1.05; }
+}
+
+/* ---------- Narrow laptops ---------- */
+@media (min-width: 1080px) and (max-width: 1279px) {
+  .brd__edit { padding-inline: 16px; }
+}
+
+/* ---------- Tablets: words on top; the portrait with the card over its right side, centred ---------- */
+@media (min-width: 761px) and (max-width: 1079px) {
+  .brd { --brd-pw: 420px; --brd-ew: 290px; }
+  .brd__grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas: "hs" "foot" "pics";
+  }
+  .brd__foot { margin-top: 26px; }
+  .brd__pics {
+    justify-self: center;
+    margin-top: 44px;
+    margin-bottom: 28px;                             /* the card hangs 28 px below the portrait: the band's foot keeps its 66 px */
+    grid-template-columns: calc(var(--brd-pw) - var(--brd-over)) var(--brd-over) calc(var(--brd-ew) - var(--brd-over));
+  }
+  .brd__portrait { grid-column: 1 / 3; }
+  .brd__edit { grid-column: 2 / 4; margin-bottom: -28px; }
+  .brd.bg--velvet .bg__scrim { background: linear-gradient(180deg, rgba(3, 18, 10, 0.62) 0%, rgba(3, 18, 10, 0.44) 45%, rgba(3, 18, 10, 0.2) 100%); }
+}
+
+/* ---------- Phones: the square portrait, then a sideways row of five small cards, then the button ---------- */
+@media (max-width: 760px) {
+  .brd__grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas: "hs" "pics" "foot";
+  }
+  .brd__pics { display: block; justify-self: stretch; min-width: 0; margin-top: 26px; }
+  .brd__portrait {
+    width: 100%;
+    aspect-ratio: 5 / 4;                             /* head to necklace: the band stays short enough for a light page */
+    border-radius: 12px;
+    box-shadow: 0 0 0 1px rgba(228, 207, 163, 0.62), 0 0 0 5px rgba(2, 16, 9, 0.38), 0 0 0 6px rgba(228, 207, 163, 0.4), 0 2px 3px rgba(0, 0, 0, 0.35), 0 30px 50px -26px rgba(0, 0, 0, 0.8);
+  }
+  .brd__portrait::after { inset: 7px; border-radius: 8px; }
+  .brd__portrait > img { object-position: 50% 0%; }    /* the tikka stays in, the necklace sits low in the frame */
+  .brd__edit {
+    width: auto;
+    min-height: 0;
+    margin: 16px -16px 0;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .brd__edit-head {                                  /* still names the list for screen readers */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+  .brd__rows {
+    display: flex;
+    gap: 10px;
+    min-height: 132px;
+    padding: 6px 16px 10px;                          /* room for the focus ring */
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 16px;
+    scrollbar-width: none;
+  }
+  .brd__rows::-webkit-scrollbar { display: none; }
+  .brd__rows > li { flex: 0 0 160px; scroll-snap-align: start; display: flex; }
+  .brd__rows > li + li { border-top: 0; }
+  .brd__row {
+    flex: 1 1 auto;
+    grid-template-columns: 40px minmax(0, 1fr);
+    grid-template-areas: "i p" "n n";
+    align-content: start;
+    row-gap: 8px;
+    min-height: 116px;
+    margin: 0;
+    padding: 10px;
+    border-radius: 14px;
+    background: var(--c-paper);
+    box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.6), var(--sh-card);
+  }
+  .brd__row:focus-visible { outline-color: var(--c-gold-light); }   /* the ring falls on the emerald here */
+  .brd__thumb { width: 40px; height: 50px; }
+  .brd__price { align-self: center; margin: 0; }
+  .brd__name { align-self: start; font-size: 1rem; line-height: 1.2; }   /* 16 px */
+  .brd__foot { margin-top: 26px; }
+}
+
+/* ---------- Less motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .brd__row, .brd__thumb { transition: none; }
+  .brd__row:hover .brd__thumb { scale: none; }
+}

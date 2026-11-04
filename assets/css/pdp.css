@@ -1,0 +1,225 @@
+/* The product page's view band and panel.
+   - The view band: the gallery column (exactly the rail plus the stage) beside the panel (at most 540 px) from
+     961 px; one centred column (at most 600 px) on tablets and phones. --stage-top tells the gallery how much of
+     the screen sits above its stage (less on short laptop screens), so the whole picture fits the first screen.
+   - The panel, in a jeweller's order: tag, name, hook, stars, price, colours, status, the quantity and the two
+     buy buttons, the four promises, the specifications sheet, the pincode check and the four folds.
+   - The specifications sheet: the piece's own card, laid out like a certificate on paper with fine gold rules.
+   Shared marks (buttons, pills, tags, stars) come from their own files; the gallery from gallery.css. */
+
+/* ======================================================================= the view band */
+.pdp { --stage-top: 236px; }
+.pdp .crumbs { margin-bottom: clamp(16px, 2vw, 24px); }
+.pdp__grid { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: clamp(36px, 4.4vw, 64px); align-items: start; }
+.pdp__panel { min-width: 0; max-width: 540px; --c-maroon-text: var(--c-maroon); }
+/* short laptop screens (1,366 × 768, 1,280 × 800): less room above, so the whole picture fits the first screen */
+@media (min-width: 961px) and (max-height: 820px) {
+  .pdp { --stage-top: 188px; }
+  .pdp .crumbs { margin-bottom: 12px; }
+}
+@media (max-width: 960px) {
+  .pdp .crumbs { max-width: 600px; margin-inline: auto; }
+  .pdp__grid { grid-template-columns: minmax(0, 1fr); gap: 28px; justify-items: center; }
+  .pdp__grid > * { width: 100%; max-width: 600px; }
+}
+/* before the piece is known (no script, no catalogue) the panel's own words take the whole column */
+html:not([data-view="ok"]) .pdp__grid { grid-template-columns: minmax(0, 1fr); }
+.pdp__grid > .gal:empty { display: none; }
+/* the reviews and "You may also like" belong to a known piece only */
+html:not([data-view="ok"]) .pdp-rv,
+html:not([data-view="ok"]) .pdp-more { display: none; }
+/* nothing painted first may move: until the page script has written the piece, the bands below the view band are
+   not laid out and the view band holds a full screen (so the footer starts below it); it keeps that screen while a
+   card list inside it is still being filled (the new pieces under the "wandered off" message) */
+html.js:not(.is-filled) .pdp-rv,
+html.js:not(.is-filled) .pdp-more { display: none; }
+html.js:not(.is-filled) .bg.pdp,
+.bg.pdp:has([data-cards]:not([data-filled])) { min-height: 100vh; }
+
+/* a single picture, when the gallery itself is unavailable */
+.pdp__still { width: 100%; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 22px; background: var(--c-sand);
+  box-shadow: 0 0 0 1px rgba(171, 142, 98, .45), var(--sh-lift); }
+.pdp__still img { width: 100%; height: 100%; object-fit: cover; }
+@media (min-width: 961px) { .pdp__still { width: min(max(440px, calc((100svh - var(--stage-top)) * .8)), 600px); } }
+
+/* ======================================================================= the panel: what it is */
+.pdp__tag { margin: 0 0 14px; }
+.pdp__tag .tag { position: static; }
+.pdp__name { margin: 0; font: 400 34px/1.14 var(--font-display); color: var(--c-ink); letter-spacing: 0; text-wrap: balance; }
+/* the name rises out of its own line on load: the line's clip ends 3 px under it (every name's letters, descenders
+   included, sit inside its line box), so the rising words never cross the hook 10 px below */
+.pdp__name.line { padding: .14em 0 0; margin: -.14em 0 0; overflow-clip-margin: 3px; }
+.pdp__hook { margin: 10px 0 0; max-width: 30em; font: italic 400 18px/1.5 var(--font-text); color: var(--c-ink-2); text-wrap: pretty; }
+.pdp__rate { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 14px 0 0; font: 400 15px/1 var(--font-text); color: var(--c-ink-2); }
+.pdp__rate b { font-weight: 600; color: var(--c-ink); font-variant-numeric: lining-nums; }
+.pdp__rate a { position: relative; color: var(--c-maroon-text); text-decoration: underline; text-decoration-color: rgba(125, 8, 35, .35); text-underline-offset: 4px;
+  transition: text-decoration-color var(--dur-fast) var(--ease); }
+.pdp__rate a::after { content: ""; position: absolute; inset: -15px -4px; }     /* 45 px tall to the touch */
+.pdp__rate a:hover { text-decoration-color: currentColor; }
+
+/* the words the page carries before its script has run (shown only without the catalogue) */
+.pdp__note { margin: 18px 0 0; max-width: 30em; font: 400 16px/1.55 var(--font-text); color: var(--c-ink-2); }
+.pdp__note-act { margin: 20px 0 0; }
+
+/* ======================================================================= the panel: price, colour, status, buying */
+/* a fine gold rule, strongest at the start, divides what the piece is from how to have it */
+.pdp__offer { position: relative; margin-top: 20px; padding-top: 20px; }
+.pdp__offer::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, rgba(171, 142, 98, .8), rgba(171, 142, 98, .4) 55%, rgba(171, 142, 98, 0)); }
+.pdp__price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0; }
+.pdp__price b { font: 600 26px/1 var(--font-text); letter-spacing: .01em; color: var(--c-maroon-text); font-variant-numeric: lining-nums tabular-nums; }
+.pdp__price span { font: 400 14px/1.3 var(--font-text); color: var(--c-ink-2); }
+
+/* colours: named pills with a swatch */
+.cl { margin-top: 22px; }
+.cl__label { margin: 0 0 10px; font: 400 15px/1.3 var(--font-text); color: var(--c-ink-2); }
+.cl__label b { font-weight: 600; color: var(--c-ink); }
+.cl__opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.cl__opt { position: relative; display: inline-flex; align-items: center; gap: 9px; height: 42px; padding: 0 16px 0 10px; border: 0; border-radius: 999px; cursor: pointer;
+  font: 400 15.5px/1 var(--font-text); color: var(--c-ink); background: var(--c-paper); box-shadow: inset 0 0 0 1px rgba(171, 142, 98, .55), var(--sh-contact);
+  transition: box-shadow var(--dur-fast) var(--ease); }
+.cl__opt::after { content: ""; position: absolute; inset: -1px 0; }             /* 44 px tall to the touch */
+.cl__opt i { flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--sw); box-shadow: inset 0 0 0 1px rgba(42, 26, 30, .2), 0 0 0 2px var(--c-paper), 0 0 0 3px rgba(171, 142, 98, .45); }
+.cl__opt:hover { box-shadow: inset 0 0 0 1px rgba(125, 8, 35, .5), var(--sh-chip); }
+.cl__opt[aria-pressed="true"] { font-weight: 600; box-shadow: inset 0 0 0 1.75px var(--c-maroon), var(--sh-chip); }
+
+/* status pill and the stock note */
+.pdp__status { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 20px; }
+.pdp__status .pill { height: 30px; padding: 0 13px 0 11px; gap: 7px; font-size: 14px; }
+.pdp__status .pill .i { font-size: 16px; }
+.pdp__stock { display: inline-flex; align-items: center; gap: 7px; font: 600 14px/1.3 var(--font-text); color: var(--c-maroon-text); }
+.pdp__stock::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* quantity beside "Add to bag"; "Ask on WhatsApp" under both, full width */
+.buy { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; margin-top: 24px; }
+.buy .pdp__wa { grid-column: 1 / -1; }
+.pdp__add { width: 100%; }
+.qty { display: inline-flex; align-items: center; height: 54px; border-radius: 999px; background: var(--c-paper); box-shadow: inset 0 0 0 1px rgba(171, 142, 98, .62), var(--sh-contact); }
+.qty__b { display: grid; place-items: center; width: 44px; height: 54px; padding: 0; border: 0; border-radius: 999px; background: none; cursor: pointer; color: var(--c-ink);
+  transition: color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease); }
+.qty__b .i { font-size: 16px; stroke-width: 2; }
+.qty__b:not([aria-disabled="true"]):hover { color: var(--c-maroon); background: var(--c-rose-50); }
+.qty__b[aria-disabled="true"] { cursor: default; color: rgba(42, 26, 30, .3); }
+.qty__n { min-width: 28px; text-align: center; font: 600 17px/1 var(--font-text); color: var(--c-ink); font-variant-numeric: lining-nums tabular-nums; }
+
+/* ======================================================================= the four promises */
+.promise { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 28px 0 0; padding: 20px 0 18px; list-style: none; }
+.promise::before,
+.promise::after { content: ""; position: absolute; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, rgba(171, 142, 98, 0), rgba(171, 142, 98, .72) 14%, rgba(171, 142, 98, .72) 86%, rgba(171, 142, 98, 0)); }
+.promise::before { top: 0; }
+.promise::after { bottom: 0; }
+.promise li { display: grid; justify-items: center; align-content: start; gap: 10px; text-align: center; font: 600 13.5px/1.3 var(--font-text); color: var(--c-ink); }
+/* each icon in a small paper medallion with a double gold ring */
+.promise__ic { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; color: var(--c-bronze);
+  background: radial-gradient(circle at 50% 32%, #FFFDF8, var(--c-paper) 72%);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, .62), inset 0 0 0 4px var(--c-paper), inset 0 0 0 5px rgba(171, 142, 98, .3),
+    0 1px 2px rgba(63, 10, 22, .14), 0 8px 14px -9px rgba(63, 10, 22, .5); }
+.promise__ic .i { font-size: 22px; stroke-width: 1.5; }
+
+/* ======================================================================= the specifications sheet */
+.spec { position: relative; isolation: isolate; overflow: hidden; margin-top: 28px; padding: 24px clamp(18px, 2.4vw, 26px) 18px; border-radius: 20px;
+  background: var(--c-paper);
+  /* the gallery frame's language: an antique-gold line, a paper mat, an inner gold hairline; a sharp shadow over a soft one */
+  box-shadow: inset 0 0 0 1px rgba(156, 124, 76, .78), inset 0 0 0 5px var(--c-paper), inset 0 0 0 6px rgba(171, 142, 98, .5),
+    0 1px 2px rgba(58, 20, 12, .2), 0 6px 10px -6px rgba(58, 20, 12, .22), 0 26px 46px -28px rgba(58, 20, 12, .55); }
+/* her fan, very faint, pressed into the paper like a watermark */
+.spec::after { content: ""; position: absolute; z-index: -1; right: -30px; bottom: -36px; width: 176px; height: 176px; opacity: .055; pointer-events: none;
+  background-color: var(--c-gold-antique); -webkit-mask: var(--mask-fan) center / contain no-repeat; mask: var(--mask-fan) center / contain no-repeat; }
+.spec__head { display: grid; justify-items: center; gap: 10px; margin: 0 0 12px; text-align: center; }
+.spec__title { margin: 0; font: 400 22px/1.2 var(--font-display); letter-spacing: .01em; color: var(--c-ink); }
+.spec__rule { width: 120px; gap: 10px; }
+.spec__rule::before,
+.spec__rule::after { width: 40px; }
+/* one label column for every row (about a third of the card, never narrower than its longest label, which never
+   wraps), the values in the rest; a narrow card (a short laptop's panel, a phone) puts each label above its value */
+.spec { container: spec / inline-size; }
+.spec__list { display: grid; grid-template-columns: minmax(max-content, 34%) minmax(0, 1fr); column-gap: 18px; margin: 0; }
+.spec__row { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 34%) minmax(0, 1fr); grid-template-columns: subgrid; align-items: baseline;
+  column-gap: 18px; padding: 11.5px 2px; border-top: 1px solid rgba(171, 142, 98, .35); }
+.spec__row dt { margin: 0; font: 600 14px/1.5 var(--font-text); letter-spacing: .04em; white-space: nowrap; color: var(--c-bronze); }
+.spec__row dd { margin: 0; font: 400 16px/1.45 var(--font-text); color: var(--c-ink); font-variant-numeric: lining-nums; text-wrap: pretty; }
+.spec__nw { white-space: nowrap; }
+/* the foot under a double gold rule, as a certificate closes */
+.spec__foot { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 2px 10px; margin: 4px 0 0; padding-top: 15px;
+  font: 400 13.5px/1.4 var(--font-text); color: var(--c-ink-2); text-align: center;
+  background: linear-gradient(rgba(171, 142, 98, .62), rgba(171, 142, 98, .62)) 0 0 / 100% 1px no-repeat,
+    linear-gradient(rgba(171, 142, 98, .3), rgba(171, 142, 98, .3)) 0 3px / 100% 1px no-repeat; }
+.spec__foot b { font-weight: 600; letter-spacing: .06em; color: var(--c-ink); font-variant-numeric: lining-nums tabular-nums; }
+/* a small gold lozenge between the two (a mark, never a letter) */
+.spec__dot { flex: none; align-self: center; width: 4px; height: 4px; margin: 0 2px; background: var(--c-gold-antique); transform: rotate(45deg); }
+
+/* the sheet on cue (phones, with motion; page-product.js keeps the cue): below its cue it waits fully covered from
+   the bottom and 24 px lower (12 px on phones); on cue it rises and is unveiled from the top down over 700 ms; once
+   whole the cover is dropped. Its words move with the panel and never fade. */
+@media (max-width: 760px) {
+  html.motion-scroll .spec[data-cue] { transition: transform var(--m-cue-panel) var(--ease), clip-path var(--m-cue-panel) var(--ease);
+    transform: translateY(calc(24px * var(--om))); clip-path: inset(-44px -48px calc(100% + 44px) -48px round 20px); }
+  html.motion-scroll .spec[data-cue].is-up { transform: none; clip-path: inset(-44px -48px -48px -48px round 20px); }
+  html.motion-scroll .spec[data-cue].is-whole { clip-path: none; }
+  html.motion-scroll .spec[data-cue].spec--now,
+  html.motion-jump .spec[data-cue] { transition: none; }
+}
+
+/* ======================================================================= the pincode check */
+.pin { margin-top: 24px; }
+.pin__row { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 2px 0 16px; border-radius: 999px; background: var(--c-paper);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, .62), var(--sh-contact); transition: box-shadow var(--dur-fast) var(--ease); }
+.pin__row:focus-within { box-shadow: inset 0 0 0 1.5px var(--c-maroon), var(--sh-contact); }
+.pin__row > .i { font-size: 18px; color: var(--c-bronze); }
+.pin__row input { flex: 1; min-width: 0; height: 44px; padding: 0; border: 0; background: none; outline: none; font: 400 16px/1 var(--font-text); color: var(--c-ink); font-variant-numeric: lining-nums; }
+.pin__row input::placeholder { color: var(--c-ink-2); opacity: 1; }
+.pin__row button { height: 44px; padding: 0 20px; border: 0; border-radius: 999px; background: none; cursor: pointer; font: 600 15px/1 var(--font-text); color: var(--c-maroon);
+  transition: background-color var(--dur-fast) var(--ease); }
+.pin__row button:hover { background: var(--c-rose-50); }
+.pin__ok { display: flex; align-items: flex-start; gap: 8px; min-height: 21px; margin: 10px 0 0 4px; font: 400 14.5px/1.4 var(--font-text); color: var(--c-sage-ink); }
+.pin__ok.is-err { color: var(--c-maroon); }
+.pin__ok .i { flex: none; margin-top: 2px; font-size: 16px; stroke-width: 2; }
+
+/* ======================================================================= the four folds */
+.acc { margin-top: 18px; border-top: 1px solid var(--c-line); }
+.acc details { border-bottom: 1px solid var(--c-line); }
+.acc summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; list-style: none; cursor: pointer; border-radius: 6px;
+  font: 600 16px/1.3 var(--font-text); color: var(--c-ink); }
+.acc summary::-webkit-details-marker { display: none; }
+.acc__ic { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 50%; color: var(--c-bronze);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, .55); transition: background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease); }
+.acc__ic .i { font-size: 16px; stroke-width: 1.8; transition: transform 320ms var(--ease); }
+.acc details[open] .acc__ic .i { transform: rotate(180deg); }
+.acc summary:hover .acc__ic { background: var(--c-paper); box-shadow: inset 0 0 0 1px rgba(171, 142, 98, .8), var(--sh-contact); }
+.acc__body { max-width: 34em; padding: 0 0 20px; font: 400 16.5px/1.6 var(--font-text); color: var(--c-ink); }
+.acc__body p { margin: 0; }
+.acc__body p + p { margin-top: 10px; }
+.acc__wear { color: var(--c-ink-2); }
+.acc__wear b { font-weight: 600; color: var(--c-ink); }
+.acc__dl { display: grid; gap: 10px; margin: 0; }
+.acc__dl > div { display: grid; grid-template-columns: 7.2em minmax(0, 1fr); gap: 14px; }
+.acc__dl dt { font-weight: 600; color: var(--c-ink-2); }
+.acc__dl dd { margin: 0; }
+.acc__body .acc__hi { margin-bottom: 6px; font-size: 24px; color: var(--c-maroon-text); }
+
+/* ======================================================================= phones */
+@media (max-width: 760px) {
+  .pdp__name { font-size: 28px; }
+  .pdp__hook { font-size: 16.5px; }
+  .pdp__price b { font-size: 22px; }
+  .promise { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 18px; }
+  .acc__dl > div { grid-template-columns: 6.4em minmax(0, 1fr); }
+}
+@container spec (max-width: 400px) {
+  .spec__row { grid-template-columns: minmax(0, 1fr); row-gap: 4px; padding: 10px 0; }
+  .spec__row dt { white-space: normal; }
+}
+@media (max-width: 560px) {
+  .spec { padding: 20px 18px 16px; }
+  .spec__title { font-size: 20px; }
+  .spec__row { grid-template-columns: minmax(0, 1fr); row-gap: 4px; padding: 10px 0; }
+  .spec__row dt { white-space: normal; }
+  .spec__row dd { font-size: 15.5px; }
+  .acc__dl > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}
+
+/* ======================================================================= less motion */
+@media (prefers-reduced-motion: reduce) {
+  .qty__b, .cl__opt, .pin__row, .pin__row button, .acc__ic, .acc__ic .i, .pdp__rate a { transition: none; }
+}

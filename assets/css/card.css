@@ -1,0 +1,338 @@
+/* Product card: the framed jewel card, built by cards.js from the catalogue.
+
+   <article class="card" data-id="…">                         card--row: in a sideways row · card--narrow: 186 px gifts card
+     <div class="card__media">
+       <a class="card__pic" href="product.html?p=…" tabindex="-1" aria-hidden="true">
+         <span class="card__track"><img class="card__img"> <span class="card__veil"><img class="card__img card__img--alt"></span>
+           <img class="card__img card__img--more"></span>          card--dissolve: the worn picture without its veil
+       </a>
+       <span class="card__dots">…</span>                       touch screens only (a button in a sideways row)
+     </div>
+     <span class="tag … card__tag">…</span>                      at most one
+     <button class="card__wish" aria-pressed="false">…</button>
+     <h3 class="card__name"><a href="product.html?p=…">…</a></h3>   the card’s one link
+     <p class="card__cap">…</p>
+     <div class="card__meta"><span class="card__price">…</span> colour dots · stars</div>
+     <span class="pill … card__status">…</span>
+   </article>
+
+   Paper frame with the fine double gold edge; lifts 4 px on hover while the worn picture rises into view behind a
+   soft top edge (the veil), or, in a list marked data-reveal="dissolve", melts in over 700 ms. On touch screens
+   a card in a grid swipes through its pictures; a card in a sideways row never swipes (the row does) and steps
+   through them when its dots are tapped. Stars wait for the product page on cards narrower than 210 px. */
+
+.card {
+  position: relative;
+  container: card / inline-size;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 10px 18px;
+  border-radius: var(--r-card);
+  background: var(--c-paper);
+  color: var(--c-ink);
+  box-shadow: var(--border-double), var(--sh-card);
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+  /* paper surface: maroon links and focus rings, also when the card sits on a dark band */
+  --c-maroon-text: var(--c-maroon);
+  --c-focus: var(--c-maroon);
+  --c-tlink: var(--c-maroon);
+}
+.card a { color: inherit; text-decoration: none; }
+
+/* ---------- Picture: 4:5, the worn picture on hover ---------- */
+.card__media {
+  position: relative;
+  display: block;
+  width: 100%;
+  flex: none;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 15px;
+  background: var(--c-sand);
+  isolation: isolate;
+}
+.card__pic { position: absolute; inset: 0; display: block; }
+.card__track { position: absolute; inset: 0; display: grid; }
+.card__img {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  color: var(--c-ink-2);
+  font: italic 400 14px/1.4 var(--font-text);   /* the alt text, if a picture fails */
+  transition: opacity 450ms var(--ease), transform 1200ms var(--ease), translate 420ms var(--ease);
+}
+.card__img--alt, .card__img--more { opacity: 0; }
+.card__img--more { display: none; }
+.card__img.is-out { opacity: 0; }
+.card__dots { display: none; }
+/* the worn picture's veil: no box of its own on touch screens, so the swipe strip and the dots are unchanged */
+.card__veil { display: contents; }
+
+/* ---------- Heart: saves the piece to the wishlist ---------- */
+.card__wish {
+  position: absolute;
+  z-index: 3;
+  top: 18px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  background: rgba(252, 248, 241, 0.9);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: var(--c-maroon);
+  box-shadow: var(--sh-chip);
+  transition: transform var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
+}
+.card__wish::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; }   /* 44 px to the touch */
+.card__wish .i { font-size: 18px; stroke-width: 1.6; transition: fill var(--dur-fast) var(--ease); }
+.card__wish[aria-pressed="true"] .i,
+.card__wish[data-wish-remove] .i { fill: var(--c-dusty-rose); }   /* saved; the wishlist's remove buttons are always saved pieces */
+
+.card__tag { position: absolute; z-index: 2; top: 18px; left: 18px; }
+
+/* ---------- Words ---------- */
+.card__name {
+  margin: 0;
+  padding: 15px 6px 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 19px;
+  line-height: 1.25;
+  color: var(--c-ink);
+  text-wrap: balance;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.card__name a { border-radius: 4px; }
+.card__cap {
+  margin: 0;
+  padding: 4px 6px 0;
+  font: italic 400 16px/1.4 var(--font-text);
+  color: var(--c-ink-2);
+  white-space: nowrap;
+}
+.card__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding: 12px 6px 0;
+}
+.card__meta .stars-avg { margin-left: auto; }
+.card__price {
+  font: 600 17.5px/1.2 var(--font-text);
+  letter-spacing: 0.01em;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--c-maroon);
+  white-space: nowrap;
+}
+.card__status { margin: 12px 6px 0; align-self: flex-start; }
+
+/* ---------- Laptops: lift, the worn picture, a slow push-in ---------- */
+@media (hover: hover) and (pointer: fine) {
+  .card:hover { transform: translateY(-4px); box-shadow: var(--border-double), var(--sh-lift); }
+  .card:hover:not(.is-picking) .card__img--alt:not(.is-out) { opacity: 1; }
+  .card:hover .card__img { transform: scale(1.04); }
+  .card__wish:hover { transform: scale(1.06); background: var(--c-paper); }
+
+  /* The veil: a box 16% taller than the picture, its top 16% a soft edge. It rests one full height below the
+     picture (out of sight) and rises into place while the worn picture inside moves the other way by the same
+     distance, so the picture stands still and only the soft edge travels up over the first one. */
+  .card__veil {
+    display: block;
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    right: 0;
+    top: -16%;
+    bottom: 0;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 13.8%);
+    mask-image: linear-gradient(180deg, transparent 0, #000 13.8%);
+    transform: translateY(100%);
+    transition: transform 420ms var(--ease);
+  }
+  .card__veil > .card__img {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(100% / 1.16);
+    opacity: 1;
+    translate: 0 -116%;
+  }
+  .card__veil > .card__img.is-out { opacity: 0; }
+  .card:hover:not(.is-picking) .card__veil { transform: none; transition-duration: 560ms; }
+  .card:hover:not(.is-picking) .card__veil > .card__img { translate: none; transition-duration: 450ms, 1200ms, 560ms; }
+
+  /* The dissolve: the worn picture melts in over 700 ms while it settles from 1.06 to the first picture's 1.04 */
+  .card--dissolve .card__img--alt { transform: scale(1.06); transition: opacity 700ms var(--ease), transform 1200ms var(--ease); }
+  .card--dissolve:hover .card__img--alt { transform: scale(1.04); }
+}
+
+/* ---------- Touch screens ---------- */
+@media (hover: none), (pointer: coarse) {
+  /* a card in a grid: pictures 1–3 as a swipe strip */
+  .card:not(.card--row) .card__track {
+    display: flex;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .card:not(.card--row) .card__track::-webkit-scrollbar { display: none; }
+  .card:not(.card--row) .card__img { flex: 0 0 100%; scroll-snap-align: start; opacity: 1; transform: none; }
+  .card:not(.card--row) .card__img.is-out { display: none; }
+
+  /* a card in a sideways row: one picture at a time, the dots step to the next */
+  .card--row .card__img { opacity: 0; transform: none; }
+  .card--row .card__img.is-on { opacity: 1; }
+
+  .card__img--more { display: block; }
+
+  .card__dots {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    bottom: 9px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+    padding: 4px 6px;
+    border-radius: 999px;
+    background: rgba(42, 26, 30, 0.18);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    pointer-events: none;
+  }
+  .card__dots i { width: 5px; height: 5px; border-radius: 99px; background: rgba(252, 248, 241, 0.65); transition: width 250ms var(--ease), background-color 250ms var(--ease); }
+  .card__dots i.on { width: 14px; background: var(--c-paper); }
+
+  /* in a row the dots are a button: the capsule sits where it always does, the button gives it 44 px */
+  button.card__dots {
+    bottom: 0;
+    min-width: 64px;
+    height: 44px;
+    margin: 0;
+    padding: 0 0 9px;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    align-items: flex-end;
+    justify-content: center;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+  button.card__dots .card__dots-in {
+    display: flex;
+    gap: 5px;
+    padding: 4px 6px;
+    border-radius: 999px;
+    background: rgba(42, 26, 30, 0.18);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+  button.card__dots:focus-visible { outline: none; }
+  button.card__dots:focus-visible .card__dots-in { outline: 2px solid var(--c-paper); outline-offset: 2px; }
+
+  /* the name answers a tap across its whole block (its padding above and room for two lines on phones), not only
+     on its words; the focus ring stays on the words */
+  .card__name { position: relative; min-height: 44px; }
+  .card__name a::after { content: ""; position: absolute; inset: 0; }
+
+  /* colour dots: the touch tap areas (24 px wide or more, 44 px tall) come from marks.css; the last dot reaches
+     a little further towards the stars */
+  .card .cdot:last-child::after { right: -14px; }
+}
+
+/* ---------- An unseen card shape: holds a list's room when the catalogue cannot load ---------- */
+.card--slot { visibility: hidden; }
+.card--slot .card__name { min-height: calc(2.5em + 15px); }   /* room for two lines: the names are not known */
+
+/* ---------- Narrow cards and phone grids: the stars wait for the product page ---------- */
+@container card (max-width: 190px) {      /* a card under 210 px across (its words column under 190 px) */
+  .card .stars-avg { display: none; }
+}
+@container card-words (max-width: 178px) { /* the same card in a grid, measured on its price row (12 px narrower) */
+  .card .stars-avg { display: none; }
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 760px) {
+  .card { padding: 8px 8px 14px; border-radius: 18px; }
+  .card__media { border-radius: 12px; }
+  .card__name, .card__cap, .card__meta { padding-left: 4px; padding-right: 4px; }
+  .card__name { padding-top: 11px; font-size: 17px; line-height: 1.25; min-height: calc(2.5em + 11px); }   /* always room for two lines */
+  .card--slot .card__name { min-height: calc(2.5em + 11px); }
+  .card__cap { font-size: 14.5px; }
+  .card__meta { padding-top: 9px; gap: 8px; }
+  .card__price { font-size: 16px; }
+  .card__status { margin: 9px 4px 0; }
+  .card__wish { top: 14px; right: 14px; width: 32px; height: 32px; }
+  .card__wish::after { inset: -6px; }
+  .card__wish .i { font-size: 16px; }
+  .card__tag { top: 14px; left: 14px; }
+}
+
+/* ---------- A grid of cards: four across, three from 1,080 px, two on phones ---------- */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.card-grid > li { display: flex; min-width: 0; }
+.card-grid > li > .card { flex: 1 1 auto; min-width: 0; }
+@media (max-width: 1080px) { .card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; } }
+@media (max-width: 760px) { .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; } }
+
+/* The cards of one grid row share their rows (picture, name, caption, price, status): the name takes the room of
+   the tallest name in that row, one line when every name fits and two when any wraps, and the prices line up. */
+@supports (grid-template-rows: subgrid) {
+  .card-grid > li { display: grid; grid-row: span 5; grid-template-rows: subgrid; grid-template-columns: minmax(0, 1fr); row-gap: 0; }
+  /* a subgrid cannot hold size containment (its rows would not count), so in a grid the card's price row is the
+     container that decides whether the stars fit */
+  .card-grid > li > .card { display: grid; grid-row: 1 / -1; grid-template-rows: subgrid; grid-template-columns: minmax(0, 1fr); row-gap: 0; container: none; }
+  .card-grid .card__media { grid-row: 1; }
+  .card-grid .card__name { grid-row: 2; min-height: 0; }
+  .card-grid .card__cap { grid-row: 3; }
+  .card-grid .card__meta { grid-row: 4; margin-top: 0; container: card-words / inline-size; }
+  .card-grid .card__status { grid-row: 5; justify-self: start; align-self: start; min-width: 0; max-width: calc(100% - 12px); }
+  .card-grid .card--slot .card__name { min-height: calc(2.5em + 15px); }
+  @media (hover: none), (pointer: coarse) {
+    .card-grid .card__name { min-height: 44px; }
+  }
+  /* three across (761–1,080 px): the longest status ("Made to order · 10–12 days") may reach the card's inner edge */
+  @media (min-width: 761px) and (max-width: 1080px) {
+    .card-grid .card__status { max-width: calc(100% - 6px); padding-right: 9px; }
+  }
+  @media (max-width: 760px) {
+    .card-grid .card--slot .card__name { min-height: calc(2.5em + 11px); }
+  }
+}
+
+/* ---------- Less motion: no lift, no push-in; the hover picture still changes ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .card, .card__wish, .card__wish .i, .card__dots i, .card__veil { transition: none; }
+  .card__img,
+  .card--dissolve .card__img--alt,
+  .card:hover:not(.is-picking) .card__veil > .card__img { transition: opacity 10ms linear; }
+  .card:hover, .card:hover .card__img, .card__wish:hover,
+  .card--dissolve .card__img--alt, .card--dissolve:hover .card__img--alt { transform: none; }
+}

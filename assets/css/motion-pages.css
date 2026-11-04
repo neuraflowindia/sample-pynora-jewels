@@ -1,0 +1,120 @@
+/* Pynora motion on the Collection, Product and not-found pages: the same living house as Home, but quieter.
+   Things arrive and answer the visitor; nothing performs.
+   - Load: the first band's lines rise out of their slots (motion-base.css and motion-load.js); here her divider
+     draws outward from the fan as they rise.
+   - Scroll: each row of cards arrives as its top crosses 92% of the screen, exactly as Home's "Just arrived" cards
+     do: every card rises 40 px from a little smaller, unveiled from the top down, its picture settling from 1.06,
+     the cards of a row 0.08 apart (0.06 on laptops); a card's tag is set on it a moment after it lands.
+   - Lower headings ("You may also like", "What our clients say", "New in the studio") rise on cue; the reviews
+     panel is unveiled from the top down on cue, its words moving with it.
+   Pictures follow the scroll; words arrive on cue, in full, and never fade. Everything here lives under
+   html.motion or html.motion-scroll, so a visitor who asks for less motion, or a page whose scripts fail, sees the
+   finished, still page. Uses motion-core.js's progress (--p on each section and leading row) and the maths of
+   motion-base.css: --t = clamp(0, (p - d) / s, 1), --e = 1 - (1 - t)^3.
+   Load order: after motion-base.css and motion-micro.css. */
+
+/* ---------- Which parts lead with their own progress (read by motion-core.js) ----------
+   Every card's list item arrives with its own row, on laptops too; on the Collection page the block under the
+   grid ("You may also like", or "New in the studio" for an unknown collection) leads its own heading. */
+:is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li[data-row],
+.pg--collection .cv-grid .more[data-row] { --m-lead: 1; }
+
+/* ---------- The first band: her divider draws outward from the fan while the lines rise ---------- */
+@keyframes m-pg-rule { from { transform: scaleX(0); } }
+@keyframes m-pg-fan { from { scale: 0.6; opacity: 0; } }
+html.motion :is(.pg--collection, .pg--product, .pg--notfound) .m-load .hs > .orn-rule::before,
+html.motion :is(.pg--collection, .pg--product, .pg--notfound) .m-load .hs > .orn-rule::after {
+  animation: m-pg-rule 900ms var(--ease) 260ms backwards paused;
+}
+html.motion :is(.pg--collection, .pg--product, .pg--notfound) .m-load .hs > .orn-rule::before { transform-origin: 100% 50%; }
+html.motion :is(.pg--collection, .pg--product, .pg--notfound) .m-load .hs > .orn-rule::after { transform-origin: 0 50%; }
+html.motion :is(.pg--collection, .pg--product, .pg--notfound) .m-load .hs > .orn-rule > .orn-fan {
+  animation: m-pg-fan 700ms var(--ease) 200ms backwards paused;
+}
+html.motion.motion-go :is(.pg--collection, .pg--product, .pg--notfound) .m-load .hs > .orn-rule::before,
+html.motion.motion-go :is(.pg--collection, .pg--product, .pg--notfound) .m-load .hs > .orn-rule::after,
+html.motion.motion-go :is(.pg--collection, .pg--product, .pg--notfound) .m-load .hs > .orn-rule > .orn-fan {
+  animation-play-state: running;
+}
+/* opened further down the page (a restored scroll or a link to the reviews): the first band is simply there */
+html.motion :is(.pg--collection, .pg--product, .pg--notfound) .m-load.m-skip .line__in,
+html.motion :is(.pg--collection, .pg--product, .pg--notfound) .m-load.m-skip .hs > .orn-rule::before,
+html.motion :is(.pg--collection, .pg--product, .pg--notfound) .m-load.m-skip .hs > .orn-rule::after,
+html.motion :is(.pg--collection, .pg--product, .pg--notfound) .m-load.m-skip .hs > .orn-rule > .orn-fan { animation: none; }
+
+/* ---------- Lower headings: the words rise on cue; the divider draws outward as the band arrives ----------
+   Shares of the band's progress (laptops: 560 px from the band's top crossing 92% of the screen; tablets and
+   phones: 0.6 of the screen height), set so each heading starts rising when its top is about 88% down the screen.
+   On the Collection page the block under the grid leads its own heading (0.45 of the screen height). */
+html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more) .hs .line__in { --d: 0.2; }
+html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more) .hs > .orn-rule { --d: 0.18; }
+html.motion-scroll .pg--collection .cv-grid .more .hs .line__in { --d: 0.1; }
+html.motion-scroll .pg--collection .cv-grid .more .hs > .orn-rule { --d: 0.08; }
+html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more, .cv-grid .more) .hs > .orn-rule {
+  --s: 0.35;
+  --t: clamp(0, (var(--p, 1) - var(--d, 0)) / var(--s), 1);
+  --e: calc(1 - (1 - var(--t)) * (1 - var(--t)) * (1 - var(--t)));
+}
+html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more, .cv-grid .more) .hs > .orn-rule::before { transform: scaleX(var(--e)); transform-origin: 100% 50%; }
+html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more, .cv-grid .more) .hs > .orn-rule::after { transform: scaleX(var(--e)); transform-origin: 0 50%; }
+html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more, .cv-grid .more) .hs > .orn-rule > .orn-fan { scale: calc(0.6 + 0.4 * var(--e)); opacity: var(--e); }
+
+/* ---------- Rows of cards: each card rises 40 px from a little smaller, unveiled from the top down ----------
+   The unveiling is done by 60% of the card's span, so its name and price are whole while it settles; the clip
+   reaches far enough past the card that its lift and shadow on hover are never cut. */
+html.motion-scroll :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li[data-row] {
+  --s: 0.5;
+  --t: clamp(0, (var(--p, 1) - var(--d, 0)) / var(--s), 1);
+  --e: calc(1 - (1 - var(--t)) * (1 - var(--t)) * (1 - var(--t)));
+  --tc: min(1, var(--t) / 0.6);
+  --ec: calc(1 - (1 - var(--tc)) * (1 - var(--tc)) * (1 - var(--tc)));
+  transform: translateY(calc(40px * var(--om) * (1 - var(--e)))) scale(calc(0.97 + 0.03 * var(--e)));
+  clip-path: inset(-44px -48px calc((100% + 128px) * (1 - var(--ec)) - 84px) -48px round 22px);
+}
+html.motion-scroll :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li[data-row] .card__pic {
+  transform: scale(calc(1.06 - 0.06 * var(--e)));
+}
+html.motion-scroll :is(.pg--collection, .pg--product, .pg--notfound) .is-moving [data-cards] > li[data-row] { will-change: transform; }
+html.motion-scroll :is(.pg--collection, .pg--product, .pg--notfound) .is-done [data-cards] > li[data-row] { clip-path: none; }
+
+/* the tag ("New", "Bestseller") is set on its card a moment after the card lands: rises 6 px, unveiled from the
+   top down, on cue */
+html.motion-scroll :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li[data-row] .card__tag {
+  transform: translateY(6px);
+  clip-path: inset(-20px -20px calc(100% + 20px) -20px);
+  transition: transform 500ms var(--ease), clip-path 500ms var(--ease);
+}
+html.motion-scroll :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li[data-row] .card__tag.is-up { transform: none; clip-path: inset(-20px); }
+
+/* across a row, the cards follow one another (two across on phones, three on tablets, four on laptops) */
+:is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li { --d: 0; }
+:is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li .card__tag { --d: 0.3; }
+@media (max-width: 760px) {
+  :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li:nth-child(2n) { --d: 0.08; }
+  :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li:nth-child(2n) .card__tag { --d: 0.38; }
+}
+@media (min-width: 761px) and (max-width: 1080px) {
+  :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li:nth-child(3n + 2) { --d: 0.08; }
+  :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li:nth-child(3n) { --d: 0.16; }
+  :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li:nth-child(3n + 2) .card__tag { --d: 0.38; }
+  :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li:nth-child(3n) .card__tag { --d: 0.46; }
+}
+@media (min-width: 1081px) {
+  :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li:nth-child(4n + 2) { --d: 0.06; }
+  :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li:nth-child(4n + 3) { --d: 0.12; }
+  :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li:nth-child(4n) { --d: 0.18; }
+  :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li:nth-child(4n + 2) .card__tag { --d: 0.36; }
+  :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li:nth-child(4n + 3) .card__tag { --d: 0.42; }
+  :is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li:nth-child(4n) .card__tag { --d: 0.48; }
+}
+
+/* ---------- The reviews panel: unveiled from the top down on cue, rising 24 px, its words moving with it ----------
+   The cue is the band's progress passing 0.38 (the panel's top about 88% down the screen): --up is 0 below it and
+   1 from it (progress is written to four decimals, so it is never in between), and the change plays over 700 ms. */
+html.motion-scroll .pdp-rv .rvb {
+  --up: clamp(0, (var(--p, 1) - 0.38) * 10000, 1);
+  transform: translateY(calc(24px * var(--om) * (1 - var(--up))));
+  clip-path: inset(-44px -48px calc((100% + 128px) * (1 - var(--up)) - 84px) -48px round 24px);
+  transition: transform var(--m-cue-panel) var(--ease), clip-path var(--m-cue-panel) var(--ease);
+}
+html.motion-scroll .pdp-rv.is-done .rvb { clip-path: none; }

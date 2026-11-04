@@ -1,0 +1,124 @@
+/* Home: gifts, the crimson box and three pieces, on the champagne silk.
+   Laptops from 1,280 px: the box on the left (380–500 px, 4:5), the heading set, three 186 px cards side by side
+   and the button on the right. 1,080–1,279 px: the box 340 x 425 and the cards as a sideways row of 200 px cards.
+   Tablets: the box at 45% beside the words, the row of cards full width below. Phones: the words, the box,
+   a sideways row of 200 px cards and the button full width.
+   The still page is the resting state: --p stays at 1 here, and nothing moves through it. */
+
+.gft { --p: 1; }
+
+/* ---------- A line of words in its own slot (the slot carries the spacing, the words none) ---------- */
+.gft .line { padding: 0.14em 0 0.2em; margin: -0.14em 0 -0.2em; }
+
+/* ---------- Layout: laptops ---------- */
+.gft__grid {
+  --gft-box: clamp(380px, 35vw, 500px);
+  display: grid;
+  grid-template-columns: var(--gft-box) minmax(0, 1fr);
+  grid-template-rows: auto auto auto 1fr;
+  grid-template-areas:
+    "pic hs"
+    "pic cards"
+    "pic foot"
+    "pic .";
+  column-gap: clamp(40px, 12.5vw - 120px, 60px);
+  align-items: start;
+}
+.gft__hs { grid-area: hs; position: relative; margin: 0 0 30px; }
+/* a soft light on the silk behind the words, so the folds’ shadows never darken the reading text */
+.gft__hs::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -70px -120px -80px -110px;
+  background: radial-gradient(closest-side, rgba(250, 243, 228, 0.86), rgba(250, 243, 228, 0.72) 60%, rgba(250, 243, 228, 0));
+  pointer-events: none;
+}
+.gft__hs > .t-lead { max-width: 30em; }
+.gft__pic { grid-area: pic; }
+.gft__cards { grid-area: cards; min-width: 0; }
+.gft__foot { grid-area: foot; display: flex; margin-top: 30px; }
+
+/* ---------- The box: framed like a mounted print ---------- */
+.gft__frame {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--r-photo);
+  overflow: hidden;
+  background: var(--c-crimson-deep);
+  box-shadow: 0 0 0 1px rgba(171, 142, 98, 0.55), 0 0 0 7px rgba(252, 248, 241, 0.62), 0 0 0 8px rgba(171, 142, 98, 0.42), var(--sh-lift);
+}
+.gft__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  color: var(--c-on-maroon);
+  font: italic 400 15px/1.4 var(--font-text);
+}
+.gft__frame::after {                         /* the mount line inside the picture */
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border-radius: 11px;
+  box-shadow: inset 0 0 0 1px var(--border-mount);
+  pointer-events: none;
+}
+
+/* ---------- The cards: three side by side from 1,280 px (the row never needs to scroll there) ---------- */
+.gft__row { --row-item: 186px; --row-gap: 20px; }
+.gft__row .pill__more { display: none; }     /* the short pill on narrow cards */
+.gft__row .track { min-height: calc(var(--row-pad-top) + 395px + var(--row-pad-bottom)); }   /* keeps its size before the cards arrive */
+
+/* ---------- Narrow laptops: a smaller box; the cards become a sideways row of 200 px cards ---------- */
+@media (min-width: 1080px) and (max-width: 1279px) {
+  .gft__grid { --gft-box: 340px; column-gap: 40px; }
+  .gft__row { --row-item: 200px; }
+  .gft__row .track { min-height: calc(var(--row-pad-top) + 412px + var(--row-pad-bottom)); }
+  /* the row runs on to the screen’s right edge, so the cards pass out of view rather than being cut inside the page */
+  .gft__row { --gft-edge: max(var(--gut), (100vw - var(--wrap)) / 2); }
+  .gft__row .row__scroller { margin-right: calc(-1 * var(--gft-edge)); }
+  .gft__row .track { padding-right: var(--gft-edge); }
+}
+
+/* ---------- Tablets: the box at 45% beside the words; the row of cards full width below ---------- */
+@media (min-width: 761px) and (max-width: 1079px) {
+  .gft__grid {
+    grid-template-columns: 45% minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas:
+      "pic hs"
+      "pic foot"
+      "pic ."
+      "cards cards";
+    column-gap: 36px;
+  }
+  .gft__hs { margin-bottom: 0; }
+  .gft__foot { margin-top: 30px; }
+  .gft__cards { margin-top: 44px; }
+  .gft__row { --row-item: 280px; --row-gap: 20px; --row-bleed: var(--gut); }   /* from one edge of the screen to the other */
+  .gft__row .pill__more { display: inline; }
+  .gft__row .track { min-height: calc(var(--row-pad-top) + 489px + var(--row-pad-bottom)); }
+}
+
+/* ---------- Phones: words, box, the row, the button ---------- */
+@media (max-width: 760px) {
+  .gft__grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas: "hs" "pic" "cards" "foot";
+    row-gap: 22px;
+  }
+  .gft__hs { margin: 0; }
+  .gft__hs::before { inset: -40px -100px -110px; background: radial-gradient(closest-side, rgba(250, 243, 228, 0.94), rgba(250, 243, 228, 0.86) 60%, rgba(250, 243, 228, 0)); }
+  .gft__frame {
+    border-radius: 12px;
+    box-shadow: 0 0 0 1px rgba(171, 142, 98, 0.55), 0 0 0 5px rgba(252, 248, 241, 0.62), 0 0 0 6px rgba(171, 142, 98, 0.42), var(--sh-lift);
+  }
+  .gft__frame::after { inset: 7px; border-radius: 8px; }
+  .gft__row { --row-item: 200px; --row-gap: 12px; }
+  .gft__row .row__bar .ib-arrows { margin-bottom: 12px; }
+  .gft__row .track { min-height: calc(var(--row-pad-top) + 391px + var(--row-pad-bottom)); }
+  .gft__foot { margin-top: 4px; }
+  .gft__foot .btn { width: 100%; }
+}

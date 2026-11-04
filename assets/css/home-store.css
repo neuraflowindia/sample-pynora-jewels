@@ -1,0 +1,178 @@
+/* Home: visit us in Karnal, on the crimson store wall.
+   Laptops: the words and her raised sign on the left; the store picture and the paper store card on the right,
+   the card overlapping the picture by 100 px (picture at 700 px and card at 980 px on a 1,440 px screen).
+   Tablets: the words and the sign on top; the picture at 55% with the card overlapping its right side.
+   Phones: the words, the sign, the square picture, and the card overlapping its foot by 60 px.
+   Her sign: the light-gold logo over a soft raised shadow baked into a picture (no filters while the page runs).
+   --sign-x / --sign-y give the sign’s centre as a share of the band, for the spotlight to rest on.
+   The still page is the resting state: --p stays at 1 here, and nothing moves through it. */
+
+/* sign centre measured on the built page: 15.4–18.3% / 58–58.5% from 1,080 to 1,440 px; 23.8% / 58.4% at 1,920 px */
+.visit { --p: 1; --sign-x: 16%; --sign-y: 58%; }
+@media (min-width: 1680px) { .visit { --sign-x: 23%; } }
+
+/* ---------- A line of words in its own slot (the slot carries the spacing, the words none) ---------- */
+.visit .line { padding: 0.14em 0 0.2em; margin: -0.14em 0 -0.2em; }
+
+/* ---------- Layout: laptops ---------- */
+.visit__grid {
+  --visit-words: clamp(300px, 29vw, 420px);
+  --visit-pic: clamp(300px, 26.4vw, 380px);
+  --visit-card: 360px;                       /* the 1,440 px card at every laptop width: the address keeps two lines and the
+                                                hours one (the flexible gap still leaves 58 px at 1,080 px) */
+  --visit-over: 100px;
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--visit-words) minmax(40px, 1fr) var(--visit-pic) calc(var(--visit-card) - var(--visit-over));
+  grid-template-areas: "words . pic card";
+  align-items: start;
+}
+/* laptops: the heading and her sign sit as one group at the middle height of the picture and card, so the wall
+   on the left is as full as the right (the group's top meets the card's top line) */
+.visit__words { grid-area: words; position: relative; align-self: center; }
+.visit__pic { grid-area: pic; margin-top: 10px; }
+.visit__card { grid-area: card; }
+
+/* a deeper shade of the wall behind the heading, so the champagne stays clear when the spotlight passes */
+.visit__words::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -120px;
+  top: -90px;
+  width: calc(100% + 200px);
+  height: 300px;
+  background: radial-gradient(closest-side, rgba(58, 6, 16, 0.36), rgba(58, 6, 16, 0.22) 55%, rgba(58, 6, 16, 0));
+  pointer-events: none;
+}
+.visit__hs > .t-section { white-space: nowrap; }
+
+/* ---------- Her sign ---------- */
+.visit__sign {
+  --logo: 240px;
+  position: relative;
+  width: var(--logo);
+  margin-top: 46px;
+  aspect-ratio: 155.13 / 112.05;
+}
+.visit__logo { position: relative; width: 100%; height: 100%; }
+.visit__shadow {
+  position: absolute;
+  left: calc(var(--logo) * -64 / 480);
+  top: calc(var(--logo) * -64 / 480);
+  width: calc(var(--logo) * 608 / 480);
+  height: auto;
+  max-width: none;
+  pointer-events: none;
+}
+
+/* ---------- The store picture ---------- */
+.visit__frame {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--r-photo);
+  overflow: hidden;
+  background: #8FA79E;
+  /* a gilt frame: a light-gold edge, a band of the wall’s shade, a fainter gold line, then the shadow on the wall */
+  box-shadow: 0 0 0 1px rgba(228, 207, 163, 0.62), 0 0 0 7px rgba(60, 6, 16, 0.34), 0 0 0 8px rgba(228, 207, 163, 0.4), 0 2px 3px rgba(30, 2, 8, 0.35), 0 40px 70px -30px rgba(30, 2, 8, 0.85);
+}
+.visit__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  color: var(--c-ink);
+  font: italic 400 15px/1.4 var(--font-text);
+}
+.visit__frame::after {                       /* the mount line inside the picture */
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border-radius: 11px;
+  box-shadow: inset 0 0 0 1px var(--border-mount);
+  pointer-events: none;
+}
+
+/* ---------- The store card: paper with the double gold edge, in front of the picture ---------- */
+.visit__card {
+  position: relative;
+  z-index: 2;
+  width: var(--visit-card);
+  margin: 120px 0 0 calc(-1 * var(--visit-over));
+  padding: 30px;
+  border-radius: var(--r-card);
+  background: var(--c-paper);
+  color: var(--c-ink);
+  box-shadow: var(--border-double), 0 2px 3px rgba(30, 2, 8, 0.32), 0 36px 64px -28px rgba(30, 2, 8, 0.82);
+}
+.visit__rows { font-style: normal; }
+.visit__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font: 400 var(--fs-body)/1.45 var(--font-text);
+  color: var(--c-ink);
+}
+.visit__row + .visit__row { margin-top: 12px; }
+.visit__nb { white-space: nowrap; }
+.visit__row .i { flex: none; margin-top: 0.22em; font-size: 20px; color: var(--c-gold-deep); }
+
+.visit__btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+
+.visit__wa { margin-top: 16px; gap: 9px; }
+.visit__dot { width: 26px; height: 26px; }
+.visit__dot .i { font-size: 14px; }
+
+.visit__quote { margin: 22px 0 0; padding-top: 18px; border-top: 1px solid var(--c-line); }
+.visit__quote blockquote { margin: 0; }
+.visit__quote blockquote p {
+  font: italic 400 var(--fs-lead)/1.45 var(--font-text);
+  color: var(--c-ink);
+}
+.visit__quote figcaption {
+  margin-top: 8px;
+  font: 400 var(--fs-small)/1.3 var(--font-text);
+  color: var(--c-ink-2);
+}
+
+/* ---------- Tablets: words and sign on top; the picture at 55% with the card overlapping its right side ---------- */
+@media (min-width: 761px) and (max-width: 1079px) {
+  .visit { --sign-x: 82%; --sign-y: 15.5%; }
+  .visit__grid {
+    --visit-card: 360px;
+    grid-template-columns: 55% minmax(0, 1fr);
+    grid-template-areas: "words words" "pic card";
+  }
+  .visit__words {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    margin-bottom: 40px;
+  }
+  .visit__words::before { left: -100px; top: -80px; width: 520px; height: 260px; }
+  .visit__sign { --logo: 180px; margin-top: 0; flex: none; }
+  .visit__pic { margin-top: 0; }
+  .visit__card { width: min(var(--visit-card), 100% + var(--visit-over)); margin: 90px 0 0 calc(-1 * var(--visit-over)); }
+}
+
+/* ---------- Phones: words, sign, the square picture, then the card over its foot ---------- */
+@media (max-width: 760px) {
+  .visit { --sign-x: 80%; --sign-y: 12%; }
+  .visit__grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "words" "pic" "card"; }
+  /* the heading and her sign side by side, as on tablets: the band stays short enough for a light page */
+  .visit__words { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+  .visit__words::before { left: -60px; top: -60px; width: 420px; height: 220px; }
+  .visit__hs { min-width: 0; }
+  .visit__hs > .t-section { white-space: normal; text-wrap: balance; }
+  .visit__sign { --logo: 124px; margin-top: 0; flex: none; }
+  .visit__pic { margin-top: 26px; }
+  .visit__frame {
+    aspect-ratio: 358 / 342;
+    border-radius: 12px;
+    box-shadow: 0 0 0 1px rgba(228, 207, 163, 0.62), 0 0 0 5px rgba(60, 6, 16, 0.34), 0 0 0 6px rgba(228, 207, 163, 0.4), 0 2px 3px rgba(30, 2, 8, 0.35), 0 30px 50px -24px rgba(30, 2, 8, 0.85);
+  }
+  .visit__frame::after { inset: 7px; border-radius: 8px; }
+  .visit__card { width: auto; margin: -60px 10px 0; padding: 22px 20px 20px; border-radius: 18px; }
+  .visit__row .i { font-size: 19px; }
+}

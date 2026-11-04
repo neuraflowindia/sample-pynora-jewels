@@ -1,0 +1,66 @@
+/* Home: "Just arrived". The heading set with the gold-leaf divider, the four new pieces as card A (four across on
+   laptops, a sideways row on tablets and phones) and "See all new pieces" under them, on the quiet sandstone.
+   The jewel ribbon lies over the top of this band, so the band's own top padding starts below the ribbon.
+   The list always keeps the height of its cards with two-line names (a 4 : 5 picture plus the card's words: the
+   room cards.js keeps when the pieces cannot be read), so the band has the same size with or without them; where
+   every name takes one line, the button moves up by the spare room, so the gap under the cards stays 42 px. */
+
+.new__in {
+  padding-top: calc(var(--rib-h) + clamp(56px, 6.1vw, 88px));
+  padding-bottom: clamp(64px, 8vw, 116px);
+}
+
+/* ---------- Tablets and phones: a sideways row (280 px cards on tablets, 260 px on phones) ---------- */
+.new__list {
+  align-items: flex-start;
+  min-height: 550.9px;                   /* a 280 px card with room for a two-line name, plus the row's shadow room */
+}
+/* the button's line keeps room for its lift, shadow and focus ring inside its clip (layout.css); --gap is the
+   visible space between the cards and the button (tablets: the names take one line, so 18.5 px of the list's
+   room is spare) */
+.new__foot { --gap: calc(42px - 18.5px); padding: 8px 20px 30px; margin: calc(var(--gap) - 8px) -20px -30px; }
+@media (min-width: 761px) and (max-width: 1079px) {
+  .new__row { --row-bleed: var(--gut); }  /* the row runs to the screen's edges; the first card keeps the column's line */
+}
+
+/* ---------- Laptops (from 1,080 px): four across, gap 28 (20 below 1,280 px) ---------- */
+@media (min-width: 1080px) {
+  .new__row { container-type: inline-size; }
+  .new__row .row__scroller {
+    margin: 0;
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+  .new__list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-content: start;
+    align-items: stretch;                /* the four cards share one height when a name takes two lines */
+    gap: 28px;
+    width: auto;
+    min-width: 0;
+    padding: 0;
+    /* card height = 10 + (card width - 20) x 1.25 + its words: 177.9 px with a two-line name (154.2 px with one) */
+    min-height: calc((100cqw - 84px) * 0.3125 + 162.9px);
+  }
+  .new__list > .row__item {
+    width: auto;
+    min-width: 0;
+  }
+}
+@media (min-width: 1080px) and (max-width: 1365px) {
+  .new__foot { --gap: 42px; }            /* at least one name takes two lines: no spare room */
+}
+@media (min-width: 1366px) {
+  .new__foot { --gap: calc(42px - 23.7px); }   /* every name takes one line: 23.7 px of the room is spare */
+}
+@media (min-width: 1080px) and (max-width: 1279px) {
+  .new__list { gap: 20px; min-height: calc((100cqw - 60px) * 0.3125 + 162.9px); }
+}
+
+/* ---------- Phones: 260 px cards in the sideways row ---------- */
+@media (max-width: 760px) {
+  .new__row { --row-item: 260px; }
+  .new__list { min-height: 504px; }      /* phone cards always keep two lines for the name */
+  .new__foot { --gap: 26px; padding-inline: 12px; margin-inline: -12px; }
+}

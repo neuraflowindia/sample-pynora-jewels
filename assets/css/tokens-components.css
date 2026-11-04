@@ -1,0 +1,56 @@
+/* Pynora component tokens: borders, shadows, text sizes, layers and movement times shared by the parts of every page.
+   Load order: fonts.css, tokens-colour.css, tokens-type.css, tokens-components.css, base-type.css, then the rest.
+   Colours come from tokens-colour.css; nothing here redefines them.
+   Things that float above the page take the strong double edge; cards, tiles and other paper surfaces keep
+   --border-double from tokens-colour.css. */
+
+:root {
+  /* ---------- Strong double gold edge (header bars, Jewellery panel, price chip, toast, search sheet) ---------- */
+  --border-double-strong: inset 0 0 0 1px rgba(171, 142, 98, 0.78), inset 0 0 0 4px rgba(252, 248, 241, 0.96), inset 0 0 0 5px rgba(171, 142, 98, 0.36);
+  /* the same edge along the bottom only, for full-width bars */
+  --border-double-strong-bottom: inset 0 -1px 0 rgba(171, 142, 98, 0.78), inset 0 -4px 0 rgba(252, 248, 241, 0.96), inset 0 -5px 0 rgba(171, 142, 98, 0.36);
+
+  /* ---------- Shadow for things that float (header bars, toast, floating WhatsApp, search sheet) ---------- */
+  --sh-float: 0 1px 2px rgba(63, 10, 22, 0.16), 0 16px 34px -18px rgba(63, 10, 22, 0.6);
+
+  /* ---------- Gold rings on paper controls ---------- */
+  --ring-gold: inset 0 0 0 1px rgba(171, 142, 98, 0.55);
+  --ring-gold-strong: inset 0 0 0 1.25px rgba(171, 142, 98, 0.8);
+
+  /* ---------- Shapes ---------- */
+  --r-plate: 12px;     /* label plates */
+
+  /* ---------- Behind drawers and search ---------- */
+  --scrim: rgba(42, 26, 30, 0.46);
+
+  /* ---------- Words on the made-to-order pill (8.8:1 on its dusty-rose tint) ---------- */
+  --c-mto-ink: #5E2A30;
+
+  /* ---------- Text sizes: phone -> laptop (390 -> 1440 px wide screens) ---------- */
+  --fs-compact: clamp(1rem, 0.976rem + 0.0952vw, 1.0625rem);            /* 16 -> 17 px */
+  --fs-card-name: clamp(1.0625rem, 1.015rem + 0.1905vw, 1.1875rem);     /* 17 -> 19 px */
+  --fs-card-price: clamp(1rem, 0.965rem + 0.1429vw, 1.09375rem);        /* 16 -> 17.5 px */
+  --fs-card-caption: clamp(0.90625rem, 0.871rem + 0.1429vw, 1rem);      /* 14.5 -> 16 px */
+  --fs-pill: clamp(0.8125rem, 0.801rem + 0.0476vw, 0.84375rem);         /* 13 -> 13.5 px */
+
+  /* ---------- Content column: 1,240 px at 1,440 px, narrowing with the screen; 16 px sides on phones ---------- */
+  --wrap: 1240px;
+  --gut: clamp(16px, 6.9vw, 100px);
+
+  /* ---------- Layers ---------- */
+  --z-float: 40;
+  --z-header: 50;
+  --z-panel: 55;
+  --z-scrim: 80;
+  --z-drawer: 90;
+  --z-toast: 100;
+
+  /* ---------- Movement times ---------- */
+  --dur-fast: 200ms;
+  --dur: 320ms;
+  --dur-drawer: 380ms;
+}
+
+@media (max-width: 760px) {
+  :root { --gut: 16px; }
+}

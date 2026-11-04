@@ -1,0 +1,62 @@
+/* Pynora type tokens.
+   Headings: Tiro Devanagari Hindi upright 400 (its English letters). Hindi accent lines: Tiro italic 400.
+   Running text, labels, buttons, menu, prices: Spectral 400 / 400 italic / 600.
+   Sizes grow smoothly from the phone value (390 px wide screen) to the laptop value (1440 px wide screen)
+   and stop there. Written in rem so a visitor's own browser text size is respected (1rem = 16 px). */
+
+:root {
+  /* ---------- Families (real font, matched fallbacks, then the system) ---------- */
+  --font-display: "Tiro Devanagari Hindi", "Tiro Fallback", "Tiro Fallback Times", serif;
+  --font-text: "Spectral", "Spectral Fallback", "Spectral Fallback Times", serif;
+  --font-hindi: "Tiro Devanagari Hindi", "Nirmala UI", "Kohinoor Devanagari", "Devanagari Sangam MN", "Noto Serif Devanagari", serif;
+
+  /* ---------- Weights (Tiro has one weight; never fake a bold) ---------- */
+  --fw-display: 400;
+  --fw-text: 400;
+  --fw-strong: 600;
+
+  /* ---------- Sizes: phone -> laptop ---------- */
+  --fs-hero: clamp(2.3125rem, 1.871rem + 1.81vw, 3.5rem);        /* 37 -> 56 px */
+  --fs-section: clamp(1.9375rem, 1.682rem + 1.048vw, 2.625rem);  /* 31 -> 42 px */
+  --fs-sub: clamp(1.5625rem, 1.446rem + 0.4762vw, 1.875rem);     /* 25 -> 30 px */
+  --fs-hindi-lead: clamp(1.5rem, 1.361rem + 0.5714vw, 1.875rem); /* 24 -> 30 px: a Hindi line that leads a section */
+  --fs-hindi: clamp(1.375rem, 1.282rem + 0.381vw, 1.625rem);     /* 22 -> 26 px */
+  --fs-card: clamp(1.25rem, 1.204rem + 0.1905vw, 1.375rem);      /* 20 -> 22 px: product names */
+  --fs-lead: clamp(1.1875rem, 1.141rem + 0.1905vw, 1.3125rem);   /* 19 -> 21 px: sub-lines */
+  --fs-body: clamp(1.09375rem, 1.059rem + 0.1429vw, 1.1875rem);  /* 17.5 -> 19 px */
+  --fs-price: clamp(1.09375rem, 1.059rem + 0.1429vw, 1.1875rem); /* 17.5 -> 19 px */
+  --fs-button: clamp(1.03125rem, 1.02rem + 0.04762vw, 1.0625rem); /* 16.5 -> 17 px */
+  --fs-menu: clamp(1.03125rem, 1.02rem + 0.04762vw, 1.0625rem);  /* 16.5 -> 17 px */
+  --fs-label: clamp(0.875rem, 0.8518rem + 0.09524vw, 0.9375rem); /* 14 -> 15 px: capitals */
+  --fs-small: clamp(0.875rem, 0.8518rem + 0.09524vw, 0.9375rem); /* 14 -> 15 px: notes, fine print */
+
+  /* ---------- Line heights (every role has one; none relies on "normal") ---------- */
+  --lh-hero: 1.08;
+  --lh-section: 1.15;
+  --lh-sub: 1.2;
+  --lh-hindi: 1.4;
+  --lh-card: 1.3;
+  --lh-lead: 1.55;
+  --lh-body: 1.62;
+  --lh-price: 1.3;
+  --lh-button: 1;
+  --lh-label: 1.3;
+  --lh-small: 1.5;
+
+  /* ---------- Letter-spacing ---------- */
+  --ls-display: 0;
+  --ls-text: 0;
+  --ls-price: 0.01em;
+  --ls-button: 0.01em;
+  --ls-label: 0.08em;
+
+  /* ---------- Figures and measure ---------- */
+  --num-price: lining-nums tabular-nums;
+  --measure: 32em;        /* about 70 characters of body text per line (45-75 allowed) */
+  --measure-lead: 30em;
+  --measure-heading: 18em;
+
+  /* ---------- Logo heights in the header (the lock-up SVG keeps its own proportions) ---------- */
+  --logo-h-laptop: 46px;
+  --logo-h-phone: 40px;  /* 40 rather than 36-38: keeps the script ampersand readable on phones */
+}

@@ -1,0 +1,47 @@
+/* Home: loved by our clients, on the rose plaster wall.
+   The heading set with the average and count, one sideways row of ten review cards (400 px; 300 px on phones;
+   arrows at its top right with a mouse, only while it can scroll), and her Instagram under the row.
+   The still page is the resting state: --p stays at 1 here, and nothing moves through it. */
+
+.rv { --p: 1; }
+
+/* ---------- A line of words in its own slot (the slot carries the spacing, the words none) ---------- */
+.rv .line { padding: 0.14em 0 0.2em; margin: -0.14em 0 -0.2em; }
+
+/* ---------- The average and count under the divider ---------- */
+.rv__avg {
+  margin-top: 14px;
+  font: 400 var(--fs-small)/1.3 var(--font-text);
+  letter-spacing: 0.01em;
+  color: var(--c-ink-2);
+}
+.rv__avg .line__in { display: flex; align-items: center; justify-content: center; gap: 9px; }
+.rv__stars .i { font-size: 16px; }
+.rv__n { font-weight: var(--fw-strong); color: var(--c-ink); font-variant-numeric: lining-nums; }
+
+/* ---------- The row ---------- */
+.rv__hs { margin-bottom: 40px; }
+.rv__row { --row-bleed: max(var(--gut), (100vw - var(--wrap)) / 2); --row-pad-bottom: 44px; }   /* the row runs from one edge of the screen to the other; the first card keeps to the column */
+.rv__row .track { min-height: calc(var(--row-pad-top) + 240px + var(--row-pad-bottom)); }   /* keeps its size before the cards arrive */
+.rv__row .row__bar { position: absolute; z-index: 1; right: 0; bottom: 100%; }   /* the arrows sit above the row’s right end, never pushing the cards down */
+.rv__row .rcard { box-shadow: var(--border-double), 0 1px 2px rgba(63, 10, 22, 0.16), 0 22px 38px -22px rgba(63, 10, 22, 0.55); }
+
+/* ---------- Her Instagram ---------- */
+.rv__ig .i { font-size: 19px; }
+.rv__ig-words { display: inline; }
+
+/* ---------- Phones ---------- */
+@media (max-width: 760px) {
+  .rv__hs { margin-bottom: 28px; }
+  .rv__avg { margin-top: 12px; }
+  .rv__stars .i { font-size: 15px; }
+  .rv__row .track { min-height: calc(var(--row-pad-top) + 260px + var(--row-pad-bottom)); }
+  .rv__row .row__bar { position: static; }
+  .rv__ig { width: 100%; padding-inline: 18px; gap: 9px; }
+}
+@media (max-width: 400px) {
+  .rv__ig { min-height: 60px; padding-block: 10px; line-height: 1.25; white-space: normal; }
+  .rv__ig-words { display: grid; justify-items: start; text-align: left; }
+  .rv__sep { display: none; }
+  .rv__handle { font-weight: var(--fw-text); font-size: 0.9375rem; }
+}
