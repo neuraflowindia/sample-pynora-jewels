@@ -8,7 +8,8 @@
    - Product (product.html?p=<id>).
    - <html data-view="ok | missing | nocat">: the id is known; the id is missing or unknown; the catalogue did not load.
      <html data-hindi="none">: a known collection without a Hindi line (its reserved line takes no room).
-     <html data-cv-room> and --cv-r4 / --cv-r3 / --cv-r2: the room the pieces will take (see reserve below).
+     <html data-cop="bottom-left | top-right | pictured">: how the opening names the piece in its portrait.
+     <html data-cv-room> and --cv-r4 / --cv-r3 / --cv-r2: the rows the collection's pieces fill (see reserve below).
    - document.title, the description and the link-preview words follow the collection or the piece.
    - window.PYNORA_PAGE = {
        kind:  "collection" | "product",
@@ -18,7 +19,9 @@
        ok:    true when the id is known,
        stage: product pages with a known piece: the first gallery picture, computed once and used both for the
               preload link below and by the gallery's own <img>, so the browser asks for it exactly once:
-              {src, srcset, sizes, n, alt, focal}; otherwise null
+              {src, srcset, sizes, n, alt, focal}; otherwise null,
+       portrait: collection pages with a known collection: the opening's framed picture, computed the same way
+              and used by page-collection.js: {src, srcset, sizes, alt, focal, focalPhone}; otherwise null
      }
    - A safety timer shows the address-dependent words after 2.5 s whatever happens (html.is-filled). */
 (function () {
@@ -45,6 +48,15 @@
     return '(max-width: 632px) ' + phone + ', (max-width: 960px) ' + px(600) + ', (max-height: 820px) ' + px(500) + ', ' + px(600);
   }
   var STAGE_WIDTH = 1200;
+
+  /* The collection's framed portrait (4:5): at most 380 px tall (304 px wide) on laptops, 440 px tall (352 px wide)
+     from 1,800 px, 140 px wide on phones. A picture wider than 4:5 fills the frame by its height, so its slot grows
+     by ratio × 1.25 */
+  function portraitSizes(ratio) {
+    var f = Math.max(1, (Number(ratio) || 0.8) * 1.25);
+    return '(max-width: 760px) ' + Math.ceil(140 * f) + 'px, (min-width: 1800px) ' + Math.ceil(352 * f) + 'px, ' + Math.ceil(304 * f) + 'px';
+  }
+  var PORTRAIT_WIDTH = 800;
 
   var me = doc.currentScript;
   var kind = (me && me.getAttribute('data-page')) || (/product\.html$/i.test(location.pathname) ? 'product' : 'collection');
@@ -102,6 +114,31 @@
       focal: pic.focal || '50% 50%'
     };
   }
+  function portraitOf(col) {
+    var pt = col && col.portrait;
+    if (!pt) return null;
+    var root = html.getAttribute('data-root') || '';
+    if (pt.home) {
+      var hw = (pt.widths || []).slice().sort(function (a, b) { return a - b; });
+      if (!hw.length) return null;
+      var at = function (w) { return root + 'assets/img/home/' + pt.home + '-' + w + '.webp'; };
+      var hsrc = hw[hw.length - 1];
+      for (var j = 0; j < hw.length; j++) if (hw[j] >= PORTRAIT_WIDTH) { hsrc = hw[j]; break; }
+      return { src: at(hsrc), srcset: hw.map(function (w) { return at(w) + ' ' + w + 'w'; }).join(', '), sizes: portraitSizes(pt.ratio),
+        alt: pt.alt || '', focal: pt.focal || '50% 50%', focalPhone: pt.focalPhone || pt.focal || '50% 50%' };
+    }
+    var p = find(cat.products, pt.product);
+    var pic = null, ims = (p && p.images) || [];
+    for (var i = 0; i < ims.length; i++) if (ims[i].n === pt.n) { pic = ims[i]; break; }
+    if (!pic) return null;
+    var ws = (pic.widths || []).slice().sort(function (a, b) { return a - b; });
+    if (!ws.length) return null;
+    var w = ws[ws.length - 1];
+    for (var k = 0; k < ws.length; k++) if (ws[k] >= PORTRAIT_WIDTH) { w = ws[k]; break; }
+    var focal = pt.focal || pic.focal || '50% 50%';
+    return { src: fileAt(p, pic, w), srcset: ws.map(function (x) { return fileAt(p, pic, x) + ' ' + x + 'w'; }).join(', '),
+      sizes: portraitSizes(pic.ratio), alt: pt.alt || pic.alt || '', focal: focal, focalPhone: pt.focalPhone || focal };
+  }
   function preload(stage) {
     var link = doc.createElement('link');
     link.rel = 'preload';
@@ -113,10 +150,9 @@
     doc.head.appendChild(link);
   }
 
-  /* The room the collection's pieces will take, so nothing moves when the cards arrive: the number of card rows
-     at 4, 3 and 2 across (--cv-r4, --cv-r3, --cv-r2), read by pages.css. An empty filter result reserves the
-     empty panel (data-cv-room="empty"); an unknown collection the four new pieces under their heading
-     (data-cv-room="lead"); without the catalogue one row. data-cv-more: "You may also like" will follow. */
+  /* The rows the collection's pieces fill at 4, 3 and 2 across (--cv-r4, --cv-r3, --cv-r2), for the grid's
+     reserved room. A price filter from the address with nothing in it is data-cv-room="empty"; an unknown
+     collection (the four new pieces under their heading) "lead"; without the catalogue one row. */
   function reserve(col) {
     var n = 4, room = 'grid';
     if (col) {
@@ -127,8 +163,6 @@
         if (p && (!page.band || (p.price >= page.band.min && p.price <= page.band.max))) n++;
       }
       if (!n) room = 'empty';
-      /* "You may also like" follows collections other than "all" showing four pieces or fewer */
-      if (col.id !== 'all' && n <= 4) html.setAttribute('data-cv-more', '');
     } else if (cat) {
       var nw = find(cat.collections, 'new');
       n = nw ? Math.min(4, (nw.productIds || []).length) : 4;
@@ -140,7 +174,7 @@
     html.style.setProperty('--cv-r2', String(Math.ceil(n / 2)));
   }
 
-  var page = { kind: kind, id: '', price: null, band: null, ok: false, stage: null };
+  var page = { kind: kind, id: '', price: null, band: null, ok: false, stage: null, portrait: null };
 
   if (kind === 'product') {
     page.id = param('p') || '';
@@ -168,6 +202,9 @@
     page.ok = !!col;
     if (col) {
       if (!col.hindi) html.setAttribute('data-hindi', 'none');
+      if (col.chip && col.chip.mode) html.setAttribute('data-cop', col.chip.mode);
+      page.portrait = portraitOf(col);
+      if (page.portrait) preload(page.portrait);
       var title = c === 'all' ? 'All pieces' : col.title;
       setWords(page.band ? title + ' ' + page.band.words : title, col.intro);
     } else if (cat) {

@@ -5,7 +5,7 @@
 /* ---------- Page ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 html {
-  scroll-padding-top: 76px;      /* anchors such as #visit and #reviews land clear of the scrolled header */
+  scroll-padding-top: 80px;      /* anchors such as #visit and #reviews land 16 px clear of the scrolled header (64 px) */
   scrollbar-gutter: stable;      /* nothing jumps when a drawer locks the page */
 }
 body { margin: 0; background: var(--c-ground); }
@@ -14,6 +14,9 @@ a { color: inherit; }
 button { color: inherit; }
 [hidden] { display: none !important; }
 
+@media (min-width: 1680px) and (min-height: 1000px) {
+  html { scroll-padding-top: 84px; }   /* the scrolled header is 68 px there */
+}
 @media (max-width: 1079px) {
   html { scroll-padding-top: 72px; }
 }

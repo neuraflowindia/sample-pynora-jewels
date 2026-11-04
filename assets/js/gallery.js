@@ -12,9 +12,12 @@
      being read, so the browser fetches it once. Once the page has loaded, laptops quietly fetch the other
      pictures of the chosen colour; phones fetch only the next one. A picture not ready 300 ms after the press
      turns in anyway and appears on the sand ground as soon as it arrives.
-   - After a turn the picture drifts slowly (laptops), resting under the pointer, off screen, in a hidden tab and
-     whenever the page's motion budget (Pynora.motion.addMover, when the page has it) asks it to.
-   - Less motion: the picture changes at once; no rise, edge, glint or drift.
+   - After a turn the picture slowly pushes in and pans (laptops), resting under the pointer, off screen, in a hidden
+     tab and whenever the page's motion budget (Pynora.motion.addMover, when the page has it) asks it to.
+   - The loupe (laptops with a fine pointer): over the picture a round, gilt-rimmed lens follows the pointer and shows
+     the detail under it at twice the size, from a sharper file; it steps aside over the buttons and during a turn.
+     A small pill on the picture says so until the loupe is first used.
+   - Less motion: the picture changes at once; no rise, edge, glint or drift; the loupe appears without growing.
    A classic script (no imports), loaded with defer after cards.js and before the page's own script. */
 (function () {
   'use strict';
@@ -34,12 +37,16 @@
   var RING = 260;
   var STEPS = 12;                                 /* keyframes per turn, so the rise follows a smooth curve */
   var AFTER_EDGE = 0.500001;                      /* a second half starts on the far side of the edge */
-  var DRIFT = 9000;
-  var THUMB_SIZES = '(max-width: 960px) 62px, 90px';   /* a thumbnail's picture, filled by a square photograph */
+  var DRIFT = 10000;
+  var PUSH = 'translate(-0.9%, -0.6%) scale(1.06)';  /* where the slow push-in and pan reaches (from rest) */
+  var ZOOM = 2;                                    /* the loupe's magnification */
+  /* a thumbnail's picture, filled by a square photograph (the prints grow on wide, tall screens: gallery.css) */
+  var THUMB_SIZES = '(max-width: 960px) 62px, (min-width: 2200px) and (min-height: 1300px) 120px, (min-width: 1680px) and (min-height: 1000px) 105px, 90px';
 
   function media(q) { return window.matchMedia ? window.matchMedia(q) : { matches: false }; }
   var smallMq = media('(max-width: 960px)');
   var reduceMq = media('(prefers-reduced-motion: reduce)');
+  var fineMq = media('(hover: hover) and (pointer: fine)');
   function listen(m, fn) { if (m.addEventListener) m.addEventListener('change', fn); else if (m.addListener) m.addListener(fn); }
   function unlisten(m, fn) { if (m.removeEventListener) m.removeEventListener('change', fn); else if (m.removeListener) m.removeListener(fn); }
   function small() { return !!smallMq.matches; }
@@ -187,8 +194,11 @@
     function face(front) {
       return '<div class="gal__face gal__face--' + (front ? 'front' : 'back') + '"' + (front ? '' : ' aria-hidden="true"') + '>' +
         '<span class="gal__sh gal__sh--sharp"></span><span class="gal__sh gal__sh--soft"></span>' +
-        '<div class="gal__well"><img class="gal__img" alt="" decoding="async" draggable="false"></div>' +
+        '<div class="gal__well"><img class="gal__img" alt="" decoding="async" draggable="false">' +
+          (front ? '<span class="gal__lens" aria-hidden="true"><span class="gal__glass"><img alt="" decoding="async" draggable="false"></span></span>' : '') +
+        '</div>' +
         (front ? '<div class="gal__strip"></div>' : '') +
+        '<span class="gal__fans" aria-hidden="true"><i></i><i></i><i></i><i></i></span>' +
         '</div>';
     }
     return '<ul class="gal__rail" aria-label="Pictures of ' + esc(p.name) + '"></ul>' +
@@ -199,10 +209,11 @@
         '</div>' +
         '<span class="gal__glint" aria-hidden="true"><i></i></span>' +
         '<div class="gal__over">' + heart +
-          '<span class="gal__count" aria-hidden="true"></span>' +
+          '<span class="gal__hint" aria-hidden="true">' + icon('zoom-in') + 'Hover to look closer</span>' +
           '<span class="gal__dots" aria-hidden="true"></span>' +
           '<span class="gal__nav">' +
             '<button type="button" data-step="-1" aria-label="Previous picture">' + icon('left') + '</button>' +
+            '<span class="gal__count" aria-hidden="true"></span>' +
             '<button type="button" data-step="1" aria-label="Next picture">' + icon('right') + '</button>' +
           '</span>' +
         '</div>' +
@@ -300,6 +311,7 @@
     var n = g.ims.length;
     if (!n) return;
     i = ((Math.round(i) % n) + n) % n;
+    lensOff(g);
     if (g.busy) {
       g.queued = i === g.target ? null : { i: i, dir: dir || 0 };
       if (i !== g.index) mark(g, i, say, true);
@@ -524,6 +536,7 @@
   function setColour(g, ci) {
     if (!g.p.colours || !g.p.colours.length) return;
     ci = colourIndex(g.p, ci);
+    lensOff(g);
     if (g.busy) { g.queuedColour = ci === g.colour ? null : ci; g.queued = null; return; }
     if (ci === g.colour) return;
     var dir = ci > g.colour ? 1 : -1;
@@ -587,10 +600,10 @@
     });
   }
 
-  /* ---------- the slow drift (laptops) ---------- */
+  /* ---------- the slow push-in and pan (laptops): from rest, so a landed picture never jumps ---------- */
   function startDrift(g) {
     if (g.drift || still()) return;
-    g.drift = g.front.animate([{ transform: 'scale(1)' }, { transform: 'scale(' + RISE + ')' }],
+    g.drift = g.front.animate([{ transform: 'none' }, { transform: PUSH }],
       { duration: DRIFT, delay: 1000, iterations: Infinity, direction: 'alternate', easing: EASE_IO });
     holdDrift(g);
     budget(g);
@@ -631,6 +644,70 @@
     g.hold.budget = false;
   }
 
+  /* ---------- the loupe (laptops with a fine pointer) ---------- */
+  function lensOff(g) {
+    if (g.lensRaf) { cancelAnimationFrame(g.lensRaf); g.lensRaf = 0; }
+    g.lensEv = null;
+    if (!g.lensOn) return;
+    g.lensOn = false;
+    g.el.classList.remove('is-loupe');
+  }
+  function pct(v, fallback) { var x = parseFloat(v); return isFinite(x) ? x / 100 : fallback; }
+  /* where the picture is drawn on screen: object-fit cover at its focal point, inside the (pushed-in) img */
+  function drawn(img) {
+    var r = img.getBoundingClientRect();
+    var nw = img.naturalWidth;
+    var nh = img.naturalHeight;
+    if (!nw || !nh || !r.width || !r.height) return null;
+    var s = Math.max(r.width / nw, r.height / nh);
+    var w = nw * s;
+    var h = nh * s;
+    var pos = String(img.style.objectPosition || '50% 50%').split(/\s+/);
+    var px = pct(pos[0], 0.5);
+    var py = pct(pos.length > 1 ? pos[1] : pos[0], 0.5);
+    return { left: r.left + (r.width - w) * px, top: r.top + (r.height - h) * py, w: w, h: h };
+  }
+  /* the lens shows the picture already on screen at once, then a file sharp enough for twice the size */
+  function lensSource(g, d) {
+    var pic = g.ims[g.shown];
+    if (!pic) return;
+    var url = P.img(g.p, pic.n, Math.ceil(d.w * ZOOM * (window.devicePixelRatio || 1)));
+    var img = g.lensImg;
+    img.style.width = (d.w * ZOOM).toFixed(1) + 'px';
+    img.style.height = (d.h * ZOOM).toFixed(1) + 'px';
+    if (img.getAttribute('data-src') === url) return;
+    img.setAttribute('data-src', url);
+    img.src = g.front.currentSrc || g.front.src;
+    var big = new Image();
+    big.decoding = 'async';
+    big.onload = function () { if (img.getAttribute('data-src') === url) img.src = url; };
+    big.src = url;
+  }
+  function lensMove(g, ev) {
+    var t = ev.t;
+    var over = !g.busy && !small() && fineMq.matches && t && g.well.contains(t) && ready(g.front) && g.lens.offsetWidth > 0;
+    if (!over) { lensOff(g); return; }
+    var d = drawn(g.front);
+    if (!d) { lensOff(g); return; }
+    if (!g.lensOn) {
+      lensSource(g, d);
+      g.lensOn = true;
+      g.el.classList.add('is-loupe', 'is-looked');
+    }
+    var wr = g.well.getBoundingClientRect();
+    var D = g.lens.offsetWidth;
+    var fx = (ev.x - d.left) / d.w;
+    var fy = (ev.y - d.top) / d.h;
+    g.lens.style.transform = 'translate3d(' + (ev.x - wr.left - D / 2).toFixed(1) + 'px,' + (ev.y - wr.top - D / 2).toFixed(1) + 'px,0)';
+    g.lensImg.style.transform = 'translate3d(' + (D / 2 - fx * d.w * ZOOM).toFixed(1) + 'px,' + (D / 2 - fy * d.h * ZOOM).toFixed(1) + 'px,0)';
+  }
+  /* one measure per frame, whatever the pointer's rate */
+  function lensQueue(g, e) {
+    if (e.pointerType && e.pointerType !== 'mouse') return;
+    g.lensEv = { x: e.clientX, y: e.clientY, t: e.target };
+    if (!g.lensRaf) g.lensRaf = requestAnimationFrame(function () { g.lensRaf = 0; if (g.lensEv) lensMove(g, g.lensEv); });
+  }
+
   /* ---------- the visitor ---------- */
   function onClick(g, e) {
     var t = e.target && e.target.closest ? e.target.closest('.gal__thumb, [data-step]') : null;
@@ -668,6 +745,7 @@
     if (i !== g.index) { mark(g, i, false); g.shown = i; ringIn(g, i, 0); }
   }
   function relayout(g) {
+    lensOff(g);
     finishNow(g);
     var i = g.index;
     if (small()) {
@@ -729,6 +807,9 @@
     g.edges = P.$$('.gal__edge', el);
     g.glintBand = el.querySelector('.gal__glint i');
     g.over = el.querySelector('.gal__over');
+    g.well = el.querySelector('.gal__face--front .gal__well');
+    g.lens = el.querySelector('.gal__lens');
+    g.lensImg = el.querySelector('.gal__glass img');
     g.count = el.querySelector('.gal__count');
     g.dots = el.querySelector('.gal__dots');
     g.live = el.querySelector('[data-gal-live]');
@@ -751,7 +832,8 @@
       click: function (e) { onClick(g, e); },
       key: function (e) { onKey(g, e); },
       enter: function (e) { if (e.pointerType === 'mouse') holdDrift(g, 'hover', true); },
-      leave: function () { holdDrift(g, 'hover', false); },
+      leave: function () { holdDrift(g, 'hover', false); lensOff(g); },
+      move: function (e) { lensQueue(g, e); },
       strip: function () { onStrip(g); },
       hidden: function () { holdDrift(g, 'hidden', doc.hidden); },
       layout: function () { relayout(g); },
@@ -761,6 +843,7 @@
     el.addEventListener('keydown', on.key);
     g.stage.addEventListener('pointerenter', on.enter);
     g.stage.addEventListener('pointerleave', on.leave);
+    g.stage.addEventListener('pointermove', on.move);
     g.strip.addEventListener('scroll', on.strip, { passive: true });
     doc.addEventListener('visibilitychange', on.hidden);
     listen(smallMq, on.layout);
@@ -782,6 +865,7 @@
       destroy: function () {
         if (!g.alive) return;
         g.alive = false;
+        lensOff(g);
         finishNow(g);
         clearTimeout(g.ringTimer);
         stopDrift(g);

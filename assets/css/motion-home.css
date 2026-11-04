@@ -1,4 +1,5 @@
-/* Home: how every section after the opening arrives, and the ribbon's and the reviews' loops.
+/* Home: how every section after the opening arrives, the ribbon's unroll, and where the gliding rows' pause
+   buttons sit (the glide itself: rows.js and rows.css).
    motion-core.js writes --p (how far a section, or a leading row, has arrived), --x (leaving) and --v (passing)
    and adds is-up to a word layer when its moment in the scroll passes; this file says, part by part, when each
    layer starts (--d, a share of that progress), how long it takes (--s) and how it moves. Pictures, tiles and
@@ -52,12 +53,6 @@ html.motion .rib.is-waiting .rib__it .line__in { transform: translateY(calc(100%
 html.motion .rib.is-waiting.is-open .rib__it .line__in {
   transform: none;
   transition: transform 520ms var(--ease) calc(180ms + var(--i, 0) * 35ms);
-}
-/* the glide (motion-loops.js sets its timing): one period (--loop-d) after another; each copy of the list starts
-   after the same empty space as the track's own padding, so the wrap is the same frame */
-@keyframes m-loop {
-  from { transform: translateX(0); }
-  to { transform: translateX(calc(-1 * var(--loop-d, 0px))); }
 }
 /* hover on a piece: its picture comes closer, her flowers on either side turn an eighth */
 html.motion .rib__th img { transition: scale 300ms var(--ease); }
@@ -284,7 +279,8 @@ html.motion-scroll .brd.is-moving .brd__portrait { will-change: transform, opaci
   html.motion-scroll .brd__portrait { --d: 0.18; --s: 0.45; }
   html.motion-scroll .brd__edit { --d: 0.38; }
 }
-/* phones: no card; the row of five small cards slides in from the right with its row */
+/* phones: no card; the row of five small cards slides in from the right with its row (its scroller moves: the
+   list itself is the part that glides) */
 @media (max-width: 760px) {
   html.motion-scroll .brd__portrait { transform: translateY(calc((0.5 - var(--v, 0.5)) * 32px)); }
   /* the row of small cards is unveiled from the top down on cue (as it comes into view), while it slides in */
@@ -297,7 +293,7 @@ html.motion-scroll .brd.is-moving .brd__portrait { will-change: transform, opaci
   html.motion-scroll .brd__edit.is-up { transform: none; clip-path: inset(-30px); }
   html.motion-scroll .brd__rows > li,
   html.motion-scroll .brd__edit.is-up .brd__rows > li { transform: none; clip-path: none; transition: none; }
-  html.motion-scroll .brd__rows {
+  html.motion-scroll .brd__sc {
     --t: clamp(0, (var(--p, 1) - 0.6) / 0.4, 1);
     --e: calc(1 - (1 - var(--t)) * (1 - var(--t)) * (1 - var(--t)));
     transform: translateX(calc(40px * (1 - var(--e))));
@@ -511,16 +507,15 @@ html.motion-scroll .rv__foot.is-up { transform: none; clip-path: inset(-20px -40
   html.motion-scroll .rv__avg .line__in { --d: 0.40; }
   html.motion-scroll .rv__rowwrap { --t: clamp(0, (var(--p, 1) - 0.3) / 0.6, 1); }
 }
-/* the pause button beside the row's arrows (laptops); alone at the row's right end on phones */
-.rv__row .rv__pause { align-self: flex-start; margin: 0 0 14px 7px; opacity: 0; }
-.rv__row:hover .rv__pause,
-.rv__row:focus-within .rv__pause,
-.rv__row.is-stopped .rv__pause,
-.rv__row .rv__pause:focus-visible { opacity: 1; }
-@media (hover: none), (pointer: coarse) {
-  .rv__row .rv__pause { opacity: 1; }
-}
-/* phones: the arrows are hidden, so the button sits above the row's right end without taking any room */
-@media (max-width: 760px) {
-  .rv__row .rv__pause { position: absolute; z-index: 2; right: 5px; bottom: 100%; margin: 0 0 1px; }
+/* its pause button: beside the row's arrows with a mouse, above the row's right end on phones (rows.css) */
+
+/* =====================================================================
+   The rows that glide on touch screens (rows.js): each pause button sits on the bottom edge of its row at the
+   right, its circle half over the cards' empty foot, so it takes no room and covers no words as they pass
+   ===================================================================== */
+@media (max-width: 1079px) and (hover: none), (max-width: 1079px) and (pointer: coarse) {
+  :is(.new__row, .gft__row) > .row__bar > .row__pause { position: absolute; z-index: 3; top: auto; bottom: 1px; right: -5px; margin: 0; }
+  .gft__row > .row__bar > .row__pause { bottom: 4px; }               /* clear of the button under the row */
+  .brd__edit > .row__pause { position: absolute; z-index: 3; bottom: -21px; right: 11px; margin: 0; }
+  .dec__facts-wrap > .row__pause { position: absolute; z-index: 3; bottom: -17px; right: 11px; margin: 0; }
 }

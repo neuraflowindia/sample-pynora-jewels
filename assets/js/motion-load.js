@@ -184,12 +184,13 @@
   /* ---------- Lean (a mouse only): the picture (with its light) and the chip lean towards it at two depths ---------- */
   function lean() {
     if (!op || !pic || typeof M.tick !== 'function' || typeof P.fine !== 'function') return;
-    var tx = 0, ty = 0, lx = 0, ly = 0, hov = 0, hovT = 0;
+    var tx = 0, ty = 0, lx = 0, ly = 0, hov = 0, hovT = 0, picW = 0;
     var w = { pic: '', chip: '' };
     var active = false;
     op.addEventListener('pointermove', function (e) {
       if (e.pointerType !== 'mouse' || !P.fine() || !root.classList.contains('motion')) return;
       var r = op.getBoundingClientRect();
+      picW = pic.offsetWidth;
       tx = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width - 0.5) * 2));
       ty = Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height - 0.5) * 2));
       if (!active) { active = true; op.classList.add('m-lean'); }
@@ -220,8 +221,9 @@
       var still = Math.abs(tx - lx) < 0.002 && Math.abs(ty - ly) < 0.002 && Math.abs(hovT - hov) < 0.01;
       if (still) { lx = tx; ly = ty; hov = hovT; }
       put(pic, 'pic', (lx * LEAN_PIC).toFixed(2) + 'px ' + (ly * LEAN_PIC).toFixed(2) + 'px');
-      /* below 1,280 px the picture is narrower and the chip sits close to the cord: there it leans with its picture */
-      var lc = win.innerWidth < 1280 ? LEAN_PIC : LEAN_CHIP;
+      /* a picture under 640 px wide (narrow or short screens) has the chip close to the cord: there it leans with
+         its picture */
+      var lc = picW < 640 ? LEAN_PIC : LEAN_CHIP;
       if (chip) put(chip, 'chip', (lx * lc).toFixed(2) + 'px ' + (ly * lc + hov).toFixed(2) + 'px');
       return !still;
     });

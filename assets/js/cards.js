@@ -3,14 +3,19 @@
      an unknown piece). variant: "grid" (the default), "row" (a card in a sideways row: it never swipes its own
      pictures; on touch screens its dots step through them) or "narrow" (the 186 px gifts card: the short
      made-to-order pill). eager: load the first picture at once. sizes: the pictures' sizes attribute.
-     reveal: how the worn picture appears on hover with a mouse: "veil" (the default: it rises into view behind
-     a soft top edge, held in span.card__veil) or "dissolve" (it melts in over the first picture; card--dissolve).
+     hover: one of HOVERS below, to give this card that way of showing its worn picture (rarely needed).
+   - How the worn picture (held in span.card__veil) appears on hover with a mouse: five ways, "veil", "dissolve",
+     "curtain", "iris" and "sweep" (class card--hv-<way>, drawn by card.css). Each card of a list takes way
+     (its place in the list + the list's own offset) mod 5, the offset coming from the list's name, so neighbours
+     never share a way, rows do not all begin alike and a card shows the same way on every visit. Lists are given
+     their ways when filled; cards placed by other scripts get theirs straight after (or on the first hover).
+     data-hover="<way>" on a list, or on any element round it, gives the whole list that one way. (data-reveal,
+     which once chose between two ways, no longer changes anything.)
    - Pynora.cards.fill(root): fills root from data-products="id,id,…" (in that order) or data-collection="slug"
      (the collection’s order), with data-variant, data-eager="4" (the first n pictures load at once) and
      data-sizes. A root that is a list gets one <li> per card (class "row__item" inside a row’s .track). A root
      with neither attribute fills every [data-cards] inside it. Unknown pieces are skipped. Every [data-cards]
-     list of the page is filled when the page is ready. data-reveal="dissolve" on the list, or on any element
-     round it, gives the whole list the dissolve; one list never mixes the two.
+     list of the page is filled when the page is ready.
    - The heart saves the piece to the wishlist ("Saved to your wishlist · View"); pressed again it takes it out
      ("Removed from your wishlist · Undo"). Every heart of the same piece stays in step.
    - Colour dots swap the card’s pictures to that colour (hover on laptops, tap on touch screens).
@@ -85,7 +90,7 @@
   }
   function link(p) { return P.url('product.html?p=' + encodeURIComponent(p.id)); }
 
-  function media(p, variant, eager, sizes, reveal) {
+  function media(p, variant, eager, sizes) {
     var ims = picsOf(p, 0);
     var imgs = ims.map(function (im, i) {
       var cls = i === 0 ? '' : i === 1 ? ' card__img--alt' : ' card__img--more';
@@ -96,14 +101,60 @@
       var load = later ? set.replace('src="', 'data-src="').replace('srcset="', 'data-srcset="') : set;
       var tag = '<img class="card__img' + cls + '" ' + load + ' sizes="' + esc(sizes) + '" alt="' + (i === 0 ? esc(im.alt) : '') +
         '" style="object-position:' + esc(im.focal || '50% 50%') + '" loading="' + (eager && i === 0 ? 'eager' : 'lazy') + '" decoding="async" data-k="' + im.n + '">';
-      /* the worn picture rises behind its veil (the veil changes nothing on touch screens) */
-      return i === 1 && reveal !== 'dissolve' ? '<span class="card__veil">' + tag + '</span>' : tag;
+      /* the worn picture comes into view inside its veil (the veil changes nothing on touch screens) */
+      return i === 1 ? '<span class="card__veil">' + tag + '</span>' : tag;
     }).join('');
     var dots = ims.map(function (_, i) { return '<i' + (i === 0 ? ' class="on"' : '') + '></i>'; }).join('');
     var dotsEl = ims.length < 2 ? '' : variant === 'row'
       ? '<button class="card__dots" type="button" aria-label="Next picture of ' + esc(p.name) + '"><span class="card__dots-in">' + dots + '</span></button>'
       : '<span class="card__dots" aria-hidden="true">' + dots + '</span>';
     return '<div class="card__media"><a class="card__pic" href="' + esc(link(p)) + '" tabindex="-1" aria-hidden="true"><span class="card__track">' + imgs + '</span></a>' + dotsEl + '</div>';
+  }
+
+  /* ---------- How the worn picture appears on hover: five ways, never the same for neighbours ---------- */
+  var HOVERS = ['veil', 'dissolve', 'curtain', 'iris', 'sweep'];
+  var HV = /(^|\s)card--hv-/;
+
+  function setHover(card, way) {
+    HOVERS.forEach(function (w) { card.classList.remove('card--hv-' + w); });
+    card.classList.add('card--hv-' + way);
+  }
+  /* a list's own offset, from its name, so that rows on one page do not all begin with the same way */
+  function listOffset(list) {
+    var key = list.getAttribute('aria-label') || list.getAttribute('data-collection') ||
+      list.getAttribute('data-products') || list.id || list.className || '';
+    var h = 0;
+    for (var i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) % 9973;
+    return h % HOVERS.length;
+  }
+  function wayFor(list, n, off) {
+    var forced = list.closest ? list.closest('[data-hover]') : null;
+    var w = forced ? forced.getAttribute('data-hover') : '';
+    return HOVERS.indexOf(w) > -1 ? w : HOVERS[(n + off) % HOVERS.length];
+  }
+  function listOf(card) {
+    var up = card.parentElement;
+    return up && up.tagName === 'LI' ? up.parentElement : up;
+  }
+  function cardsOf(list) {
+    return Array.prototype.map.call(list.children, function (ch) {
+      return ch.classList.contains('card') ? ch : ch.tagName === 'LI' ? ch.querySelector(':scope > .card') : null;
+    }).filter(function (c) { return c && !c.classList.contains('card--slot'); });
+  }
+  /* gives a way to every card on the page that has none yet (cards placed by other scripts) */
+  function assignAll() {
+    P.$$('.card:not(.card--slot)').forEach(function (card) {
+      if (HV.test(card.className)) return;
+      var list = listOf(card);
+      if (!list) return;
+      var off = listOffset(list);
+      cardsOf(list).forEach(function (c, n) { if (!HV.test(c.className)) setHover(c, wayFor(list, n, off)); });
+    });
+  }
+  var assignTimer = 0;
+  function assignSoon() {
+    if (assignTimer) return;
+    assignTimer = setTimeout(function () { assignTimer = 0; assignAll(); }, 0);
   }
 
   /* ---------- The card ---------- */
@@ -114,11 +165,12 @@
     var variant = opts.variant === 'row' || opts.variant === 'narrow' ? opts.variant : 'grid';
     var sizes = opts.sizes || SIZES[variant];
     var h = opts.heading || 'h3';
-    var reveal = opts.reveal === 'dissolve' ? 'dissolve' : 'veil';
     var el = doc.createElement('article');
-    el.className = 'card' + (variant === 'grid' ? '' : ' card--' + variant) + (reveal === 'dissolve' ? ' card--dissolve' : '');
+    el.className = 'card' + (variant === 'grid' ? '' : ' card--' + variant);
     el.setAttribute('data-id', p.id);
-    el.innerHTML = media(p, variant, !!opts.eager, sizes, reveal) + tagPill(p) + heart(p) +
+    if (HOVERS.indexOf(opts.hover) > -1) setHover(el, opts.hover);
+    else assignSoon();
+    el.innerHTML = media(p, variant, !!opts.eager, sizes) + tagPill(p) + heart(p) +
       '<' + h + ' class="card__name"><a href="' + esc(link(p)) + '">' + esc(p.name) + '</a></' + h + '>' +
       '<p class="card__cap">' + esc(p.caption) + '</p>' +
       '<div class="card__meta"><span class="card__price">' + esc(P.inr(p.price)) + '</span>' + colourDots(p) + starsAvg(p) + '</div>' +
@@ -143,17 +195,16 @@
     var max = parseInt(root.getAttribute('data-limit'), 10);
     if (max > 0) list = list.slice(0, max);
     var eager = parseInt(root.getAttribute('data-eager'), 10) || 0;
-    var revealer = root.closest ? root.closest('[data-reveal]') : null;
     var opts = {
       variant: root.getAttribute('data-variant') || root.getAttribute('data-cards') || 'grid',
-      sizes: root.getAttribute('data-sizes') || '',
-      reveal: revealer ? revealer.getAttribute('data-reveal') : ''
+      sizes: root.getAttribute('data-sizes') || ''
     };
     var isList = /^(UL|OL)$/.test(root.tagName);
     var itemClass = root.getAttribute('data-item-class') || (root.classList.contains('track') ? 'row__item' : '');
     var frag = doc.createDocumentFragment();
+    var off = listOffset(root);
     list.forEach(function (p, n) {
-      var card = render(p, { variant: opts.variant, sizes: opts.sizes || undefined, eager: n < eager, heading: root.getAttribute('data-heading') || 'h3', reveal: opts.reveal });
+      var card = render(p, { variant: opts.variant, sizes: opts.sizes || undefined, eager: n < eager, heading: root.getAttribute('data-heading') || 'h3', hover: wayFor(root, n, off) });
       if (!card) return;
       if (isList) {
         var li = doc.createElement('li');
@@ -319,6 +370,8 @@
   });
   doc.addEventListener('mouseover', function (e) {
     if (!P.fine()) return;
+    var k = e.target.closest && e.target.closest('.card');
+    if (k && !HV.test(k.className) && !k.classList.contains('card--slot')) assignAll();
     var c = e.target.closest && e.target.closest('.card .cdot');
     if (!c) return;
     var card = c.closest('.card');

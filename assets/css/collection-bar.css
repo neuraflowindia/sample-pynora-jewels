@@ -1,0 +1,325 @@
+/* The Collection page's shop bar (collection-bar.js), on the quiet sandstone above the grid.
+
+   <div class="cbar-wrap" data-collection-bar>            no box of its own: the bar sticks within the whole band
+     <div class="cbar-sentinel">                            1 px, just above the bar: tells the exact moment it sticks
+     <div class="cbar-stick [is-stuck]">                    sticky, 10 px under the scrolled header (--cbar-top)
+       <div class="cbar">  count · gold rule · chips (each with its panel) · Sort · "Filter & sort" (tablets, phones)
+     <div class="cbar-active">                              the filters in use: removable tags and "Clear all"
+   <aside class="drawer cbar-sheet" data-overlay="filters">  tablets and phones: the filter panel (#filters)
+
+   At rest a 64 px row between two fine gold lines; once it sticks under the header it becomes a floating paper
+   capsule (56 px, fully round, the strong double edge and the float shadow) without moving anything: the capsule
+   is a layer behind the row, slightly wider than it, so the words stay exactly where they were. */
+
+.cbar-wrap { display: contents; }
+.cbar-wrap[hidden] { display: none; }
+.cbar-sentinel { height: 1px; pointer-events: none; }
+
+.cbar-stick {
+  position: sticky;
+  top: var(--cbar-top, 70px);
+  z-index: 30;                                   /* under the header (50), its Jewellery panel (55) and the toast */
+  margin-bottom: 20px;
+}
+
+/* ---------- The row ---------- */
+.cbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 0 2px;
+}
+.cbar > * { position: relative; z-index: 1; }
+/* the two fine gold lines, fading at both ends */
+.cbar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, rgba(171, 142, 98, 0.55) 6%, rgba(171, 142, 98, 0.55) 94%, transparent) top / 100% 1px no-repeat,
+    linear-gradient(90deg, transparent, rgba(171, 142, 98, 0.55) 6%, rgba(171, 142, 98, 0.55) 94%, transparent) bottom / 100% 1px no-repeat;
+  transition: opacity var(--dur) var(--ease);
+}
+/* the capsule's paper: behind the row, 56 px tall, a little wider than it */
+.cbar::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 4px -20px;
+  border-radius: 999px;
+  background: rgba(252, 248, 241, 0.96);
+  box-shadow: var(--border-double-strong), var(--sh-float);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .cbar::before { -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+}
+@media not all and (hover: hover) and (pointer: fine) {
+  .cbar::before { background: var(--c-paper); }   /* touch screens: solid paper */
+}
+.cbar-stick.is-stuck .cbar::before { opacity: 1; }
+.cbar-stick.is-stuck .cbar::after { opacity: 0; }
+
+/* ---------- The count ("3 pieces", "3 pieces of 7"): a polite live region; the number rolls inside its clip ---------- */
+.cbar__count {
+  flex: none;
+  display: grid;
+  height: 22px;
+  margin: 0 4px 0 0;
+  overflow: hidden;
+  overflow: clip;
+  font: 400 15px/22px var(--font-text);
+  color: var(--c-ink-2);
+  white-space: nowrap;
+}
+.cbar__count-in { grid-area: 1 / 1; display: block; }
+.cbar__count b { font-weight: 600; color: var(--c-ink); font-variant-numeric: lining-nums tabular-nums; }
+
+/* ---------- The chips ---------- */
+.cbar__chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; }
+.cbar__chips::before { content: ""; flex: none; width: 1px; height: 24px; margin-right: 6px; background: rgba(171, 142, 98, 0.55); }
+.cbar.is-bare .cbar__chips::before { display: none; }
+.cbar__f { position: relative; }
+.cbar__sort { flex: none; margin-left: auto; }
+
+.cbar__chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 40px;
+  margin: 0;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font: 400 15px/1 var(--font-text);
+  color: var(--c-ink);
+  white-space: nowrap;
+  background: rgba(252, 248, 241, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.55), var(--sh-contact);
+  transition: background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.cbar__chip::after { content: ""; position: absolute; inset: -2px 0; }   /* 44 px to the touch */
+.cbar__chip .i { font-size: 15px; color: var(--c-gold-deep); stroke-width: 1.8; }
+.cbar__chip .cbar__chev { font-size: 14px; transition: rotate var(--dur) var(--ease); }
+.cbar__chip[aria-expanded="true"] .cbar__chev { rotate: 180deg; }
+.cbar__n { font: 600 13px/1 var(--font-text); color: var(--c-ink-2); font-variant-numeric: lining-nums; }
+.cbar__n[hidden] { display: none; }
+@media (hover: hover) {
+  .cbar__chip:hover { background: var(--c-paper); box-shadow: inset 0 0 0 1px rgba(125, 8, 35, 0.5), var(--sh-chip); }
+}
+.cbar__chip[aria-expanded="true"] { background: var(--c-paper); box-shadow: inset 0 0 0 1px rgba(125, 8, 35, 0.5), var(--sh-chip); }
+.cbar__chip.is-on { font-weight: 600; background: var(--c-paper); box-shadow: inset 0 0 0 1.5px var(--c-maroon), var(--sh-chip); }
+.cbar__chip.is-on .cbar__n { color: var(--c-maroon); }
+/* "Ready to ship" in use: the sage of the Ready-to-ship pill */
+.cbar__ready.is-on { color: var(--c-sage-ink); background: var(--c-sage-tint); box-shadow: inset 0 0 0 1.5px var(--c-sage-ink), var(--sh-chip); }
+.cbar__ready.is-on .i, .cbar__ready.is-on .cbar__n { color: var(--c-sage-ink); }
+.cbar__ready[aria-disabled="true"] { color: rgba(79, 59, 64, 0.55); cursor: default; }
+.cbar__ready[aria-disabled="true"]:hover { background: rgba(252, 248, 241, 0.72); box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.55), var(--sh-contact); }
+.cbar__sortbtn { gap: 8px; }
+.cbar__sort-k { color: var(--c-ink-2); }
+.cbar__sort-v { font-weight: 600; }
+.cbar__sortbtn.is-on { font-weight: 400; }
+
+/* ---------- A chip's panel ---------- */
+.cbar__pop {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + 10px);
+  left: 0;
+  min-width: 260px;
+  padding: 10px;
+  border-radius: 16px;
+  background: var(--c-paper);
+  box-shadow: var(--border-double-strong), var(--sh-lift);
+  --c-focus: var(--c-maroon);
+}
+.cbar__pop[hidden] { display: none; }
+.cbar__pop--end, .cbar__pop.is-end { left: auto; right: 0; }
+.cbar__opt {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  font: 400 15.5px/1.2 var(--font-text);
+  color: var(--c-ink);
+  white-space: nowrap;
+  background: transparent;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.cbar__opt:focus-visible { outline: 2px solid var(--c-maroon); outline-offset: -2px; }
+@media (hover: hover) { .cbar__opt:hover { background: var(--c-rose-50); } }
+.cbar__opt-n { font: 400 14px/1 var(--font-text); color: var(--c-ink-2); font-variant-numeric: lining-nums; }
+.cbar__opt[aria-disabled="true"], .cbar__opt[aria-disabled="true"] .cbar__opt-n { color: rgba(79, 59, 64, 0.55); cursor: default; }
+@media (hover: hover) { .cbar__opt[aria-disabled="true"]:hover { background: transparent; } }
+
+/* the tick box (round for a single choice) and the colour swatch */
+.cbar__box {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: var(--c-paper);
+  box-shadow: inset 0 0 0 1.25px rgba(171, 142, 98, 0.85);
+  transition: background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.cbar__box.is-round { border-radius: 50%; }
+.cbar__box .i { font-size: 14px; color: var(--c-on-maroon); stroke-width: 2.4; opacity: 0; transform: scale(0.6); transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease); }
+:is(.cbar__opt, .cbar__pill):is([aria-checked="true"], [aria-pressed="true"]) .cbar__box { background: var(--c-maroon); box-shadow: none; }
+:is(.cbar__opt, .cbar__pill):is([aria-checked="true"], [aria-pressed="true"]) .cbar__box .i { opacity: 1; transform: none; }
+[aria-disabled="true"] > .cbar__box { box-shadow: inset 0 0 0 1.25px rgba(171, 142, 98, 0.45); }
+.cbar__sw {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--sw);
+  box-shadow: inset 0 0 0 1px rgba(42, 26, 30, 0.2), 0 0 0 2.5px var(--c-paper), 0 0 0 3.5px rgba(171, 142, 98, 0.5);
+  transition: box-shadow var(--dur-fast) var(--ease);
+}
+:is(.cbar__opt, .cbar__pill)[aria-pressed="true"] .cbar__sw { box-shadow: inset 0 0 0 1px rgba(42, 26, 30, 0.2), 0 0 0 2.5px var(--c-paper), 0 0 0 4px var(--c-maroon); }
+[aria-disabled="true"] > .cbar__sw { opacity: 0.5; }
+
+/* ---------- The filters in use, under the bar ---------- */
+.cbar-active { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: -6px 0 22px; }
+.cbar-active[hidden] { display: none; }
+.cbar__tag {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  margin: 0;
+  padding: 0 10px 0 14px;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font: 600 14px/1 var(--font-text);
+  color: var(--c-gold-deep);
+  white-space: nowrap;
+  background: var(--c-champagne);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.7);
+  transition: box-shadow var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
+}
+.cbar__tag::after { content: ""; position: absolute; inset: -5px 0; }   /* 44 px to the touch */
+.cbar__tag .i { font-size: 14px; color: var(--c-maroon); stroke-width: 2; transition: transform var(--dur-fast) var(--ease); }
+@media (hover: hover) {
+  .cbar__tag:hover { background: #F7EEDC; box-shadow: inset 0 0 0 1px rgba(125, 8, 35, 0.5), var(--sh-contact); }
+  .cbar__tag:hover .i { transform: rotate(90deg); }
+}
+.cbar__clear { position: relative; margin-left: 4px; font-size: 15px; }
+.cbar__clear::after { content: ""; position: absolute; inset: -13px -6px; }
+
+/* ---------- "Filter & sort" (tablets and phones) ---------- */
+.cbar__fbtn { display: none; }
+
+@media (max-width: 1080px) {
+  .cbar__chips, .cbar__sort { display: none; }
+  .cbar { justify-content: space-between; min-height: 60px; padding: 0 0 0 8px; }
+  /* the capsule: room before the count, and the button's end concentric with its own (6 px all round) */
+  .cbar::before { inset: 2px -6px 2px -10px; }
+  .cbar__fbtn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    margin: 0;
+    padding: 0 16px 0 14px;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    font: 600 15px/1 var(--font-text);
+    color: var(--c-ink);
+    background: var(--c-paper);
+    box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.7), var(--sh-chip);
+    transition: box-shadow var(--dur-fast) var(--ease);
+  }
+  .cbar__fbtn .i { font-size: 18px; color: var(--c-gold-deep); stroke-width: 1.7; }
+  .cbar__fbtn:active { box-shadow: inset 0 0 0 1.5px var(--c-maroon), var(--sh-contact); }
+  .cbar__fbtn-n {
+    display: grid;
+    place-items: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--c-maroon);
+    color: var(--c-on-maroon);
+    font: 600 13px/1 var(--font-text);
+    font-variant-numeric: lining-nums;
+  }
+  .cbar__fbtn-n[hidden] { display: none; }
+  .cbar-active { margin-top: -4px; }
+}
+@media (max-width: 760px) {
+  .cbar { padding-left: 10px; }
+  .cbar::before { inset: 2px -6px; }
+  .cbar-stick { margin-bottom: 16px; }
+}
+
+/* ---------- The filter panel (#filters): the drawer shell, its groups of pills ---------- */
+html.is-locked[data-overlay-open="filters"] { background: var(--c-paper); }
+.cbar-sheet__body { padding-top: 4px; padding-bottom: 8px; }
+.cbar-fs { padding: 18px 0 20px; }
+.cbar-fs + .cbar-fs { border-top: 1px solid var(--c-line); }
+.cbar-fs__t {
+  margin: 0 0 12px;
+  font: 600 var(--fs-label)/1.3 var(--font-text);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-gold-deep);
+}
+.cbar-fs__pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.cbar__pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  margin: 0;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font: 400 15px/1 var(--font-text);
+  color: var(--c-ink);
+  white-space: nowrap;
+  background: rgba(252, 248, 241, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.6), var(--sh-contact);
+  transition: background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+.cbar__pill::after { content: ""; position: absolute; inset: -1px 0; }   /* 44 px to the touch */
+.cbar__pill .cbar__box { display: none; }
+.cbar__pill .cbar__sw { width: 16px; height: 16px; }
+.cbar__pill .cbar__opt-n { font: 600 13px/1 var(--font-text); color: var(--c-ink-2); font-variant-numeric: lining-nums; }
+.cbar__pill:is([aria-pressed="true"], [aria-checked="true"]) { font-weight: 600; background: var(--c-paper); box-shadow: inset 0 0 0 1.5px var(--c-maroon), var(--sh-chip); }
+.cbar__pill:is([aria-pressed="true"], [aria-checked="true"]) .cbar__opt-n { color: var(--c-maroon); }
+.cbar__pill[data-k="ready"][aria-pressed="true"] { color: var(--c-sage-ink); background: var(--c-sage-tint); box-shadow: inset 0 0 0 1.5px var(--c-sage-ink), var(--sh-chip); }
+.cbar__pill[aria-disabled="true"], .cbar__pill[aria-disabled="true"] .cbar__opt-n { color: rgba(79, 59, 64, 0.55); cursor: default; }
+.cbar__pill[aria-disabled="true"] { box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.35); }
+.cbar-sheet__foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.cbar-sheet__clear { position: relative; flex: none; font-size: 16px; }
+.cbar-sheet__clear::after { content: ""; position: absolute; inset: -13px -8px; }
+.cbar-sheet__go { flex: 1 1 auto; max-width: 260px; }
+
+/* ---------- Less motion: everything changes at once ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .cbar::before, .cbar::after, .cbar__chip, .cbar__chip .cbar__chev, .cbar__opt, .cbar__box, .cbar__box .i, .cbar__sw,
+  .cbar__tag, .cbar__tag .i, .cbar__fbtn, .cbar__pill { transition: none; }
+}

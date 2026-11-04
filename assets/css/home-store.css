@@ -27,6 +27,11 @@
   grid-template-areas: "words . pic card";
   align-items: start;
 }
+/* wide screens (from 1,441 px, where the column widens): the store picture grows with it (447 px at 1,920,
+   520 px from 2,440), so the wall between the words and the picture stays a pause, not a gap */
+@media (min-width: 1441px) {
+  .visit__grid { --visit-pic: clamp(380px, calc(380px + (100vw - 1440px) * 0.14), 520px); }
+}
 /* laptops: the heading and her sign sit as one group at the middle height of the picture and card, so the wall
    on the left is as full as the right (the group's top meets the card's top line) */
 .visit__words { grid-area: words; position: relative; align-self: center; }

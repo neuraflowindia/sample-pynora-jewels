@@ -21,12 +21,14 @@
      from CSS. A line's bottom room (its padding, or more under an inline box) is written as --line-room so it starts
      fully out of sight.
    - is-moving while a section's values change (for will-change), is-done one second after it is complete.
-   - The three-movers budget: counted movers (each band's moving light, the opening, the strip, the marquees, the
-     Decode tour, movers added with addMover) qualify while they are on screen enough; the strip cannot be held;
-     beyond three, the lowest in rank waits. A band covering under a quarter of the screen rests (class is-held).
+   - The three-movers budget: counted movers (each band's moving light, the opening, the strip, the gliding rows,
+     the Decode tour, movers added with addMover) qualify while they are on screen enough; beyond three, the
+     lowest in rank waits. Movers added as forced (the strip, and every gliding row: the visitor is looking at it)
+     are never held; they still count, so the others wait for them. A band covering under a quarter of the screen
+     rests (class is-held). The walls' ambient drift is not a mover.
    - Hidden tabs sleep; a change to "less motion" returns the page to its still state at once.
 
-   Pynora.motion: refresh(), addMover({ id, el, rank, need, wants, pause, resume }) -> remove(), watch(el, fn) ->
+   Pynora.motion: refresh(), addMover({ id, el, rank, need, wants, pause, resume, forced }) -> remove(), watch(el, fn) ->
    unwatch(), progress(el), tick(fn) -> untick(), kick(), jump(), release(), hold(), released, settled, loadBand, H().
    Events (Pynora.on): motion:release (the strip and the ribbon may start), motion:jump, motion:off, motion:on. */
 (function () {

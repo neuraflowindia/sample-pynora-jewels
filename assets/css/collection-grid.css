@@ -1,0 +1,226 @@
+/* The Collection page's pieces (collection-grid.js): the grid of cards, "From the studio", the end line and the
+   empty result, on the quiet sandstone.
+
+   <ul class="card-grid cgr-grid" data-cards>                four across, three from 1,080 px, two on phones
+     <li data-row><article class="card">…</article></li>
+     <li class="cgr-note-li [is-band]" style="--span: 2">     the places left in the last row, or a whole row
+       <div class="cgr-note" role="note" data-shape="one | two | three | band">…</div></li>
+   <div class="cgr-empty">…</div>                             only when an address's filters hold nothing
+   <div class="cgr-end" data-collection-end>…</div>           "You've seen all 3 pieces in Earrings."
+
+   The note: champagne paper in the cards' own frame family (the double edge, the card shadow) with a fine inner
+   gold line 9 px inside (6 px on phones), as the portrait's mount line. Beside cards it is exactly as tall as
+   they are (its own content never sets the row's height; it is sized as a container instead), so a row stays
+   one even line. */
+
+/* ---------- The grid ---------- */
+.cgr-grid { position: relative; }
+@media (min-width: 1081px) and (max-width: 1279px) { .cgr-grid { gap: 20px; } }
+.cgr-grid[hidden] { display: none; }
+
+/* ---------- The note's place in the grid ---------- */
+.cgr-grid > .cgr-note-li { grid-column: span var(--span, 1); }
+.cgr-grid > .cgr-note-li:not(.is-band) {
+  display: flex;
+  container: cgr-note / size;                     /* as tall as the cards beside it, never taller */
+}
+.cgr-grid > .cgr-note-li > .cgr-note { flex: 1 1 auto; grid-row: 1 / -1; min-width: 0; }
+
+/* ---------- The note ---------- */
+.cgr-note {
+  position: relative;
+  display: grid;
+  align-content: center;
+  padding: 30px 28px 28px;
+  border-radius: var(--r-card);
+  color: var(--c-ink);
+  background: radial-gradient(120% 90% at 50% 0%, #FBF4E6 0%, var(--c-champagne) 70%);
+  box-shadow: var(--border-double), var(--sh-card);
+  overflow: hidden;
+  --c-maroon-text: var(--c-maroon);
+  --c-focus: var(--c-maroon);
+}
+.cgr-note::before {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border-radius: 15px;
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.42);
+  pointer-events: none;
+}
+.cgr-note__mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--c-paper);
+  box-shadow: 0 0 0 1px rgba(171, 142, 98, 0.62), 0 0 0 4px var(--c-paper), 0 0 0 5px rgba(171, 142, 98, 0.3), var(--sh-contact);
+}
+.cgr-note__mark .orn-fan { width: 26px; height: 26px; color: var(--c-maroon); }
+.cgr-note__label {
+  margin: 18px 0 0;
+  font: 600 15px/1.3 var(--font-text);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-gold-deep);
+}
+.cgr-note__title { margin: 8px 0 0; font: 400 22px/1.25 var(--font-display); color: var(--c-ink); text-wrap: balance; }
+.cgr-note__text { margin: 10px 0 0; font: 400 17px/1.55 var(--font-text); color: var(--c-ink-2); text-wrap: pretty; }
+.cgr-note__link { margin-top: 18px; justify-self: start; font-size: 16px; }
+.cgr-note__part { display: grid; align-content: center; min-width: 0; }
+.cgr-note__head { display: flex; align-items: center; gap: 16px; }
+.cgr-note__head .cgr-note__label { margin: 0; }
+.cgr-note__head .cgr-note__mark { width: 48px; height: 48px; }
+.cgr-note__head .cgr-note__mark .orn-fan { width: 22px; height: 22px; }
+.cgr-note__main .cgr-note__title { margin-top: 14px; }
+
+/* the client's words */
+.cgr-note__quote { margin: 0; }
+.cgr-note__stars .i { font-size: 15px; }
+.cgr-note__quote blockquote { margin: 12px 0 0; font: italic 400 19px/1.5 var(--font-text); color: var(--c-ink); text-wrap: pretty; }
+.cgr-note__quote figcaption { margin-top: 12px; font: 400 15px/1.45 var(--font-text); color: var(--c-ink-2); }
+.cgr-note__quote figcaption b { font-weight: 600; color: var(--c-ink); }
+.cgr-note__quote figcaption a {
+  position: relative;
+  display: inline-block;                          /* one box (the piece's name moves to the next line whole), so its tap area is whole */
+  color: var(--c-maroon);
+  text-decoration: underline;
+  text-decoration-color: rgba(125, 8, 35, 0.38);
+  text-underline-offset: 4px;
+  border-radius: 3px;
+  transition: text-decoration-color var(--dur-fast) var(--ease);
+}
+.cgr-note__quote figcaption a::after { content: ""; position: absolute; inset: -12px -4px; }
+.cgr-note__quote figcaption a:hover { text-decoration-color: currentColor; }
+
+/* how we look after you */
+.cgr-note__care { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.cgr-note__care li { display: grid; grid-template-columns: 40px minmax(0, 1fr); align-items: center; gap: 12px; font: 400 16px/1.4 var(--font-text); color: var(--c-ink-2); }
+.cgr-note__care b { display: block; font: 400 19px/1.25 var(--font-display); color: var(--c-ink); }
+.cgr-note__ic {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--c-champagne);
+  color: var(--c-maroon);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.5), 0 0 0 3px rgba(252, 248, 241, 0.7);
+}
+.cgr-note__ic .i { font-size: 19px; stroke-width: 1.6; }
+.cgr-note__rule { width: 1px; align-self: stretch; background: linear-gradient(180deg, transparent, rgba(171, 142, 98, 0.6) 15%, rgba(171, 142, 98, 0.6) 85%, transparent); }
+
+/* one place: everything stacked and centred */
+.cgr-note[data-shape="one"] { justify-items: center; text-align: center; }
+.cgr-note[data-shape="one"] .cgr-note__link { justify-self: center; }
+/* two places: the note | the client's words */
+.cgr-note[data-shape="two"] { grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr); column-gap: 30px; align-items: center; padding: 34px 34px 30px; }
+/* three places: the note | the client's words, then how we look after you in a row beneath a gold hairline */
+.cgr-note[data-shape="three"] { grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr); grid-template-rows: 1fr auto; column-gap: 34px; align-items: center; padding: 40px 42px 34px; }
+.cgr-note__base {
+  grid-column: 1 / -1;
+  align-self: end;
+  margin-top: 28px;
+  padding-top: 24px;
+  background: linear-gradient(90deg, transparent, rgba(171, 142, 98, 0.6) 10%, rgba(171, 142, 98, 0.6) 90%, transparent) top / 100% 1px no-repeat;
+}
+.cgr-note[data-shape="three"] .cgr-note__care { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+/* a whole row: a calmer, shorter interlude in three parts */
+.cgr-note[data-shape="band"] { grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1.1fr) 1px minmax(0, 0.9fr); column-gap: 36px; align-items: center; padding: 36px 42px; }
+
+/* narrow laptops (1,081-1,279 px): the shapes keep their parts a little closer */
+@media (max-width: 1279px) and (min-width: 1081px) {
+  .cgr-note[data-shape="one"] { padding: 26px 20px 24px; }
+  .cgr-note[data-shape="two"] { padding: 30px 28px 26px; column-gap: 24px; }
+  .cgr-note[data-shape="three"] { padding: 32px 30px 28px; column-gap: 26px; }
+  .cgr-note[data-shape="three"] .cgr-note__care { gap: 14px; }
+  .cgr-note[data-shape="band"] { padding: 32px 34px; column-gap: 28px; }
+}
+/* tablets: a whole row keeps the note and the client's words (how we look after you is in the footer) */
+@media (max-width: 1080px) {
+  .cgr-note[data-shape="band"] { grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr); padding: 32px 32px; }
+  .cgr-note[data-shape="band"] .cgr-note__rule:nth-of-type(2), .cgr-note[data-shape="band"] .cgr-note__end { display: none; }
+  .cgr-note[data-shape="one"] { padding: 26px 20px 24px; }
+}
+/* phones */
+@media (max-width: 760px) {
+  .cgr-note { padding: 22px 16px 20px; border-radius: 18px; }
+  .cgr-note::before { inset: 6px; border-radius: 13px; }
+  .cgr-note__mark { width: 44px; height: 44px; }
+  .cgr-note__mark .orn-fan { width: 20px; height: 20px; }
+  .cgr-note__label { margin-top: 12px; font-size: 13px; }
+  .cgr-note__title { font-size: 18px; }
+  .cgr-note__text { font-size: 15px; line-height: 1.5; }
+  .cgr-note__link { margin-top: 12px; font-size: 15px; }
+  .cgr-note[data-shape="one"] { padding: 20px 14px 18px; }
+  .cgr-note[data-shape="one"] .cgr-note__label { text-wrap: balance; }
+  /* in a 150-175 px place the link may take two lines: it wraps as centred words, its glyph leading the first */
+  .cgr-note[data-shape="one"] .cgr-note__link { display: block; text-align: center; text-wrap: balance; }
+  .cgr-note[data-shape="one"] .cgr-note__link .i { display: inline-block; margin-right: 5px; vertical-align: -3px; }
+  .cgr-note[data-shape="band"] { grid-template-columns: minmax(0, 1fr); row-gap: 18px; padding: 26px 22px 24px; }
+  .cgr-note[data-shape="band"] .cgr-note__rule { width: auto; height: 1px; background: linear-gradient(90deg, transparent, rgba(171, 142, 98, 0.6) 15%, rgba(171, 142, 98, 0.6) 85%, transparent); }
+  .cgr-note[data-shape="band"] .cgr-note__title { font-size: 20px; }
+  .cgr-note[data-shape="band"] .cgr-note__text { font-size: 16px; }
+  .cgr-note__quote blockquote { font-size: 17px; }
+}
+/* a one-place note on a short card (phones, narrow tablets): the mark gives way before any words do */
+@container cgr-note (max-height: 380px) {
+  .cgr-note[data-shape="one"] .cgr-note__mark { width: 36px; height: 36px; box-shadow: 0 0 0 1px rgba(171, 142, 98, 0.62), 0 0 0 3px var(--c-paper), 0 0 0 4px rgba(171, 142, 98, 0.3); }
+  .cgr-note[data-shape="one"] .cgr-note__mark .orn-fan { width: 17px; height: 17px; }
+  .cgr-note[data-shape="one"] .cgr-note__label { margin-top: 10px; }
+}
+@container cgr-note (max-height: 352px) {
+  .cgr-note[data-shape="one"] { padding-top: 16px; padding-bottom: 14px; }
+  .cgr-note[data-shape="one"] .cgr-note__mark { display: none; }
+  .cgr-note[data-shape="one"] .cgr-note__label { margin-top: 0; }
+}
+
+/* ---------- The end of the list ---------- */
+.cgr-end {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin-top: clamp(40px, 4.4vw, 60px);
+  text-align: center;
+  font: 400 15px/1.4 var(--font-text);
+  color: var(--c-ink-2);
+}
+.cgr-end[hidden] { display: none; }
+.cgr-end__rule { width: 168px; }
+.cgr-end__line { margin: 0; }
+.cgr-end__all { font-size: 16px; }
+@media (max-width: 760px) { .cgr-end { font-size: 14px; } }
+
+/* ---------- The empty result ---------- */
+.cgr-empty {
+  max-width: 560px;
+  margin: 8px auto 0;
+  padding: 36px clamp(22px, 4vw, 40px) 32px;
+  text-align: center;
+  border-radius: 24px;
+  background: var(--c-paper);
+  box-shadow: var(--border-double), var(--sh-card);
+  --c-maroon-text: var(--c-maroon);
+}
+.cgr-empty[hidden] { display: none; }
+.cgr-empty__ic {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: var(--c-rose-50);
+  color: var(--c-maroon);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.35);
+}
+.cgr-empty__ic .i { font-size: 26px; }
+.cgr-empty__title { margin: 0; font: 400 25px/1.2 var(--font-display); color: var(--c-ink); text-wrap: balance; }
+.cgr-empty__text { margin: 10px auto 0; max-width: 30em; font: 400 16px/1.55 var(--font-text); color: var(--c-ink-2); text-wrap: pretty; }
+.cgr-empty__acts { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 16px 22px; margin-top: 22px; }   /* the link's tap area never reaches into the button */
+
+/* ---------- Without the catalogue ---------- */
+.cgr-none { max-width: 34em; margin: 0 auto 24px; text-align: center; font: 400 16px/1.55 var(--font-text); color: var(--c-ink-2); }
+.cgr-none .tlink { font-size: inherit; }

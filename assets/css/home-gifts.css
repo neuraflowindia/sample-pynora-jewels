@@ -1,6 +1,6 @@
 /* Home: gifts, the crimson box and three pieces, on the champagne silk.
    Laptops from 1,280 px: the box on the left (380–500 px, 4:5), the heading set, three 186 px cards side by side
-   and the button on the right. 1,080–1,279 px: the box 340 x 425 and the cards as a sideways row of 200 px cards.
+   and the button on the right; wide screens grow the box to 640 px and the cards to 240 px. 1,080–1,279 px: the box 340 x 425 and the cards as a sideways row of 200 px cards.
    Tablets: the box at 45% beside the words, the row of cards full width below. Phones: the words, the box,
    a sideways row of 200 px cards and the button full width.
    The still page is the resting state: --p stays at 1 here, and nothing moves through it. */
@@ -69,6 +69,17 @@
 .gft__row { --row-item: 186px; --row-gap: 20px; }
 .gft__row .pill__more { display: none; }     /* the short pill on narrow cards */
 .gft__row .track { min-height: calc(var(--row-pad-top) + 395px + var(--row-pad-bottom)); }   /* keeps its size before the cards arrive */
+
+/* ---------- Wide screens (from 1,441 px, where the column widens): the box and the cards grow with it, so the
+   three cards still fill the words' column (box 577 px and cards 229 px at 1,920; 640 and 240 px from 2,200) ---------- */
+@media (min-width: 1441px) {
+  .gft__grid { --gft-box: clamp(500px, calc(500px + (100vw - 1440px) * 0.16), 640px); }
+  .gft__row {
+    --row-item: clamp(186px, calc(186px + (100vw - 1440px) * 0.09), 240px);
+    --row-gap: clamp(20px, calc(20px + (100vw - 1440px) * 0.01), 26px);
+  }
+  .gft__row .track { min-height: calc(var(--row-pad-top) + (var(--row-item) - 20px) * 1.25 + 187px + var(--row-pad-bottom)); }
+}
 
 /* ---------- Narrow laptops: a smaller box; the cards become a sideways row of 200 px cards ---------- */
 @media (min-width: 1080px) and (max-width: 1279px) {

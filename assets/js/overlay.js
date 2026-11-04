@@ -1,5 +1,6 @@
 /* Pynora overlays: the drawers (bag, wishlist, menu, client care), search, and the states kept in the address.
-   - State hashes: #bag, #wishlist, #search, #menu, #care/<tab>, #newsletter-thanks. Any other hash is an
+   - State hashes: #bag, #wishlist, #search, #menu, #care/<tab>, #newsletter-thanks, #filters (the Collection
+     page's filter panel on tablets and phones). Any other hash is an
      ordinary anchor and scrolls as usual.
    - A link to a state hash (a[href="#bag"]) or an element with data-open="bag" (or "care/faqs") opens it.
    - Opening from the page adds a history entry; closing with ×, Esc or the scrim goes back, so Back never
@@ -19,7 +20,7 @@
 
   var doc = document;
   var html = doc.documentElement;
-  var STATES = ['bag', 'wishlist', 'search', 'menu', 'care', 'newsletter-thanks'];
+  var STATES = ['bag', 'wishlist', 'search', 'menu', 'care', 'newsletter-thanks', 'filters'];
   var WITH_ARG = { care: true };
   var FOCUSABLE = 'a[href], area[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), ' +
     'select:not([disabled]), textarea:not([disabled]), iframe, summary, [contenteditable="true"], [tabindex]:not([tabindex="-1"])';

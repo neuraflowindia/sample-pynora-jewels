@@ -1,54 +1,104 @@
-/* The product gallery: framed thumbnails beside a framed picture that turns over like a gilded card.
-   - Laptops (961 px and wider): a rail of thumbnails, then the stage. The gallery is exactly as wide as both, the
-     stage is sized so that it fits the first screen with its counter and arrows, and the gallery stays in view
-     under the scrolled header. The rail is never taller than the stage: with many pictures its thumbnails shrink.
-   - Tablets and phones (960 px and narrower): the stage is a swipe strip; its thumbnails are a row under it that
-     scrolls sideways inside the column.
-   - The frame: an outer antique-gold line, a paper mat, an inner gold hairline, a small gilt leaf laid in each
-     corner of the mat, and a sharp shadow over a soft one. Thumbnails are small framed prints; the chosen one steps
-     forward, towards the stage, with a deeper shadow, and its maroon ring draws in as its picture lands.
+/* The product gallery: small framed prints on a gilt rail beside a picture in a grand gilt frame, all set in a softly
+   lit rose niche; the picture turns over like a gilded card.
+   - Laptops (961 px and wider): the rail, then the stage. The gallery is exactly as wide as both, the stage is sized
+     so that it (and its niche) fits the first screen, and the gallery stays in view under the scrolled header. The
+     rail is a gilt rod as tall as the stage, its prints centred on it: with many pictures they shrink, on wide, tall
+     screens they grow. The niche is drawn around the gallery (it takes no room of its own).
+   - Tablets and phones (960 px and narrower): the stage is a swipe strip; its prints are a row under it that scrolls
+     sideways inside the column; both sit on a lit rose shelf that runs the width of the screen.
+   - The frame, from the outside in: a gilt moulding (gold leaf, lit from the top left, a dark outer edge and a catch
+     of light), a dark step, an ivory reveal, a gold fillet round the picture, and her fan laid in each corner as a
+     gilt fan bracket. Under it a tight contact shadow and a deeper fall, each on its own layer.
+   - The prints: each a miniature of the same frame (gilt edge, ivory reveal, gold fillet). Hover lifts a print a
+     little; the chosen one steps forward towards the stage, larger, with a sharper, deeper shadow, and its maroon
+     ring draws in as its picture lands.
+   - Controls are gilt pills: the heart, and one capsule holding the arrows and the counter. On laptops with a fine
+     pointer the picture is a jeweller's loupe: a round, gilt-rimmed lens follows the pointer and shows the detail at
+     twice the size (gallery.js); a small pill says so until it is first used.
    - The turn (gallery.js): the card rises as it turns, its gilt edge catches the light at the half-way point, its
-     shadow softens and comes back crisp, and one soft glint crosses the new picture as it lands. The heart,
-     counter, arrows and dots turn with the picture they sit on, and change as the new face appears. The 3-D parts
-     exist only while it turns, so the frame's hairlines are drawn flat and crisp at rest.
+     shadow softens and comes back crisp, and one soft glint crosses the new picture as it lands. The heart, the
+     capsule and the dots turn with the picture they sit on. The 3-D parts exist only while it turns, so the frame's
+     lines are drawn flat and crisp at rest. After a turn the picture pushes in and pans slowly (laptops).
    - Shadows never animate: each is drawn once on its own layer, whose opacity or size changes.
-   - Visitors who ask for less motion: the picture changes at once; no rise, edge, glint or drift; the chosen
-     thumbnail keeps its raised place without moving there. */
+   - Visitors who ask for less motion: the picture changes at once; no rise, edge, glint or drift; the chosen print
+     keeps its raised place without moving there; the loupe appears without growing. */
 
 .gal {
   --gal-turn: 840ms;                                  /* the card's turn on laptops (read by gallery.js) */
   --gal-turn-half: 400ms;                             /* each half of the strip's turn on tablets and phones */
-  --gal-line: var(--c-gold-antique);                  /* the frame's outer line */
-  --gal-hair: rgba(171, 142, 98, .6);                 /* the inner hairline */
-  --gal-in: 7px;                                      /* outer line 1 px + paper mat 6 px */
-  --gal-r: 22px;
-  --gal-r-in: 16px;
-  --gal-leaf: 24px;                                   /* the box each corner leaf is drawn in (the leaf is 12 px) */
-  --gal-over: 17px;                                   /* overlays: 10 px inside the inner hairline */
-  --sh-raised-sharp: 0 1px 2px rgba(58, 20, 12, .30), 0 6px 10px -4px rgba(58, 20, 12, .28);
-  --sh-raised-soft: 0 26px 44px -18px rgba(58, 20, 12, .42);
+  --gal-mould: 10px;                                  /* the gilt moulding */
+  --gal-in: 18px;                                     /* moulding 10 px + ivory reveal 8 px: the picture starts here (read by gallery.js) */
+  --gal-r: 24px;                                      /* the frame's outer corner */
+  --gal-r-mid: 14px;                                  /* the reveal's corner (frame corner less the moulding) */
+  --gal-r-in: 7px;                                    /* the picture's corner */
+  --gal-fan: 40px;                                    /* the box each corner fan is drawn in */
+  --gal-over: 30px;                                   /* overlays: 12 px inside the picture */
+  --gal-lens: 210px;                                  /* the loupe's glass (read by gallery.js) */
+  --niche-x: 22px;                                    /* how far the rose niche reaches round the gallery */
+  --niche-top: 20px;
+  --niche-bottom: 20px;
+  /* gilding: gold leaf under a light from the top left; flat gold until the leaf arrives */
+  --gilt:
+    linear-gradient(135deg, rgba(255, 246, 220, .62) 0%, rgba(255, 246, 220, .16) 26%, rgba(255, 246, 220, 0) 44%, rgba(66, 40, 12, 0) 62%, rgba(66, 40, 12, .34) 100%),
+    var(--tex-gold-leaf, none) 34% 40% / 400px auto repeat,
+    linear-gradient(135deg, #E2C994 0%, #B8975F 38%, #CDAE74 62%, #8F6F3E 100%);
+  --sh-raised-sharp: 0 1px 1px rgba(40, 14, 6, .42), 0 2px 3px rgba(40, 14, 6, .26), 0 9px 12px -7px rgba(40, 14, 6, .48);
+  --sh-raised-soft: 0 30px 46px -20px rgba(58, 20, 12, .5), 0 64px 84px -50px rgba(63, 10, 22, .46);
   --sh-raised: var(--sh-raised-sharp), var(--sh-raised-soft);
-  --sh-thumb-up: 0 2px 3px rgba(58, 20, 12, .32), 0 12px 22px -8px rgba(58, 20, 12, .40);
-  --rail-w: 78px;
-  --rail-gap: 16px;
-  --thumb-gap: 12px;                                  /* room for the chosen thumbnail's scale and ring */
-  --gal-top: var(--stage-top, 236px);                 /* what the stage leaves of the screen's height */
-  --stage-w: min(max(440px, calc((100vh - var(--gal-top)) * .8)), calc(.55 * min(var(--wrap, 1240px), 100vw - 2 * var(--gut, 16px)) - var(--rail-w) - var(--rail-gap)), 600px);
-  /* the corner leaves: one small gilt leaf laid across each rounded corner of the mat, a fine light vein down its middle */
-  --gal-leaf-tl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3ClinearGradient id='g' x1='0' y1='1' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%236E5228'/%3E%3Cstop offset='.5' stop-color='%23B39466'/%3E%3Cstop offset='1' stop-color='%236E5228'/%3E%3C/linearGradient%3E%3Cg%3E%3Cpath fill='url(%23g)' fill-opacity='.88' d='M5.18 13.66Q7.58 7.58 13.66 5.18Q11.26 11.26 5.18 13.66Z'/%3E%3Cpath d='M6.2 12.64L12.64 6.2' stroke='%23F3E3BE' stroke-opacity='.75' stroke-width='.45' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");
-  --gal-leaf-tr: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3ClinearGradient id='g' x1='0' y1='1' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%236E5228'/%3E%3Cstop offset='.5' stop-color='%23B39466'/%3E%3Cstop offset='1' stop-color='%236E5228'/%3E%3C/linearGradient%3E%3Cg transform='rotate(90 12 12)'%3E%3Cpath fill='url(%23g)' fill-opacity='.88' d='M5.18 13.66Q7.58 7.58 13.66 5.18Q11.26 11.26 5.18 13.66Z'/%3E%3Cpath d='M6.2 12.64L12.64 6.2' stroke='%23F3E3BE' stroke-opacity='.75' stroke-width='.45' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");
-  --gal-leaf-br: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3ClinearGradient id='g' x1='0' y1='1' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%236E5228'/%3E%3Cstop offset='.5' stop-color='%23B39466'/%3E%3Cstop offset='1' stop-color='%236E5228'/%3E%3C/linearGradient%3E%3Cg transform='rotate(180 12 12)'%3E%3Cpath fill='url(%23g)' fill-opacity='.88' d='M5.18 13.66Q7.58 7.58 13.66 5.18Q11.26 11.26 5.18 13.66Z'/%3E%3Cpath d='M6.2 12.64L12.64 6.2' stroke='%23F3E3BE' stroke-opacity='.75' stroke-width='.45' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");
-  --gal-leaf-bl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3ClinearGradient id='g' x1='0' y1='1' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%236E5228'/%3E%3Cstop offset='.5' stop-color='%23B39466'/%3E%3Cstop offset='1' stop-color='%236E5228'/%3E%3C/linearGradient%3E%3Cg transform='rotate(270 12 12)'%3E%3Cpath fill='url(%23g)' fill-opacity='.88' d='M5.18 13.66Q7.58 7.58 13.66 5.18Q11.26 11.26 5.18 13.66Z'/%3E%3Cpath d='M6.2 12.64L12.64 6.2' stroke='%23F3E3BE' stroke-opacity='.75' stroke-width='.45' stroke-linecap='round'/%3E%3C/g%3E%3C/svg%3E");
+  --sh-print: 0 1px 1px rgba(40, 14, 6, .3), 0 4px 7px -4px rgba(40, 14, 6, .34);
+  --sh-print-up: 0 2px 2px rgba(40, 14, 6, .34), 0 7px 10px -5px rgba(40, 14, 6, .44), 0 18px 24px -12px rgba(58, 20, 12, .5);
+  --rail-w: 84px;
+  --rail-gap: 18px;
+  --thumb-gap: 14px;                                  /* room for the chosen print's scale and ring */
+  --gal-top: var(--stage-top, 288px);                 /* what the stage leaves of the screen's height */
+  --stage-min: 440px;                                 /* the smallest stage (less on short screens) */
+  --stage-max: 760px;                                 /* reached only on very wide, tall screens */
+  --stage-w: min(max(var(--stage-min), calc((100vh - var(--gal-top)) * .8)), calc(.55 * min(var(--wrap, 1240px), 100vw - 2 * var(--gut, 16px)) - var(--rail-w) - var(--rail-gap)), var(--stage-max));
+  /* her fan, as a gilt bracket for the top-left corner (turned for the others) */
+  --gal-fan-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23F6E7C1'/%3E%3Cstop offset='.42' stop-color='%23C8A86E'/%3E%3Cstop offset='.7' stop-color='%239C7C4C'/%3E%3Cstop offset='1' stop-color='%236E5228'/%3E%3C/linearGradient%3E%3Cfilter id='s' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeGaussianBlur stdDeviation='.7'/%3E%3C/filter%3E%3Cpath id='f' fill-rule='evenodd' d='M50 86C33.7 79.4 20.1 78.3 11.3 73.6 2.5 68.9 9.2 56.2 18.1 60.9 26.9 65.6 35.4 76.2 50 86ZM11.7 67.2a3 3 0 1 0 6 0 3 3 0 1 0-6 0Z M50 86C34.8 71.4 20.5 63.9 12.6 54.9 4.7 45.8 16.5 35.6 24.4 44.7 32.3 53.7 37.7 68.9 50 86ZM15.2 49.8a3.3 3.3 0 1 0 6.6 0 3.3 3.3 0 1 0-6.6 0Z M50 86C39.7 64.4 27.8 50.7 23.1 38 18.3 25.2 34.1 19.4 38.8 32.1 43.6 44.8 43.6 63 50 86ZM27.4 35a3.5 3.5 0 1 0 7.1 0 3.5 3.5 0 1 0-7.1 0Z M50 86C47.8 60.1 41 41.6 41 26.8 41 12 59 12 59 26.8 59 41.6 52.2 60.1 50 86ZM46.2 26.8a3.8 3.8 0 1 0 7.6 0 3.8 3.8 0 1 0-7.6 0Z M50 86C56.4 63 56.4 44.8 61.2 32.1 65.9 19.4 81.7 25.2 76.9 38 72.2 50.7 60.3 64.4 50 86ZM65.5 35a3.5 3.5 0 1 0 7.1 0 3.5 3.5 0 1 0-7.1 0Z M50 86C62.3 68.9 67.7 53.7 75.6 44.7 83.5 35.6 95.3 45.8 87.4 54.9 79.5 63.9 65.2 71.4 50 86ZM78.2 49.8a3.3 3.3 0 1 0 6.6 0 3.3 3.3 0 1 0-6.6 0Z M50 86C64.6 76.2 73.1 65.6 81.9 60.9 90.8 56.2 97.5 68.9 88.7 73.6 79.9 78.3 66.3 79.4 50 86ZM82.3 67.2a3 3 0 1 0 6 0 3 3 0 1 0-6 0Z M33 89c5-8 29-8 34 0-7 6-27 6-34 0z'/%3E%3C/defs%3E%3Cg transform='translate(7 7) rotate(135) scale(.25 .34) translate(-50 -96)'%3E%3Cuse href='%23f' fill='%233A1A0C' fill-opacity='.4' filter='url(%23s)'/%3E%3Cuse href='%23f' fill='url(%23g)' stroke='%235A411E' stroke-width='2.2' stroke-opacity='.75'/%3E%3Ccircle cx='50' cy='96' r='3.6' fill='%23F3E3BE' stroke='%235A411E' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E");
   position: relative;
 }
 @supports (height: 100svh) {
-  .gal { --stage-w: min(max(440px, calc((100svh - var(--gal-top)) * .8)), calc(.55 * min(var(--wrap, 1240px), 100vw - 2 * var(--gut, 16px)) - var(--rail-w) - var(--rail-gap)), 600px); }
+  .gal { --stage-w: min(max(var(--stage-min), calc((100svh - var(--gal-top)) * .8)), calc(.55 * min(var(--wrap, 1240px), 100vw - 2 * var(--gut, 16px)) - var(--rail-w) - var(--rail-gap)), var(--stage-max)); }
 }
 
-/* ======================================================================= the rail of thumbnails */
-.gal__rail { margin: 0; padding: 0; list-style: none; }
+/* ======================================================================= the niche (laptops) and the shelf (phones) */
+/* rose plaster under a soft light from above, edged in a fine double gold line; the wall's damask pressed in faintly */
+.gal::before,
+.gal::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: calc(-1 * var(--niche-top)) calc(-1 * var(--niche-x)) calc(-1 * var(--niche-bottom));
+  border-radius: 32px;
+  pointer-events: none;
+}
+.gal::before {
+  background:
+    radial-gradient(60% 46% at 62% 6%, rgba(255, 251, 244, .9), rgba(255, 251, 244, .35) 52%, rgba(255, 251, 244, 0) 100%),
+    radial-gradient(130% 100% at 55% 35%, rgba(150, 92, 84, 0) 50%, rgba(150, 92, 84, .2) 100%),
+    var(--c-rose-50);
+  box-shadow:
+    inset 0 0 0 1px rgba(156, 124, 76, .7),
+    inset 0 0 0 6px rgba(252, 248, 241, .5),
+    inset 0 0 0 7px rgba(171, 142, 98, .42),
+    inset 0 16px 22px -18px rgba(63, 10, 22, .32),
+    0 1px 0 rgba(255, 252, 246, .9);
+}
+.gal::after {
+  inset: calc(7px - var(--niche-top)) calc(7px - var(--niche-x)) calc(7px - var(--niche-bottom));
+  border-radius: 25px;
+  background: url("../img/ornament/wall-damask-fan.svg") 50% 0 / 96px 134px repeat;
+  opacity: .07;
+}
+.gal:empty::before,
+.gal:empty::after { content: none; }
 
-/* each thumbnail: a small framed print (gold line, 3 px paper mat, inner hairline) */
+/* ======================================================================= the rail of prints */
+.gal__rail { position: relative; margin: 0; padding: 0; list-style: none; }
+.gal__rail > li { position: relative; z-index: 1; }
+
+/* each print: a miniature frame (gilt edge, ivory reveal, gold fillet over the picture's edge) */
 .gal__thumb {
   position: relative;
   display: block;
@@ -56,24 +106,27 @@
   width: var(--rail-w);
   aspect-ratio: 4 / 5;
   margin: 0;
-  padding: 5px;
+  padding: 3px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 11px;
   cursor: pointer;
-  background: var(--c-paper);
-  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, .45), var(--sh-contact);
+  background: var(--gilt);
+  box-shadow: inset 0 0 0 1px rgba(94, 67, 30, .85), inset 0 0 0 1.75px rgba(255, 240, 206, .45), var(--sh-print);
   -webkit-tap-highlight-color: transparent;
-  transition: translate 320ms var(--ease), scale 320ms var(--ease);
+  transition: translate 340ms var(--ease), scale 340ms var(--ease);
 }
 .gal__thumb img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 5px;
+  border: 3px solid #FCF7EE;
+  border-radius: 8px;
+  outline: 1px solid rgba(156, 124, 76, .9);
+  outline-offset: -4px;
   background: var(--c-sand);
-  box-shadow: 0 0 0 1px rgba(171, 142, 98, .5);
-  opacity: .82;
-  transition: opacity var(--dur-fast) var(--ease);
+  filter: saturate(.8) brightness(.97);
+  transition: filter 260ms var(--ease);
 }
 /* the chosen print's deeper, sharper shadow, drawn once and faded in */
 .gal__thumb::before {
@@ -81,34 +134,35 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: var(--sh-thumb-up);
+  box-shadow: var(--sh-print-up);
   opacity: 0;
-  transition: opacity 320ms var(--ease);
+  transition: opacity 340ms var(--ease);
   pointer-events: none;
 }
-/* the maroon ring, 3 px outside the print, drawing in as the chosen picture lands */
+/* the maroon ring, 4 px outside the print with a breath of gold beyond it, drawing in as the chosen picture lands */
 .gal__thumb::after {
   content: "";
   position: absolute;
-  inset: -3px;
-  border-radius: 13px;
-  box-shadow: 0 0 0 1.5px var(--c-maroon);
+  inset: -4px;
+  border-radius: 15px;
+  box-shadow: 0 0 0 1.5px var(--c-maroon), 0 0 0 3.5px rgba(201, 172, 120, .32);
   opacity: 0;
   transform: scale(.9);
   transition: opacity 260ms var(--ease), transform 260ms var(--ease);
   pointer-events: none;
 }
 @media (hover: hover) {
-  .gal__thumb:hover { translate: 2px 0; }
-  .gal__thumb:hover img { opacity: 1; }
+  .gal__thumb:hover { translate: 2px -1px; scale: 1.03; }
+  .gal__thumb:hover img { filter: none; }
+  .gal__thumb:hover::before { opacity: .55; }
 }
-.gal__thumb[aria-current="true"] { z-index: 1; translate: 4px 0; scale: 1.08; }
-.gal__thumb[aria-current="true"] img { opacity: 1; }
+.gal__thumb[aria-current="true"] { z-index: 1; translate: 6px 0; scale: 1.07; }
+.gal__thumb[aria-current="true"] img { filter: none; }
 .gal__thumb[aria-current="true"]::before { opacity: 1; }
 .gal__thumb.is-ring::after { opacity: 1; transform: none; }
-.gal__thumb:active { scale: .96; transition-duration: 120ms; }
-/* keyboard focus sits outside the chosen print's maroon ring, in deep gold (8.6:1 on the ground) */
-.gal__thumb:focus-visible { outline: 2px solid var(--c-gold-deep); outline-offset: 6px; }
+.gal__thumb:active { scale: .97; transition-duration: 120ms; }
+/* keyboard focus sits outside the chosen print's ring, in deep gold (8.6:1 on the ground) */
+.gal__thumb:focus-visible { outline: 2px solid var(--c-gold-deep); outline-offset: 8px; }
 
 /* ======================================================================= the stage */
 .gal__stage {
@@ -117,10 +171,10 @@
   width: var(--stage-w);
   aspect-ratio: 4 / 5;
   border-radius: var(--gal-r);
-  outline-offset: 5px;
+  outline-offset: 6px;
   -webkit-tap-highlight-color: transparent;
 }
-/* the card's shadow on the counter while it turns: narrow at its edge, soft as it rises */
+/* the card's shadow on the niche while it turns: narrow at its edge, soft as it rises */
 .gal__ground {
   position: absolute;
   left: 9%;
@@ -134,23 +188,37 @@
 }
 .gal__card { position: absolute; inset: 0; }
 
-/* each face is the whole framed picture: outer gold line, paper mat with its four leaves, then the picture */
+/* each face is the whole framed picture */
 .gal__face {
   position: absolute;
   inset: 0;
   border-radius: var(--gal-r);
-  background:
-    var(--gal-leaf-tl) left top / var(--gal-leaf) var(--gal-leaf) no-repeat,
-    var(--gal-leaf-tr) right top / var(--gal-leaf) var(--gal-leaf) no-repeat,
-    var(--gal-leaf-br) right bottom / var(--gal-leaf) var(--gal-leaf) no-repeat,
-    var(--gal-leaf-bl) left bottom / var(--gal-leaf) var(--gal-leaf) no-repeat,
-    var(--c-paper);
-  box-shadow: inset 0 0 0 1px var(--gal-line);
+  background: var(--gilt);
+  /* the moulding: a dark outer edge, a catch of light inside it, light along the top, shade along the bottom */
+  box-shadow:
+    inset 0 0 0 1px rgba(84, 58, 24, .95),
+    inset 0 0 0 2px rgba(255, 240, 206, .5),
+    inset 0 3px 4px -2px rgba(255, 246, 222, .7),
+    inset 0 -3px 4px -2px rgba(60, 36, 10, .45);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
 .gal__face--back { transform: rotateY(180deg); visibility: hidden; }
-/* the raised shadow in two layers: sharp (close to the frame) and soft (the long fall) */
+/* the ivory reveal, stepped down from the moulding (a dark line on the moulding's inner edge, shade under its lip) */
+.gal__face::before {
+  content: "";
+  position: absolute;
+  inset: var(--gal-mould);
+  border-radius: var(--gal-r-mid);
+  background: linear-gradient(160deg, #FFFDF8 0%, #FBF5EA 55%, #F4EBDB 100%);
+  box-shadow:
+    0 0 0 1px rgba(78, 52, 20, .6),
+    0 0 0 2px rgba(255, 238, 200, .35),
+    inset 0 2px 3px -1px rgba(63, 10, 22, .22),
+    inset 0 -1px 0 rgba(255, 255, 255, .7);
+  pointer-events: none;
+}
+/* the raised shadow in two layers: sharp (the contact) and soft (the long fall) */
 .gal__sh { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; }
 .gal__sh--sharp { box-shadow: var(--sh-raised-sharp); }
 .gal__sh--soft { box-shadow: var(--sh-raised-soft); }
@@ -162,21 +230,38 @@
   background: var(--c-sand);
 }
 .gal__img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: opacity 360ms var(--ease);
 }
 .gal__img.is-wait { opacity: 0; transition: none; }      /* a late picture: the sand ground until it arrives */
-/* the inner hairline lies over the picture's edge */
+/* the gold fillet round the picture (on the reveal), a catch of light on the picture's edge, the picture set in */
 .gal__face::after {
   content: "";
   position: absolute;
   inset: var(--gal-in);
   border-radius: var(--gal-r-in);
-  box-shadow: inset 0 0 0 1px var(--gal-hair);
+  box-shadow:
+    0 0 0 1px rgba(156, 124, 76, .95),
+    0 0 0 2px rgba(255, 244, 218, .55),
+    inset 0 0 0 1px rgba(255, 238, 204, .32),
+    inset 0 3px 7px -2px rgba(40, 16, 6, .38);
   pointer-events: none;
 }
+/* her fan in each corner, a gilt bracket opening towards the picture */
+.gal__fans { position: absolute; inset: 0; pointer-events: none; }
+.gal__fans i {
+  position: absolute;
+  width: var(--gal-fan);
+  height: var(--gal-fan);
+  background: var(--gal-fan-img) 0 0 / 100% 100% no-repeat;
+}
+.gal__fans i:nth-child(1) { left: 0; top: 0; }
+.gal__fans i:nth-child(2) { right: 0; top: 0; rotate: 90deg; }
+.gal__fans i:nth-child(3) { right: 0; bottom: 0; rotate: 180deg; }
+.gal__fans i:nth-child(4) { left: 0; bottom: 0; rotate: 270deg; }
 .gal__strip { display: none; }
 
 /* the card's gilt edge: 3 px of gold at each side, seen only as the card passes its edge */
@@ -209,7 +294,7 @@
 .gal.is-turning .gal__card { -webkit-transform-style: preserve-3d; transform-style: preserve-3d; will-change: transform; }
 .gal.is-turning .gal__face--front { transform: translateZ(1.5px); }
 .gal.is-turning .gal__face--back { transform: rotateY(180deg) translateZ(1.5px); visibility: visible; }
-.gal.is-turning .gal__over { will-change: transform; }      /* the heart, counter, arrows and dots turn with the picture */
+.gal.is-turning .gal__over { will-change: transform; }      /* the heart, capsule and dots turn with the picture */
 .gal.is-turning .gal__edge {
   display: block;
   position: absolute;
@@ -223,115 +308,278 @@
 .gal__edge--l { left: -1.5px; transform: rotateY(90deg); }
 .gal__edge--r { right: -1.5px; transform: rotateY(90deg); }
 
-/* ---------- overlays: inside the inner hairline, frosted paper ---------- */
+/* ---------- the loupe: a round lens with a gilt rim (laptops with a fine pointer; gallery.js moves it) ---------- */
+.gal__lens { display: none; }
+.gal__hint { display: none; }
+
+/* ---------- overlays: inside the picture, gilt pills on frosted ivory ---------- */
 .gal__over { position: absolute; z-index: 3; inset: 0; pointer-events: none; }
 .gal__over > * { pointer-events: auto; }
 .gal__stage .gal__wish { position: absolute; top: var(--gal-over); right: var(--gal-over); left: auto; }
-.gal__count {
+/* one capsule: previous, the counter, next, parted by gold hairlines */
+.gal__nav {
   position: absolute;
-  left: var(--gal-over);
+  right: var(--gal-over);
   bottom: var(--gal-over);
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  height: 28px;
-  padding: 0 11px;
+  height: 42px;
+  padding: 0 2px;
   border-radius: 999px;
-  font: 600 13px/1 var(--font-text);
-  letter-spacing: .04em;
-  font-variant-numeric: lining-nums tabular-nums;
-  color: var(--c-ink);
   background: rgba(252, 248, 241, .9);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
-  box-shadow: var(--sh-chip);
-  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(156, 124, 76, .9),
+    inset 0 0 0 3px rgba(252, 248, 241, .9),
+    inset 0 0 0 3.75px rgba(171, 142, 98, .45),
+    0 1px 2px rgba(40, 14, 6, .3),
+    0 10px 18px -10px rgba(40, 14, 6, .55);
 }
-.gal__nav { position: absolute; right: var(--gal-over); bottom: var(--gal-over); display: flex; gap: 8px; }
 .gal__nav button {
   position: relative;
   display: grid;
   place-items: center;
   width: 40px;
-  height: 40px;
+  height: 38px;
   padding: 0;
   border: 0;
-  border-radius: 50%;
+  border-radius: 999px;
   cursor: pointer;
   color: var(--c-ink);
-  background: rgba(252, 248, 241, .9);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  box-shadow: var(--sh-chip);
-  transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+  background: none;
+  transition: color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
 }
-.gal__nav button::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; }   /* 44 px to the touch */
-.gal__nav .i { font-size: 18px; }
+.gal__nav button::after { content: ""; position: absolute; inset: -3px -2px; border-radius: 999px; }   /* 44 px to the touch */
+.gal__nav .i { font-size: 18px; stroke-width: 1.8; }
 @media (hover: hover) {
-  .gal__nav button:hover { color: var(--c-maroon); background: var(--c-paper); }
+  .gal__nav button:hover { color: var(--c-maroon); background: rgba(243, 231, 207, .75); }
+}
+.gal__nav button:focus-visible { outline: 2px solid var(--c-gold-deep); outline-offset: 1px; }
+.gal__count {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 11px;
+  border-inline: 1px solid rgba(171, 142, 98, .55);
+  font: 600 14px/1 var(--font-text);
+  letter-spacing: .06em;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--c-ink);
+  white-space: nowrap;
+  pointer-events: none;
 }
 .gal__dots { display: none; }
-.gal.is-single .gal__nav, .gal.is-single .gal__count, .gal.is-single .gal__dots, .gal.is-single .gal__rail { display: none; }
+.gal.is-single .gal__nav, .gal.is-single .gal__dots, .gal.is-single .gal__rail { display: none; }
 
 /* ======================================================================= laptops (from 961 px) */
 @media (min-width: 961px) {
   .gal {
     position: sticky;
-    top: 84px;                                        /* the scrolled header (60 px) and 24 px */
+    top: calc(var(--hdr-fold, 64px) + 24px + var(--niche-top));   /* the folded header bar, 24 px, and the niche's top */
     align-self: start;
     display: grid;
     grid-template-columns: var(--rail-w) var(--stage-w);
     column-gap: var(--rail-gap);
     align-items: start;
   }
-  /* the rail is never taller than the stage: the thumbnails shrink and keep 4:5 */
+  /* the rail runs the stage's full height and is never taller: the prints shrink and keep 4:5, and sit centred on
+     the rod, so a piece with few pictures (or a tall stage) never leaves an empty lane in the niche */
   .gal__rail {
+    align-self: stretch;
     display: grid;
     gap: var(--thumb-gap);
-    align-content: start;
-    grid-auto-rows: min(97.5px, calc((var(--stage-w) * 1.25 - (var(--n, 5) - 1) * var(--thumb-gap)) / var(--n, 5)));
+    align-content: center;
+    grid-auto-rows: min(calc(var(--rail-w) * 1.25), calc((var(--stage-w) * 1.25 - (var(--n, 5) - 1) * var(--thumb-gap)) / var(--n, 5)));
   }
   .gal__rail > li { display: flex; justify-content: center; min-height: 0; height: 100%; }
   .gal__rail .gal__thumb { width: auto; height: 100%; }
+  /* the gilt rod the prints hang on, the stage's height, lit down its middle and ended by a gilt bead at each end */
+  .gal__rail::before,
+  .gal__rail::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    left: 50%;
+    pointer-events: none;
+  }
+  .gal__rail::before {
+    top: 16px;
+    bottom: 16px;
+    width: 3px;
+    margin-left: -1.5px;
+    border-radius: 1.5px;
+    background: linear-gradient(90deg, rgba(122, 92, 46, .72) 0%, rgba(243, 227, 190, .95) 45%, rgba(156, 124, 76, .78) 100%);
+    box-shadow: 1px 0 1px rgba(63, 10, 22, .12);
+  }
+  .gal__rail::after {
+    top: 10px;
+    bottom: 10px;
+    width: 11px;
+    margin-left: -5.5px;
+    background:
+      radial-gradient(circle 2px at 4px 4px, rgba(255, 249, 232, .95), rgba(255, 249, 232, 0)) 0 0 / 11px 11px no-repeat,
+      radial-gradient(circle 5.5px at 5.5px 5.5px, #E9D6AE 0%, #C9A96F 42%, #9C7C4C 74%, #5A411E 94%, rgba(90, 65, 30, 0) 100%) 0 0 / 11px 11px no-repeat,
+      radial-gradient(circle 2px at 4px 4px, rgba(255, 249, 232, .95), rgba(255, 249, 232, 0)) 0 100% / 11px 11px no-repeat,
+      radial-gradient(circle 5.5px at 5.5px 5.5px, #E9D6AE 0%, #C9A96F 42%, #9C7C4C 74%, #5A411E 94%, rgba(90, 65, 30, 0) 100%) 0 100% / 11px 11px no-repeat;
+    filter: drop-shadow(0 1px 1px rgba(40, 14, 6, .3));
+  }
+  .gal.is-single::before { left: calc(var(--rail-w) + var(--rail-gap) - var(--niche-x)); }
+  .gal.is-single::after { left: calc(var(--rail-w) + var(--rail-gap) + 7px - var(--niche-x)); }
 }
-/* short laptop screens (1,366 × 768, 1,280 × 800): the band's top room is smaller, so the stage may be taller */
+/* the loupe and its hint: laptops with a fine pointer */
+@media (min-width: 961px) and (hover: hover) and (pointer: fine) {
+  .gal__well { cursor: zoom-in; }
+  .gal.is-loupe .gal__well { cursor: none; }
+  .gal__lens {
+    display: block;
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: var(--gal-lens);
+    height: var(--gal-lens);
+    pointer-events: none;
+    will-change: transform;
+  }
+  .gal__glass {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 50%;
+    background: var(--c-sand);
+    box-shadow: 0 2px 3px rgba(30, 10, 4, .45), 0 18px 32px -12px rgba(30, 10, 4, .6);
+    opacity: 0;
+    transform: scale(.72);
+    transition: opacity 220ms var(--ease), transform 300ms var(--ease);
+  }
+  .gal__glass img { position: absolute; left: 0; top: 0; max-width: none; transform-origin: 0 0; }
+  /* the rim: gilt, with a catch of light on the glass */
+  .gal__glass::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(70% 55% at 32% 22%, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0) 60%);
+    box-shadow:
+      inset 0 0 0 1px rgba(84, 58, 24, .95),
+      inset 0 0 0 4px #C9A96F,
+      inset 0 0 0 4.75px rgba(255, 240, 206, .8),
+      inset 0 0 0 5.5px rgba(84, 58, 24, .7),
+      inset 0 0 14px rgba(30, 10, 4, .35);
+  }
+  .gal.is-loupe .gal__glass { opacity: 1; transform: none; }
+  .gal.is-loupe .gal__nav,
+  .gal.is-loupe .gal__wish { z-index: 4; }
+
+  /* the hint: a small pill, top left, until the loupe is first used (its words are cut away, never faded) */
+  .gal__hint {
+    position: absolute;
+    left: var(--gal-over);
+    top: var(--gal-over);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 13px 0 10px;
+    border-radius: 999px;
+    font: 600 13.5px/1 var(--font-text);
+    letter-spacing: .02em;
+    color: var(--c-ink);
+    background: rgba(252, 248, 241, .9);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    box-shadow: inset 0 0 0 1px rgba(156, 124, 76, .85), 0 1px 2px rgba(40, 14, 6, .26), 0 8px 16px -10px rgba(40, 14, 6, .5);
+    clip-path: inset(-12px -24px -24px -12px round 999px);
+    pointer-events: none;
+    transition: clip-path 420ms var(--ease);
+  }
+  .gal__hint .i { font-size: 16px; color: var(--c-bronze); stroke-width: 1.8; }
+  .gal.is-looked .gal__hint { clip-path: inset(-12px 100% -24px 0 round 999px); }
+}
+/* short laptop screens (1,366 × 768, 1,280 × 800): the niche hugs the gallery more closely and the stage may go
+   down to 380 px, so the whole niche still fits the first screen */
 @media (min-width: 961px) and (max-height: 820px) {
-  .gal { --gal-top: var(--stage-top, 188px); }
+  .gal { --gal-top: var(--stage-top, 262px); --stage-min: 380px; --niche-top: 16px; --niche-bottom: 16px; }
+}
+/* wide, tall screens, where the stage grows past 620 px: the prints grow with it (96 px, then 108 px wide) */
+@media (min-width: 1680px) and (min-height: 1000px) {
+  .gal { --rail-w: 96px; }
+}
+@media (min-width: 2200px) and (min-height: 1300px) {
+  .gal { --rail-w: 108px; }
 }
 
 /* ======================================================================= tablets and phones (960 px and down) */
 @media (max-width: 960px) {
   .gal {
-    --gal-in: 6px;                                    /* outer line 1 px + paper mat 5 px */
-    --gal-r: 18px;
-    --gal-r-in: 13px;
-    --gal-leaf: 20px;
-    --gal-over: 14px;
+    --gal-mould: 7px;
+    --gal-in: 12px;                                   /* moulding 7 px + ivory reveal 5 px */
+    --gal-r: 20px;
+    --gal-r-mid: 13px;
+    --gal-r-in: 8px;
+    --gal-fan: 30px;
+    --gal-over: 22px;
+    --niche-top: 16px;
+    --niche-bottom: 18px;
     --stage-w: 100%;
-    position: static;
+    z-index: 0;
     display: flex;
     flex-direction: column;
-    align-items: stretch;                             /* the thumbnail row scrolls inside the column, never past it */
+    align-items: stretch;                             /* the print row scrolls inside the column, never past it */
     gap: 12px;
   }
+  /* the shelf: the same lit rose, edged above and below by a double gold line, the width of the screen */
+  .gal::before,
+  .gal::after {
+    left: 50%;
+    right: auto;
+    width: 100vw;
+    margin-left: -50vw;
+    border-radius: 0;
+  }
+  .gal::before {
+    background:
+      radial-gradient(70% 40% at 50% 0%, rgba(255, 251, 244, .9), rgba(255, 251, 244, 0) 100%),
+      var(--c-rose-50);
+    box-shadow:
+      inset 0 1px 0 rgba(156, 124, 76, .62),
+      inset 0 4px 0 rgba(252, 248, 241, .55),
+      inset 0 5px 0 rgba(171, 142, 98, .36),
+      inset 0 -1px 0 rgba(156, 124, 76, .62),
+      inset 0 -4px 0 rgba(252, 248, 241, .55),
+      inset 0 -5px 0 rgba(171, 142, 98, .36),
+      inset 0 16px 18px -16px rgba(63, 10, 22, .28);
+  }
+  .gal::after { top: calc(5px - var(--niche-top)); bottom: calc(5px - var(--niche-bottom)); }
   .gal__stage { order: 1; width: 100%; }
-  /* the row keeps room around each thumbnail for the chosen one's lift, ring, shadow and focus ring */
+  /* the row keeps room around each print for the chosen one's lift, ring, shadow and focus ring */
   .gal__rail {
     order: 2;
     display: flex;
-    gap: 8px;
-    margin: -14px -11px -18px;
-    padding: 14px 11px 18px;
+    gap: 10px;
+    margin: -14px -12px -18px;
+    padding: 14px 12px 18px;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
-    scroll-padding-inline: 11px;
+    scroll-padding-inline: 12px;
   }
   .gal__rail::-webkit-scrollbar { display: none; }
   .gal__rail > li { flex: none; display: flex; }
-  .gal__thumb { width: 56px; }                        /* 56 × 70 */
-  .gal__thumb:hover { translate: none; }
-  .gal__thumb[aria-current="true"] { translate: 0 -2px; }
-  .gal__face--back, .gal__well, .gal__nav { display: none; }
+  /* a row that fits sits centred under the picture; a longer one starts at the left and scrolls (auto margins
+     give way to nothing once the row overflows) */
+  .gal__rail > li:first-child { margin-left: auto; }
+  .gal__rail > li:last-child { margin-right: auto; }
+  .gal__thumb { width: 58px; padding: 2.5px; border-radius: 10px; }          /* 58 × 72.5 */
+  .gal__thumb img { border-width: 2.5px; border-radius: 7.5px; outline-offset: -3.5px; }
+  .gal__thumb::after { border-radius: 14px; }
+  .gal__thumb:hover { translate: none; scale: none; }
+  .gal__thumb[aria-current="true"] { translate: 0 -3px; scale: 1.07; }
+  .gal__face--back, .gal__well { display: none; }
+  .gal__nav { height: 34px; padding: 0; left: var(--gal-over); right: auto; }
+  .gal__nav button { display: none; }
+  .gal__count { height: 34px; padding: 0 13px; border: 0; font-size: 14px; }
   .gal__strip {
     position: absolute;
     inset: var(--gal-in);
@@ -358,15 +606,15 @@
   .gal__dots {
     position: absolute;
     left: 50%;
-    bottom: var(--gal-over);
+    bottom: calc(var(--gal-over) + 5px);
     display: flex;
     gap: 6px;
     padding: 7px 9px;
     border-radius: 999px;
-    background: rgba(252, 248, 241, .82);
+    background: rgba(252, 248, 241, .86);
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
-    box-shadow: var(--sh-chip);
+    box-shadow: inset 0 0 0 1px rgba(156, 124, 76, .7), var(--sh-chip);
     transform: translateX(-50%);
     pointer-events: none;
   }
@@ -376,5 +624,6 @@
 
 /* ======================================================================= less motion */
 @media (prefers-reduced-motion: reduce) {
-  .gal__thumb, .gal__thumb img, .gal__thumb::before, .gal__thumb::after, .gal__img, .gal__strip img, .gal__dots i, .gal__nav button { transition: none; }
+  .gal__thumb, .gal__thumb img, .gal__thumb::before, .gal__thumb::after, .gal__img, .gal__strip img, .gal__dots i,
+  .gal__nav button, .gal__glass, .gal__hint { transition: none; }
 }

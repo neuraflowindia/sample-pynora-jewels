@@ -9,8 +9,15 @@
    - With a mouse, each band's light leans towards the pointer (up to 8% of the band, smoothed over about 0.45 s).
    - The lamp on the maroon band and the footer follows the mouse (0.18 s) or wanders by itself. Its gold thread
      stays out of the clear zone; its warm light is never cut, it only eases down to --lamp-near over the words.
+     The footer's flowers slide sideways (backgrounds.css); the lamp's gold reads their place every frame, so it
+     stays in register with them.
+   - The quiet sandstone gets its gliding light (.bg__sheen) from here.
+   - Gold lines catch the light now and then: a narrow gleam runs along one divider or one gilt frame's mount line
+     at a time (never two at once on the page, at least 3 s apart), each line every 7-11 s, only while it is wholly
+     arrived on screen. The gleam is one short Web Animation of a transform (ornament.css styles it).
    - The clear zone behind the words is measured from elements marked data-bg-words.
-   - When the visitor asks for less motion: no drift, no lean, the lamp rests. Only transforms change here. */
+   - When the visitor asks for less motion: no drift, no lean, no gleam, the lamp rests. Only transforms change
+     here. */
 (function () {
   'use strict';
 
@@ -59,6 +66,9 @@
       box: null,
       lean: null,
       lamp: null,
+      pat: null,
+      slide: null,
+      slideAmp: 1,
       mx: 0.5,
       my: 0.5,
       hover: false,
@@ -71,12 +81,17 @@
     /* moving parts get their own element, so moving them never repaints anything */
     var drawHost = cls.contains('bg--rose') ? el.querySelector('.bg__b') : null;
     if (drawHost) b.draw = drawHost.querySelector('.bg__drift') || drawHost.appendChild(make('bg__drift'));
+    if (cls.contains('bg--quiet') && b.tex && !el.querySelector('.bg__sheen')) {
+      b.tex.parentNode.insertBefore(make('bg__sheen'), b.tex.nextSibling);
+    }
     var lampEl = el.querySelector('.bg__lamp');
     if (lampEl) {
       var gold = lampEl.querySelector('.bg__lamp-gold') || lampEl.appendChild(make('bg__lamp-gold'));
       var host = lampEl.parentNode;                            /* .bg__b, which the clear zone masks */
       var glow = el.querySelector('.bg__glow') || host.parentNode.insertBefore(make('bg__glow'), host);
-      b.lamp = { el: lampEl, gold: gold, glow: glow, x: 0.24, y: 0.36, fx: 0.24, fy: 0.36, w: 0, size: 900, tile: 132, near: 0.45, fade: -1, shown: -1 };
+      b.lamp = { el: lampEl, gold: gold, glow: glow, x: 0.24, y: 0.36, fx: 0.24, fy: 0.36, w: 0, size: 900, tile: 132, near: 0.45, fade: -1, shown: -1, dx: 0 };
+      /* the footer's flowers slide sideways: the lamp's gold follows their place */
+      if (cls.contains('bg--footer')) b.pat = el.querySelector('.bg__a');
     }
     bands.push(b);
     if (byEl) byEl.set(el, b); else el._bg = b;
@@ -129,7 +144,7 @@
       placeLamp(b);
     }
   }
-  function measureAll() { bands.forEach(measure); kick(); }
+  function measureAll() { bands.forEach(measure); if (gleams) fitGleams(); kick(); }
 
   /* The lamp's resting place in CSS is 24% / 36%; the script moves it from there, keeps the gold pattern
      inside it in register with the pattern on the wall, and eases its light down as it nears the words
@@ -141,10 +156,11 @@
     var left = 0.24 * b.w - L.size / 2 + dx;
     var top = 0.36 * b.h - L.size / 2 + dy;
     var t = L.tile;
+    var gx = left - L.dx;                                      /* the wall's flowers start L.dx along (0 or less) */
     var move = px(dx) + ' ' + px(dy);
     L.el.style.translate = move;
     L.glow.style.translate = move;
-    L.gold.style.translate = px(-(((left % t) + t) % t)) + ' ' + px(-(((top % t) + t) % t));
+    L.gold.style.translate = px(-(((gx % t) + t) % t)) + ' ' + px(-(((top % t) + t) % t));
     var fade = 1;
     if (b.box) {
       var cx = L.x * b.w, cy = L.y * b.h, q = b.box;
@@ -199,7 +215,7 @@
     root.classList.toggle('bg-asleep', hidden);
     bands.forEach(function (b) { setLive(b, b.live); });
     last = 0;
-    if (!hidden) kick();
+    if (!hidden) { kick(); gleamStart(); } else gleamStop();
   });
 
   /* ---------- Less motion: everything rests ---------- */
@@ -208,12 +224,33 @@
       if (b.tex) b.tex.style.translate = '';
       if (b.draw) b.draw.style.translate = '';
       if (b.lean) { b.lean.x = b.lean.y = 0; b.lean.el.style.translate = ''; }
-      if (b.lamp) { b.lamp.x = 0.24; b.lamp.y = 0.36; b.lamp.w = 0; placeLamp(b); }
+      if (b.lamp) { b.lamp.x = 0.24; b.lamp.y = 0.36; b.lamp.w = 0; b.lamp.dx = 0; placeLamp(b); }
     });
+    gleamStop();
   }
   function onReduceChange() {
     reduce = reduceMq.matches;
-    if (reduce) rest(); else kick();
+    if (reduce) rest(); else { kick(); gleamStart(); }
+  }
+
+  /* where the footer's sliding flowers are now (0 or less). Read from the slide's own clock (linear, one tile per
+     run), so no frame has to work out styles; when the slide cannot be found, from the layer's computed transform. */
+  function shiftOf(b) {
+    var a = b.slide;
+    if (!a || a.playState === 'idle') {
+      a = b.slide = null;
+      var list = b.pat.getAnimations ? b.pat.getAnimations() : [];
+      for (var i = 0; i < list.length; i++) if (list[i].animationName === 'bg-lattice-slide') a = b.slide = list[i];
+      if (a) b.slideAmp = parseFloat(window.getComputedStyle(b.pat).getPropertyValue('--motion-amp')) === 0 ? 0 : 1;
+    }
+    if (a) {
+      var d = Number(a.effect && a.effect.getTiming().duration);
+      var t = Number(a.currentTime);
+      return d > 0 && isFinite(t) ? -b.lamp.tile * b.slideAmp * ((t % d) / d) : 0;
+    }
+    var m = /^matrix\(([^)]+)\)/.exec(window.getComputedStyle(b.pat).transform || '');
+    var v = m ? parseFloat(m[1].split(',')[4]) : 0;
+    return isFinite(v) ? v : 0;
   }
   if (reduceMq) {
     if (reduceMq.addEventListener) reduceMq.addEventListener('change', onReduceChange);
@@ -234,7 +271,7 @@
     bands.forEach(function (b) {
       if (!b.live) return;
       var r = b.el.getBoundingClientRect();
-      work.push({ b: b, top: r.top, h: r.height });
+      work.push({ b: b, top: r.top, h: r.height, dx: b.pat ? shiftOf(b) : 0 });
     });
 
     work.forEach(function (o) {
@@ -271,6 +308,7 @@
         M.w += ((follow ? 1 : 0) - M.w) * (1 - Math.exp(-dt / (follow ? LAMP_TIME * 1.5 : LAMP_RETURN)));
         M.x = wx + (M.fx - wx) * M.w;
         M.y = wy + (M.fy - wy) * M.w;
+        M.dx = o.dx;
         placeLamp(b, dt);
         if (!held || follow || M.w > 0.005) again = true;
       }
@@ -282,6 +320,120 @@
     if (!raf && !hidden && !reduce) raf = window.requestAnimationFrame(frame);
   }
 
+  /* ---------- Gold lines catch the light now and then ----------
+     Each divider inside a band gets <i class="orn-gleam"><i></i></i>; each gilt frame gets two, thin strips on
+     the top and bottom edges of its mount line (thin, so a pass costs the screen almost nothing). Every GLEAM_TICK
+     the most overdue line that is wholly arrived on screen gets one pass, if the last pass on the page began at
+     least GLEAM_GAP ago (so two never run together). A line then waits 7-11 s before its next pass. */
+  var GLEAM_TICK = 500;
+  var GLEAM_GAP = 3000;           /* ms between the starts of any two passes on the page (each pass is shorter) */
+  var GLEAM_WAIT = 7000;          /* ms, plus up to GLEAM_SPREAD more, between two passes of one line */
+  var GLEAM_SPREAD = 4000;
+  var GLEAM_SETTLE = 1200;        /* ms a line must have been in full view (its arrival done) before it gleams */
+  var GLEAM_STILL = 400;          /* ms without scrolling before lines are looked at: a gleam is for a resting
+                                     screen, and no check ever makes a scrolling frame work out styles */
+  var GLEAM_RULE = { ms: 1800, from: '-60%', to: '60%' };   /* along a divider's lines */
+  var GLEAM_EDGE = { ms: 1800, from: '-60%', to: '60%', lag: 420 };   /* a frame: the top edge, then the bottom
+                                                                     a moment later, as a slanted light crosses */
+  var FRAMES = '.op__pic, .dec__pic, .brd__portrait, .visit__frame';
+  var gleams = [];
+  var gleamTimer = 0;
+  var gleamLast = -1e9;
+  var scrolledAt = -1e9;
+  function clock() { return window.performance && performance.now ? performance.now() : Date.now(); }
+
+  function strip(host, cls) {
+    var el = make(cls);
+    el.appendChild(doc.createElement('i'));
+    return host.appendChild(el);
+  }
+  function addGleam(host, ring) {
+    if (host.querySelector(':scope > .orn-gleam')) return;
+    var els = ring ? [strip(host, 'orn-gleam orn-gleam--edge'), strip(host, 'orn-gleam orn-gleam--edge')] : [strip(host, 'orn-gleam')];
+    gleams.push({ els: els, host: host, ring: ring, band: host.closest('[data-bg]'), last: clock(), wait: 1500 + Math.random() * 3000, seen: -1, anims: [] });
+  }
+  /* a frame's two strips sit exactly on its own mount line (its ::after), between the rounded corners, at every
+     size: 2 px tall, centred on the 1 px line */
+  function fitRing(g) {
+    var cs = window.getComputedStyle(g.host, '::after');
+    if (!cs || cs.content === 'none' || cs.position !== 'absolute') return;
+    var rad = parseFloat(cs.borderTopLeftRadius) || 0;
+    var l = (parseFloat(cs.left) + rad) + 'px', r = (parseFloat(cs.right) + rad) + 'px';
+    var top = g.els[0].style, bot = g.els[1].style;
+    top.left = bot.left = l;
+    top.right = bot.right = r;
+    top.top = (parseFloat(cs.top) - 0.5) + 'px';
+    bot.bottom = (parseFloat(cs.bottom) - 0.5) + 'px';
+  }
+  if (Element.prototype.animate && Element.prototype.closest) {
+    Array.prototype.forEach.call(doc.querySelectorAll('[data-bg] .orn-rule'), function (r) { addGleam(r, false); });
+    Array.prototype.forEach.call(doc.querySelectorAll(FRAMES), function (f) { if (f.closest('[data-bg]')) addGleam(f, true); });
+  }
+  function fitGleams() { gleams.forEach(function (g) { if (g.ring) fitRing(g); }); }
+
+  /* wholly arrived on screen: its band live, most of it in view, nothing of it still rising, scaling or fading in */
+  function gleamReady(g, vh, t) {
+    var bb = g.band ? bandOf(g.band) : null;
+    var ok = !g.band || (bb && bb.live);
+    if (ok) {
+      var r = g.host.getBoundingClientRect();
+      var inView = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+      ok = r.width > 0 && inView >= Math.min(0.85 * r.height, 0.6 * vh);
+    }
+    if (ok) {
+      if (g.ring) ok = parseFloat(window.getComputedStyle(g.host).opacity) > 0.99;
+      else {
+        var line = window.getComputedStyle(g.host, '::after');
+        var m = /^matrix\(([^)]+)\)/.exec(line.transform || '');
+        ok = line.display !== 'none' && (!m || parseFloat(m[1].split(',')[0]) > 0.99);
+      }
+    }
+    if (!ok) { g.seen = -1; return false; }
+    if (g.seen < 0) g.seen = t;
+    return t - g.seen >= GLEAM_SETTLE;
+  }
+  function gleamCancel(g) { g.anims.forEach(function (a) { a.cancel(); }); g.anims = []; }
+  function gleamPass(g, t) {
+    var k = g.ring ? GLEAM_EDGE : GLEAM_RULE;
+    g.last = t;
+    g.wait = GLEAM_WAIT + Math.random() * GLEAM_SPREAD;
+    gleamLast = t;
+    gleamCancel(g);
+    g.els.forEach(function (el, i) {
+      g.anims.push(el.firstChild.animate([{ transform: 'translateX(' + k.from + ')' }, { transform: 'translateX(' + k.to + ')' }],
+        { duration: k.ms, delay: i * (k.lag || 0), easing: 'cubic-bezier(0.45, 0.05, 0.55, 0.95)' }));
+    });
+    g.anims[g.anims.length - 1].onfinish = function () { g.anims = []; };
+  }
+  /* looked at at the start of a frame, while the page rests */
+  function gleamLook() {
+    if (hidden || reduce) return;
+    var t = clock();
+    if (t - scrolledAt < GLEAM_STILL) return;
+    var vh = window.innerHeight;
+    var best = null, most = 0;
+    gleams.forEach(function (g) {
+      if (!gleamReady(g, vh, t)) return;
+      var over = t - g.last - g.wait;
+      if (over >= 0 && (!best || over > most)) { best = g; most = over; }
+    });
+    if (best && t - gleamLast >= GLEAM_GAP) gleamPass(best, t);
+  }
+  function gleamTick() {
+    gleamTimer = 0;
+    if (hidden || reduce || !gleams.length) return;
+    if (clock() - scrolledAt >= GLEAM_STILL) window.requestAnimationFrame(gleamLook);
+    else gleams.forEach(function (g) { g.seen = -1; });     /* scrolling: each line settles again once it rests */
+    gleamTimer = window.setTimeout(gleamTick, GLEAM_TICK);
+  }
+  function gleamStart() {
+    if (!gleamTimer && gleams.length && !hidden && !reduce) gleamTimer = window.setTimeout(gleamTick, GLEAM_TICK);
+  }
+  function gleamStop() {
+    if (gleamTimer) { window.clearTimeout(gleamTimer); gleamTimer = 0; }
+    gleams.forEach(function (g) { gleamCancel(g); g.seen = -1; });
+  }
+
   /* a band released from .is-held starts its lamp again */
   if ('MutationObserver' in window) {
     var heldMO = new MutationObserver(function () { kick(); });
@@ -289,6 +441,7 @@
   }
 
   window.addEventListener('scroll', kick, { passive: true });
+  window.addEventListener('scroll', function () { scrolledAt = clock(); }, { passive: true });
   window.addEventListener('resize', measureAll);
   if ('ResizeObserver' in window) {
     var ro = new ResizeObserver(function (entries) {
@@ -301,5 +454,5 @@
   window.addEventListener('load', measureAll);
 
   measureAll();
-  if (reduce) rest();
+  if (reduce) rest(); else gleamStart();
 })();

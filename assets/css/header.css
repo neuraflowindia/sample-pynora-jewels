@@ -9,20 +9,41 @@
    </header>
 
    The header takes no room in the page: its bar sits over the top of the first band, which keeps the bar's
-   height free (--hdr-h). Laptops (from 1,080 px): two tiers, 52 + 36 px, transparent; after scrolling one paper
-   bar of 60 px with the strong double edge. Tablets and phones: one row of 64 / 60 px; after scrolling 56 px.
-   header.js adds .is-scrolled once the strip has left the screen. */
+   height free (--hdr-h). Laptops (from 1,080 px): two tiers, transparent, the logo tier over the collections
+   tier: 76 + 50 px with a 50 px logo; short screens (up to 860 px tall) 68 + 46 px, very short (up to 720 px)
+   62 + 44 px; large screens (from 1,680 x 1,000) 84 + 54 px, very large (from 2,200 x 1,300) 90 + 58 px. After
+   scrolling one paper bar of 64 px (68 on large screens) with the strong double edge. Tablets and phones: one row
+   of 64 / 60 px; after scrolling 56 px. header.js adds .is-scrolled once the strip has left the screen. */
 
-:root { --hdr-h: 88px; }
-@media (max-width: 1079px) { :root { --hdr-h: 64px; } }
-@media (max-width: 760px)  { :root { --hdr-h: 60px; } }
+:root {
+  --strip-h: 36px;
+  --hdr-top: 76px;        /* the logo tier */
+  --hdr-row: 50px;        /* the collections tier */
+  --hdr-logo: 50px;
+  --hdr-fold: 64px;       /* the one-tier bar after scrolling */
+  --hdr-h: 126px;         /* the two tiers together */
+}
+@media (min-width: 1080px) and (max-height: 860px) {
+  :root { --hdr-top: 68px; --hdr-row: 46px; --hdr-logo: 46px; --hdr-h: 114px; }
+}
+@media (min-width: 1080px) and (max-height: 720px) {
+  :root { --hdr-top: 62px; --hdr-row: 44px; --hdr-logo: 44px; --hdr-h: 106px; }
+}
+@media (min-width: 1680px) and (min-height: 1000px) {
+  :root { --hdr-top: 84px; --hdr-row: 54px; --hdr-logo: 54px; --hdr-fold: 68px; --hdr-h: 138px; }
+}
+@media (min-width: 2200px) and (min-height: 1300px) {
+  :root { --hdr-top: 92px; --hdr-row: 58px; --hdr-logo: 62px; --hdr-h: 150px; }
+}
+@media (max-width: 1079px) { :root { --hdr-logo: 40px; --hdr-h: 64px; } }
+@media (max-width: 760px)  { :root { --strip-h: 32px; --hdr-h: 60px; } }
 
 /* =====================================================================
    The strip: her maroon, three lines that take turns
    ===================================================================== */
 .strip {
   position: relative;
-  height: 36px;
+  height: var(--strip-h);
   padding: 0 16px;
   overflow: hidden;
   overflow: clip;                  /* never scrolled by the browser when a hidden line's link takes focus */
@@ -91,7 +112,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 88px;
+  height: var(--hdr-h);
   color: var(--c-ink);
   --c-focus: var(--c-maroon);
   --c-tlink: var(--c-maroon);
@@ -103,7 +124,7 @@
   margin-inline: auto;
   padding-inline: var(--gut);
   display: grid;
-  grid-template-rows: 52px 36px;
+  grid-template-rows: var(--hdr-top) var(--hdr-row);
 }
 
 /* ---------- Tier 1: visit · logo · icons ---------- */
@@ -113,11 +134,12 @@
   align-items: center;
   column-gap: 24px;
   min-width: 0;
+  padding-bottom: 2px;             /* the logo sits a breath above the middle: more air over the gold line below it */
 }
 .hdr__start { justify-self: start; display: flex; align-items: center; gap: 4px; }
 .hdr__tools { justify-self: end; display: flex; align-items: center; gap: 6px; }
 .hdr__logo { justify-self: center; display: flex; align-items: center; min-height: 44px; line-height: 0; border-radius: 6px; }
-.hdr__logo img { width: auto; height: 40px; max-width: none; }
+.hdr__logo img { width: auto; height: var(--hdr-logo); max-width: none; }
 
 .hdr__visit {
   display: inline-flex;
@@ -139,14 +161,20 @@
 .hdr__visit .i { font-size: 17px; color: var(--c-gold-deep); }
 .hdr__visit:hover { color: var(--hdr-press); text-decoration-color: rgba(171, 142, 98, 0.8); }
 
-/* icon buttons: 40 px circles, no rings; 44 px to the touch */
+/* icon buttons: 40 px circles, no rings; 44 px to the touch. Beside the larger logo at rest: 44 px circles. */
 .hdr .ib { width: 40px; height: 40px; }
 .hdr__small { display: none; }
+@media (min-width: 1080px) {
+  .hdr__top .ib { width: 44px; height: 44px; }
+  .hdr__top .ib .i { font-size: 21px; }
+  .hdr__top .hdr__tools { gap: 8px; }
+}
 
 /* ---------- Tier 2: the collections between two gold lines ---------- */
 .hdr__row {
   display: flex;
   justify-content: center;
+  align-items: stretch;
   min-width: 0;
   background:
     linear-gradient(90deg, rgba(171, 142, 98, 0), rgba(171, 142, 98, 0.34) 12%, rgba(171, 142, 98, 0.34) 88%, rgba(171, 142, 98, 0)) top / 100% 1px no-repeat,
@@ -166,9 +194,9 @@
 .hdr__item + .hdr__item::before {
   content: "";
   flex: none;
-  width: 7px;
-  height: 7px;
-  margin: 0 14px;
+  width: 8px;
+  height: 8px;
+  margin: 0 18px;
   background-color: var(--c-gold-antique);
   -webkit-mask: var(--mask-flower) center / contain no-repeat;
   mask: var(--mask-flower) center / contain no-repeat;
@@ -179,16 +207,16 @@
   align-items: center;
   gap: 5px;
   margin: 0;
-  padding: 8px 6px;
+  padding: 10px 8px;
   border: 0;
   border-radius: 4px;              /* the focus ring matches the other rings */
   background: none;
   cursor: pointer;
   font-family: var(--font-text);
   font-weight: 400;
-  font-size: 1.0625rem;            /* 17 px */
+  font-size: 1.0625rem;            /* 17 px (18 px on large screens) */
   line-height: 1;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.015em;
   color: var(--c-ink);
   text-decoration: none;
   white-space: nowrap;
@@ -199,7 +227,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 3px;
+  bottom: 4px;
   height: 1.5px;
   border-radius: 2px;
   background: linear-gradient(90deg, rgba(171, 142, 98, 0), var(--c-gold) 30%, var(--c-gold) 70%, rgba(171, 142, 98, 0));
@@ -228,7 +256,7 @@
    After scrolling: one paper bar, the strong double edge along its foot
    ===================================================================== */
 .hdr.is-scrolled .hdr__bar {
-  height: 60px;
+  height: var(--hdr-fold);
   --hdr-press: var(--c-maroon);
   background: rgba(252, 248, 241, 0.96);
   box-shadow: var(--border-double-strong-bottom), var(--sh-float);
@@ -243,7 +271,7 @@
 @media not all and (hover: hover) and (pointer: fine) {
   .hdr.is-scrolled .hdr__bar { background: var(--c-paper); }
 }
-.hdr.is-scrolled .hdr__in { grid-template-rows: 60px; }
+.hdr.is-scrolled .hdr__in { grid-template-rows: var(--hdr-fold); }
 .hdr.is-scrolled .hdr__top { display: none; }
 .hdr.is-scrolled .hdr__row {
   display: grid;
@@ -251,8 +279,11 @@
   column-gap: 24px;
   background: none;
 }
+/* the folded bar keeps its compact spacing */
+.hdr.is-scrolled .hdr__item + .hdr__item::before { width: 7px; height: 7px; margin: 0 14px; }
+.hdr.is-scrolled .hdr__link { padding: 8px 6px; }
 .hdr.is-scrolled .hdr__logo--bar { display: flex; justify-self: start; align-self: center; }
-.hdr.is-scrolled .hdr__logo--bar img { height: 38px; }
+.hdr.is-scrolled .hdr__logo--bar img { height: 40px; }
 .hdr.is-scrolled .hdr__tools--bar { display: flex; justify-self: end; align-self: center; }
 @media (hover: hover) {
   .hdr.is-scrolled .ib:not(:disabled):hover { background: var(--c-rose-50); }
@@ -263,6 +294,27 @@
   .hdr.is-scrolled .hdr__item + .hdr__item::before { margin: 0 10px; }
   .hdr.is-scrolled .hdr__link { padding-inline: 4px; }
   .hdr.is-scrolled .hdr__tools--bar { gap: 4px; }
+}
+/* narrow laptops at rest: the collections a little closer, so the row keeps its margins */
+@media (min-width: 1080px) and (max-width: 1179px) {
+  .hdr__item + .hdr__item::before { margin: 0 15px; }
+  .hdr__link { padding-inline: 6px; }
+}
+/* large screens: the words and the folded bar a size up with the taller tiers */
+@media (min-width: 1680px) and (min-height: 1000px) {
+  .hdr__visit { font-size: 1.0625rem; }                          /* 17 px */
+  .hdr__link { font-size: 1.125rem; }                            /* 18 px */
+  .hdr__item + .hdr__item::before { margin: 0 20px; }
+  .hdr.is-scrolled .hdr__link { font-size: 1.0625rem; }
+  .hdr.is-scrolled .hdr__logo--bar img { height: 42px; }
+}
+@media (min-width: 2200px) and (min-height: 1300px) {
+  .hdr__visit { font-size: 1.125rem; }                           /* 18 px */
+  .hdr__visit .i { font-size: 18px; }
+  .hdr__link { font-size: 1.1875rem; }                           /* 19 px */
+  .hdr__item + .hdr__item::before { margin: 0 22px; }
+  .hdr__top .ib { width: 46px; height: 46px; }
+  .hdr__top .ib .i { font-size: 22px; }
 }
 
 /* the bar arrives from above when it changes (not with less motion) */
@@ -397,7 +449,7 @@
   .hdr__row { display: none !important; }
   .hdr__small { display: inline-grid; }
   .hdr__wide { display: none; }
-  .hdr__top { column-gap: 8px; }
+  .hdr__top { column-gap: 8px; padding-bottom: 0; }
   .hdr__start, .hdr__tools { gap: 4px; }
   .hdr .badge { top: -3px; right: -2px; }    /* inside the bar */
 

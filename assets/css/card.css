@@ -4,7 +4,7 @@
      <div class="card__media">
        <a class="card__pic" href="product.html?p=…" tabindex="-1" aria-hidden="true">
          <span class="card__track"><img class="card__img"> <span class="card__veil"><img class="card__img card__img--alt"></span>
-           <img class="card__img card__img--more"></span>          card--dissolve: the worn picture without its veil
+           <img class="card__img card__img--more"></span>          card--hv-…: how the worn picture appears (below)
        </a>
        <span class="card__dots">…</span>                       touch screens only (a button in a sideways row)
      </div>
@@ -16,8 +16,11 @@
      <span class="pill … card__status">…</span>
    </article>
 
-   Paper frame with the fine double gold edge; lifts 4 px on hover while the worn picture rises into view behind a
-   soft top edge (the veil), or, in a list marked data-reveal="dissolve", melts in over 700 ms. On touch screens
+   Paper frame with the fine double gold edge; lifts 4 px on hover while the worn picture comes into view in one of
+   five ways, so that neighbours never repeat (cards.js gives each card its class): card--hv-veil rises behind a
+   soft top edge, card--hv-dissolve melts in, card--hv-curtain draws across from the left behind a feathered edge,
+   card--hv-iris opens as a circle from the piece's centre, card--hv-sweep crosses from the top-left corner with a
+   faint gold gleam on its edge. A card without a class shows the veil. On touch screens
    a card in a grid swipes through its pictures; a card in a sideways row never swipes (the row does) and steps
    through them when its dots are tapped. Stars wait for the product page on cards narrower than 210 px. */
 
@@ -177,9 +180,100 @@
   .card:hover:not(.is-picking) .card__veil { transform: none; transition-duration: 560ms; }
   .card:hover:not(.is-picking) .card__veil > .card__img { translate: none; transition-duration: 450ms, 1200ms, 560ms; }
 
-  /* The dissolve: the worn picture melts in over 700 ms while it settles from 1.06 to the first picture's 1.04 */
-  .card--dissolve .card__img--alt { transform: scale(1.06); transition: opacity 700ms var(--ease), transform 1200ms var(--ease); }
-  .card--dissolve:hover .card__img--alt { transform: scale(1.04); }
+  /* The other four: the veil box is simply the picture's box, and each shows the worn picture its own way. Each
+     arrives in 620–700 ms and goes back the way it came, a little quicker. */
+  .card--hv-dissolve .card__veil,
+  .card--hv-curtain .card__veil,
+  .card--hv-iris .card__veil,
+  .card--hv-sweep .card__veil {
+    top: 0;
+    -webkit-mask-image: none;
+    mask-image: none;
+    transform: none;
+    transition: none;
+  }
+  .card--hv-dissolve .card__veil > .card__img,
+  .card--hv-curtain .card__veil > .card__img,
+  .card--hv-iris .card__veil > .card__img,
+  .card--hv-sweep .card__veil > .card__img { top: 0; height: 100%; translate: none; }
+
+  /* The dissolve: melts in over 700 ms while it settles from 1.06 to the first picture's 1.04 */
+  .card--hv-dissolve .card__veil > .card__img {
+    opacity: 0;
+    transform: scale(1.06);
+    transition: opacity 380ms var(--ease), transform 700ms var(--ease);
+  }
+  .card.card--hv-dissolve:hover:not(.is-picking) .card__veil > .card__img:not(.is-out) {
+    opacity: 1;
+    transform: scale(1.04);
+    transition: opacity 700ms var(--ease), transform 1200ms var(--ease);
+  }
+
+  /* The curtain: a mask two and a half pictures wide, opaque on its left, clear on its right, with a feathered
+     edge (30% of the picture) between; sliding it to the left draws the worn picture across from the left */
+  .card--hv-curtain .card__veil {
+    -webkit-mask-image: linear-gradient(90deg, #000 44%, transparent 56%);
+    mask-image: linear-gradient(90deg, #000 44%, transparent 56%);
+    -webkit-mask-size: 250% 100%;
+    mask-size: 250% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+    transition: -webkit-mask-position 420ms var(--ease), mask-position 420ms var(--ease);
+  }
+  .card.card--hv-curtain:hover:not(.is-picking) .card__veil {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+    transition-duration: 620ms;
+  }
+
+  /* The iris: opens as a circle from the piece's centre while the picture settles from 1.05 to 1.02 */
+  .card--hv-iris .card__veil {
+    clip-path: circle(0% at 50% 55%);
+    transition: clip-path 420ms var(--ease);
+  }
+  .card--hv-iris .card__veil > .card__img { transform: scale(1.05); transition: opacity 450ms var(--ease), transform 700ms var(--ease); }
+  .card.card--hv-iris:hover:not(.is-picking) .card__veil { clip-path: circle(75% at 50% 55%); transition-duration: 650ms; }
+  .card.card--hv-iris:hover:not(.is-picking) .card__veil > .card__img { transform: scale(1.02); transition-duration: 450ms, 1100ms; }
+
+  /* The sweep: the same feathered mask, laid on the diagonal, crosses from the top-left corner to the bottom-right;
+     a faint gold gleam rides the middle of its edge (a second mask of the same size moving in step, over the
+     pictures) and is out of sight before and after */
+  .card--hv-sweep .card__veil,
+  .card--hv-sweep .card__pic::after {
+    -webkit-mask-size: 250% 250%;
+    mask-size: 250% 250%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: 100% 100%;
+    mask-position: 100% 100%;
+    transition: -webkit-mask-position 460ms var(--ease), mask-position 460ms var(--ease);
+  }
+  .card--hv-sweep .card__veil {
+    -webkit-mask-image: linear-gradient(135deg, #000 44%, transparent 56%);
+    mask-image: linear-gradient(135deg, #000 44%, transparent 56%);
+  }
+  .card--hv-sweep .card__pic::after {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    pointer-events: none;
+    background: var(--c-gold-light);
+    opacity: 0.5;
+    mix-blend-mode: screen;
+    -webkit-mask-image: linear-gradient(135deg, transparent 48%, #000 50%, transparent 52%);
+    mask-image: linear-gradient(135deg, transparent 48%, #000 50%, transparent 52%);
+  }
+  .card.card--hv-sweep:hover:not(.is-picking) .card__veil,
+  .card.card--hv-sweep:hover:not(.is-picking) .card__pic::after {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+    transition-duration: 700ms;
+  }
+  /* no gold line passes over a piece that has no worn picture in this colour */
+  .card.card--hv-sweep:has(.card__img--alt.is-out) .card__pic::after { display: none; }
 }
 
 /* ---------- Touch screens ---------- */
@@ -331,8 +425,10 @@
 @media (prefers-reduced-motion: reduce) {
   .card, .card__wish, .card__wish .i, .card__dots i, .card__veil { transition: none; }
   .card__img,
-  .card--dissolve .card__img--alt,
   .card:hover:not(.is-picking) .card__veil > .card__img { transition: opacity 10ms linear; }
-  .card:hover, .card:hover .card__img, .card__wish:hover,
-  .card--dissolve .card__img--alt, .card--dissolve:hover .card__img--alt { transform: none; }
+  .card:hover, .card:hover .card__img, .card__wish:hover { transform: none; }
+  /* every way of showing the worn picture becomes the same instant change (these outrank the rules above) */
+  .card[class*="card--hv-"] .card__veil,
+  .card[class*="card--hv-"] .card__pic::after { transition: none !important; }
+  .card[class*="card--hv-"] .card__veil > .card__img { transform: none !important; transition: opacity 10ms linear !important; }
 }

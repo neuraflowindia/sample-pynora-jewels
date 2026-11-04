@@ -11,11 +11,15 @@
    The first band of a page also carries class="is-near" so its surface paints at once.
 
    backgrounds.js adds .is-near (within 1.5 screens: textures load) and .is-live (on screen: loops run); the motion
-   scripts add .is-held, which pauses a band's loops while more than three things would move on their own.
+   scripts add .is-held, which pauses a band's light loops while more than three things would move on their own.
    Loops animate transform and opacity only; the script moves layers with the separate `translate` property,
-   so scroll drift, mouse lean and the lamp add to the loops instead of replacing them. The script also adds three
-   elements of its own (.bg__drift, the rose wall's drawing; .bg__lamp-gold, the gold pattern under the lamp;
-   .bg__glow, the lamp's warm light), so that moving them never repaints anything.
+   so scroll drift, mouse lean and the lamp add to the loops instead of replacing them. The script also adds four
+   elements of its own (.bg__drift, the rose wall's drawing; .bg__sheen, the light gliding over the quiet sandstone;
+   .bg__lamp-gold, the gold pattern under the lamp; .bg__glow, the lamp's warm light), so that moving them never
+   repaints anything.
+   The walls never stand still: the rose wall's drawing rises one pattern at a time, the sandstone's light glides
+   across, the velvet's sheen breathes, the footer's flowers slide slowly sideways. These ambient loops are not
+   counted as movers and are not held; like every loop they pause off screen and in a hidden tab.
    Without the script, or when the visitor asks for less motion, every band rests in its still state. */
 
 /* ---------- The band ---------- */
@@ -38,12 +42,14 @@
 .bg__tex,
 .bg__a,
 .bg__b,
+.bg__sheen,
 .bg__scrim {
   position: absolute;
   pointer-events: none;
 }
 .bg__tex { inset: -48px 0; z-index: -5; }  /* 48 px spare above and below for the scroll drift (at most 36 px) */
 .bg__a { inset: 0; z-index: -4; }
+.bg__sheen { inset: 0; z-index: -4; }
 .bg__b { inset: 0; z-index: -3; }
 .bg__scrim { inset: 0; z-index: -2; }
 .bg__content {
@@ -58,17 +64,22 @@
 .bg.is-live .bg__a,
 .bg.is-live .bg__b,
 .bg.is-live .bg__drift,
+.bg.is-live .bg__sheen,
 .bg.is-live .bg__lamp,
 .bg.is-live .bg__lamp-gold,
 .bg.is-live .bg__glow { will-change: transform; }
 .bg:not(.is-live) .bg__tex,
 .bg:not(.is-live) .bg__a,
 .bg:not(.is-live) .bg__b,
+.bg:not(.is-live) .bg__drift,
+.bg:not(.is-live) .bg__sheen,
 html.bg-asleep .bg__tex,
 html.bg-asleep .bg__a,
 html.bg-asleep .bg__b,
+html.bg-asleep .bg__drift,
+html.bg-asleep .bg__sheen,
 .bg.is-held .bg__tex,                       /* held by the motion scripts: at most three things move on their own */
-.bg.is-held .bg__a,
+.bg.is-held .bg__a,                         /* (the drawing and the sandstone's light are ambient: never held) */
 .bg.is-held .bg__b { animation-play-state: paused; }
 
 /* ---------- Clear zone: a soft-edged hole around the words (box + 24 px, then a gradual fade) ----------
@@ -138,12 +149,20 @@ html.bg-asleep .bg__b,
 .bg--rose .bg__b { z-index: -4; opacity: 0.13; }          /* the wall drawing sits on the plaster, under the light */
 .bg--rose .bg__b::before,
 .bg--rose .bg__drift {                                       /* the drawing; the script moves it with the scroll */
+  --motif-h: 168px;                                          /* one pattern period, top to top */
   content: "";
   position: absolute;
-  inset: -96px 0;
-  background: url("../img/ornament/wall-damask-fan.svg") 50% 0 / 120px 168px repeat;
+  inset: -96px 0 calc(-96px - var(--motif-h));               /* 96 px spare for the scroll drift (at most 90 px), */
+  background: url("../img/ornament/wall-damask-fan.svg") 50% 0 / 120px var(--motif-h) repeat;   /* + one period */
 }
 .bg--rose .bg__b:not(:empty)::before { content: none; }
+/* The drawing rises without end, under the grain and the light (which keep their own pace): one period in 18 s
+   (9.3 px/s; 8 px/s on phones), then it starts again exactly one pattern lower, so the loop never shows a seam.
+   Its travel is always a whole period: --motion-amp at 0 stops it, any other value leaves it whole. */
+.bg--rose .bg__drift { animation: bg-motif-rise calc(18s * var(--motion-speed)) linear infinite; }
+@keyframes bg-motif-rise {
+  to { transform: translateY(calc(var(--motif-h) * -1 * min(1, 1000 * var(--motion-amp)))); }
+}
 .bg--rose .bg__a {                                           /* afternoon daylight: a warm pool with the wall in */
   inset: auto;                                               /* comparative shade around it, both soft-light, so */
   left: -55%;                                                /* the plaster's grain stays visible in light and shade */
@@ -178,22 +197,29 @@ html.bg-asleep .bg__b,
   background: radial-gradient(55% 65% at 72% 28%, rgba(255, 247, 230, 0.62), rgba(255, 247, 230, 0) 72%);
   mix-blend-mode: screen;
   opacity: 0.75;
-  animation: bg-palm-sun calc(9s * var(--motion-speed)) var(--ease-io) infinite alternate;
+  animation: bg-palm-sun calc(12s * var(--motion-speed)) var(--ease-io) infinite alternate;
 }
 .bg--palm .bg__b {                                           /* palm shade from the right edge, clear on the left */
   inset: -16% -9% auto auto;
   width: 74%;
   height: 138%;
+  --palm-shade: 0.24;                                        /* the fronds' shade at its deepest */
   background: var(--tex-palm, none) 100% 0 / cover no-repeat;
-  opacity: 0.24;
+  opacity: var(--palm-shade);
   transform-origin: 100% 0;
   -webkit-mask: linear-gradient(270deg, #000 34%, transparent 86%);
   mask: linear-gradient(270deg, #000 34%, transparent 86%);
-  animation: bg-palm-sway calc(8s * var(--motion-speed)) var(--ease-io) infinite alternate;
+  animation:
+    bg-palm-sway calc(8s * var(--motion-speed)) var(--ease-io) infinite alternate,
+    bg-palm-cloud calc(10.5s * var(--motion-speed)) var(--ease-io) infinite alternate;
 }
-@keyframes bg-palm-sun {
-  from { transform: translate(calc(-1.5% * var(--motion-amp)), calc(1% * var(--motion-amp))); opacity: 0.45; }
-  to { transform: translate(calc(1.5% * var(--motion-amp)), calc(-1% * var(--motion-amp))); opacity: 1; }
+@keyframes bg-palm-sun {                                   /* the sun moves behind the fronds: about 180 px across */
+  from { transform: translate(calc(-9% * var(--motion-amp)), calc(5% * var(--motion-amp))); opacity: 0.45; }
+  to { transform: translate(calc(9% * var(--motion-amp)), calc(-5% * var(--motion-amp))); opacity: 1; }
+}
+@keyframes bg-palm-cloud {                                 /* the sun goes in and comes out: the fronds' shade fades */
+  from { opacity: var(--palm-shade); }                       /* to half and returns, never deeper than at rest */
+  to { opacity: calc(var(--palm-shade) * 0.5); }
 }
 @keyframes bg-palm-sway {
   0% { transform: rotate(calc(-1.2deg * var(--motion-amp))); }
@@ -280,7 +306,14 @@ html:not(.js) .bg--lattice .bg__lamp { display: none; }
   min-height: 0;
   align-items: stretch;
 }
-.bg--footer .bg__a { opacity: 0.62; }                         /* tone on tone, so cream and champagne words stay at 7:1 */
+.bg--footer .bg__a {                                         /* tone on tone, so cream and champagne words stay at 7:1 */
+  right: calc(var(--lattice) * -1);                          /* one tile wider: the flowers slide left one tile in 22 s */
+  opacity: 0.62;                                             /* (5 px/s), then start again exactly one tile back; the */
+  animation: bg-lattice-slide calc(22s * var(--motion-speed)) linear infinite;   /* script keeps the lamp's gold in */
+}                                                            /* register. Sideways, so the gold row stays on its line */
+@keyframes bg-lattice-slide {
+  to { transform: translateX(calc(var(--lattice) * -1 * min(1, 1000 * var(--motion-amp)))); }
+}
 .bg--footer .bg__a::after {                                  /* the whole row of flowers centred --lattice-y down, in gold; */
   content: "";                                               /* the window ends in the empty gaps between rows (a flower */
   position: absolute;                                        /* reaches 0.235 tiles from its centre, the next row 0.265) */
@@ -304,7 +337,20 @@ html:not(.js) .bg--lattice .bg__lamp { display: none; }
   inset: -10%;                                               /* a jewel emerald instead of a green haze */
   background: radial-gradient(36% 44% at 50% 50%, rgba(190, 240, 210, 0.95) 0%, rgba(160, 225, 190, 0.5) 40%, rgba(150, 220, 185, 0.16) 72%, rgba(150, 220, 185, 0) 100%);
   mix-blend-mode: soft-light;
-  animation: bg-velvet-sheen calc(10s * var(--motion-speed)) var(--ease-io) infinite alternate;
+  animation:
+    bg-velvet-sheen calc(10s * var(--motion-speed)) var(--ease-io) infinite alternate,
+    bg-velvet-breathe calc(6.5s * var(--motion-speed)) var(--ease-io) infinite alternate;
+}
+.bg--velvet .bg__tex {                                       /* the drape shifts on its rail, so the folds move under */
+  animation: bg-velvet-pile calc(19s * var(--motion-speed)) var(--ease-io) infinite alternate;   /* the light */
+}
+@keyframes bg-velvet-breathe {                              /* the sheen breathes: never brighter than it was */
+  from { opacity: 0.62; }
+  to { opacity: 1; }
+}
+@keyframes bg-velvet-pile {                                 /* the drape still covers the band at each end */
+  from { transform: scale(1.04) translate(calc(-1.2% * var(--motion-amp)), calc(-0.6% * var(--motion-amp))); }
+  to { transform: scale(1.08) translate(calc(1.4% * var(--motion-amp)), calc(0.8% * var(--motion-amp))); }
 }
 .bg--velvet .bg__scrim {
   background:
@@ -340,11 +386,24 @@ html:not(.js) .bg--lattice .bg__lamp { display: none; }
   to { transform: translate(calc(6% * var(--motion-amp)), calc(4% * var(--motion-amp))) scale(1.1); opacity: 1; }
 }
 
-/* ---------- Quiet sandstone: product grids, the Collection page, product details (drift only) ---------- */
+/* ---------- Quiet sandstone: product grids, the Collection page, product details ----------
+   A broad shaft of afternoon light glides across the sandstone and back (14 s each way), with a soft shade on
+   either side of it, all in one soft-light layer. The shade is at most 3 levels: second text keeps 8:1 or more. */
 .bg--quiet {
   min-height: 0;
   align-items: start;
   background-color: var(--c-ground);
+}
+.bg--quiet .bg__sheen {
+  inset: 0 -45%;                                             /* 190% of the band: the shaft's soft edges never show */
+  background:
+    linear-gradient(102deg, rgba(92, 62, 44, 0) 16%, rgba(92, 62, 44, 0.42) 29%, rgba(92, 62, 44, 0) 38%, rgba(255, 247, 232, 0.6) 44%, rgba(255, 251, 244, 1) 50%, rgba(255, 247, 232, 0.6) 56%, rgba(92, 62, 44, 0) 62%, rgba(92, 62, 44, 0.42) 71%, rgba(92, 62, 44, 0) 84%);
+  mix-blend-mode: soft-light;
+  animation: bg-quiet-light calc(14s * var(--motion-speed)) var(--ease-io) infinite alternate;
+}
+@keyframes bg-quiet-light {                                  /* the shaft's heart crosses from 12% to 88% of the band */
+  from { transform: translateX(calc(-20% * var(--motion-amp))); }
+  to { transform: translateX(calc(20% * var(--motion-amp))); }
 }
 
 /* ---------- Still states: no script, or the visitor asks for less motion ---------- */
@@ -354,7 +413,9 @@ html:not(.js) .bg__b { animation: none; }
 @media (prefers-reduced-motion: reduce) {
   .bg__tex,
   .bg__a,
-  .bg__b { animation: none !important; }
+  .bg__b,
+  .bg__drift,
+  .bg__sheen { animation: none !important; }
 }
 
 /* ---------- Phones and narrow screens ---------- */
@@ -362,8 +423,9 @@ html:not(.js) .bg__b { animation: none; }
   .bg { min-height: 0; }
   .bg__content { padding-block: 64px; }
   .bg--rose .bg__b { opacity: 0.11; }
+  .bg--rose .bg__drift { animation-duration: calc(21s * var(--motion-speed)); }   /* 8 px/s on a phone's narrower wall */
   .bg--palm .bg__b {
-    opacity: 0.17;
+    --palm-shade: 0.17;
     width: 150%;
     right: -45%;
     -webkit-mask: linear-gradient(212deg, #000 18%, transparent 60%);

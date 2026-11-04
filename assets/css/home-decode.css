@@ -11,6 +11,10 @@
   --dec-lens: 200px;
   --dec-dot: 30px;
 }
+/* wide screens (the column grows to 1,394 px at 1,920 and 1,600 at 2,560): the picture grows with it */
+@media (min-width: 1441px) {
+  .dec { --dec-pw: clamp(540px, calc(540px + (100vw - 1440px) * 0.13), 680px); }
+}
 
 .dec .line { padding: 0.14em 0 0.2em; margin: -0.14em 0 -0.2em; }   /* room for matras and descenders; the clip is layout.css's */
 
@@ -280,18 +284,24 @@
     box-shadow: 0 0 0 1px rgba(171, 142, 98, 0.55), 0 0 0 5px rgba(252, 248, 241, 0.62), 0 0 0 6px rgba(171, 142, 98, 0.42), var(--sh-lift);
   }
   .dec__pic::after { inset: 7px; border-radius: 8px; }
-  .dec__facts-wrap { min-width: 0; margin: 0 -16px; }
-  .dec__facts {
-    display: flex;
-    gap: 10px;
-    padding: 6px 16px 12px;                          /* room for the focus ring */
+  .dec__facts-wrap { position: relative; min-width: 0; margin: 0 -16px; }
+  /* the scroller, and the list in it (the part that glides, rows.js) */
+  .dec__facts-sc {
     overflow-x: auto;
+    overflow-y: hidden;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
     scroll-padding-inline: 16px;
     scrollbar-width: none;
   }
-  .dec__facts::-webkit-scrollbar { display: none; }
+  .dec__facts-sc::-webkit-scrollbar { display: none; }
+  .dec__facts {
+    display: flex;
+    gap: 10px;
+    width: max-content;
+    min-width: 100%;
+    padding: 6px 16px 12px;                          /* room for the focus ring */
+  }
   .dec__fact { flex: 0 0 280px; scroll-snap-align: start; }
   .dec__fbtn {
     align-content: start;

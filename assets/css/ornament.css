@@ -82,6 +82,62 @@
 }
 .orn-rule--leaf > .orn-fan { width: 26px; height: 26px; }
 
+/* ---------- The gleam: now and then a narrow light runs along a gold line ----------
+   backgrounds.js adds <i class="orn-gleam"><i></i></i> to each divider inside a band and two to each gilt frame (on
+   its mount line), and runs one pass at a time: 1.8 s along a divider, 2.2 s across a frame, each line every
+   7-11 s, never two at once on the page. The light is the inner <i>; at rest it waits outside its line. Only its transform
+   moves; nothing here repaints. Without the script, or with less motion, there is no gleam. */
+.orn-rule { position: relative; }
+.orn-gleam {
+  position: absolute;
+  pointer-events: none;
+  overflow: hidden;
+}
+.orn-gleam > i {                               /* on a light wall the line warms to bright gold as the light passes */
+  position: absolute;
+  inset: 0;
+  transform: translateX(-60%);
+  background: linear-gradient(90deg, rgba(222, 178, 92, 0) 40%, rgba(222, 178, 92, 0.9) 46%, rgba(246, 214, 140, 1) 50%, rgba(222, 178, 92, 0.9) 54%, rgba(222, 178, 92, 0) 60%);
+}
+.on-dark .orn-gleam > i {                      /* on a dark wall it turns to pale light */
+  background: linear-gradient(90deg, rgba(255, 232, 170, 0) 40%, rgba(255, 232, 170, 0.85) 46.5%, rgba(255, 249, 228, 1) 50%, rgba(255, 232, 170, 0.85) 53.5%, rgba(255, 232, 170, 0) 60%);
+}
+/* a divider: one strip over both lines (each min(140px, 22vw)), cut to their fade and clear of the fan */
+.orn-rule > .orn-gleam {
+  --gl: min(140px, 22vw);                      /* one line */
+  --gf: 24px;                                  /* centre to a line's inner end: half the fan + the 14 px gap */
+  left: calc(50% - var(--gl) - var(--gf));
+  top: calc(50% - 0.5px);
+  width: calc(2 * (var(--gl) + var(--gf)));
+  height: 1px;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 calc(var(--gl) * 0.45), #000 var(--gl), transparent var(--gl), transparent calc(100% - var(--gl)), #000 calc(100% - var(--gl)), #000 calc(100% - var(--gl) * 0.45), transparent);
+  mask: linear-gradient(90deg, transparent, #000 calc(var(--gl) * 0.45), #000 var(--gl), transparent var(--gl), transparent calc(100% - var(--gl)), #000 calc(100% - var(--gl)), #000 calc(100% - var(--gl) * 0.45), transparent);
+}
+.orn-rule--leaf > .orn-gleam { --gf: 27px; top: calc(50% - 1px); height: 2px; }
+.hs--start > .orn-rule > .orn-gleam {          /* the fan first, then one line running right */
+  left: calc(var(--gf) * 2 - 14px);
+  width: var(--gl);
+  -webkit-mask: linear-gradient(270deg, transparent, #000 45%);
+  mask: linear-gradient(270deg, transparent, #000 45%);
+}
+/* a gilt frame: two 2 px strips centred on the top and bottom edges of its 1 px mount line, between the rounded
+   corners (the script places them from the line's own inset and corners); the light crosses the top edge, then the
+   bottom 0.42 s later, as a slanted light would. Its ends fade, so it never stops short at a corner. */
+.orn-gleam--edge {
+  z-index: 3;
+  height: 2px;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+.orn-gleam--edge > i,
+.on-dark .orn-gleam--edge > i {               /* over the photograph: pale light on the light-gold line */
+  background: linear-gradient(90deg, rgba(255, 236, 184, 0) 40%, rgba(255, 236, 184, 0.8) 46.5%, rgba(255, 252, 240, 1) 50%, rgba(255, 236, 184, 0.8) 53.5%, rgba(255, 236, 184, 0) 60%);
+}
+.bg.is-live .orn-gleam > i { will-change: transform; }   /* its own layer while its band is on screen: a pass never repaints */
+@media (prefers-reduced-motion: reduce) {
+  .orn-gleam { display: none; }
+}
+
 /* ---------- Pearl divider: inside cards, under product names ---------- */
 .orn-pearls { gap: 10px; color: var(--c-gold); }
 .orn-pearls::before,

@@ -12,7 +12,8 @@
    </div>
    The row reaches 16 px past its column on each side (on phones: to the screen’s edges), so the first card lines
    up with the column. --row-item sets a card’s width and --row-gap the space between cards. The .track is the
-   one element that moves when the row is set in motion later; keep it as the scroller’s only child. */
+   one element that moves when the row glides (data-loop, rows.js; see the end of this file); keep it as the
+   scroller’s only child. */
 
 .row {
   --row-item: 260px;
@@ -59,7 +60,8 @@
 .row__item > * { flex: 1 1 auto; min-width: 0; }
 /* the last card snaps by its end, so the row's far end is a resting place too (a start snap there cannot be
    reached, and the row would spring back with the last card half out of sight) */
-.row__item:last-child { scroll-snap-align: end; }
+.row__item:last-child,
+[data-loop]:not(.is-looping) .row__item:has(+ [data-copy]) { scroll-snap-align: end; }
 
 /* Arrows that cannot move further stay in place and keep focus, drawn like a switched-off button */
 .row .ib[aria-disabled="true"] { cursor: default; color: rgba(42, 26, 30, 0.3); }
@@ -84,4 +86,32 @@
 
 @media (prefers-reduced-motion: reduce) {
   .row__scroller { scroll-behavior: auto; }
+}
+
+/* ---------- Gliding rows (rows.js, only with motion) ----------
+   A row marked data-loop (and every reviews row) is copied and glides as a circle while is-looping is on; at
+   every other moment (a width where it does not glide, less motion) its copies are not there. One period is
+   --loop-d, written by the script. */
+[data-loop]:not(.is-looping) [data-copy],
+.row--reviews:not(.is-looping) [data-copy] { display: none !important; }
+@keyframes m-loop {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-1 * var(--loop-d, 0px))); }
+}
+
+/* its pause button (motion-micro.css draws it): beside the arrows with a mouse, shown on hover, on focus and
+   while stopped; always shown on touch screens */
+.row__pause { opacity: 0; }
+.row__pause[hidden] { display: none; }
+.row__bar > .row__pause { align-self: flex-start; margin: 0 0 14px 7px; }
+.is-looping:hover .row__pause,
+.is-looping:focus-within .row__pause,
+.is-stopped .row__pause,
+.row__pause:focus-visible { opacity: 1; }
+@media (hover: none), (pointer: coarse) {
+  .row__pause { opacity: 1; }
+}
+/* phones (touch): above the row's right end, taking no room (a row can place it otherwise in its own file) */
+@media (max-width: 760px) and (hover: none), (max-width: 760px) and (pointer: coarse) {
+  .row__bar > .row__pause { position: absolute; z-index: 2; right: 5px; bottom: 100%; margin: 0 0 1px; }
 }

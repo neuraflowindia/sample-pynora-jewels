@@ -5,7 +5,8 @@
    - the gallery, through Pynora.gallery.mount(el, piece, {colour}) (a single picture if the gallery is unavailable);
    - the panel: tag, name, hook, stars with the reviews link, price, colours, the status and stock note, the quantity
      and "Add to bag" (into the real bag, then the bag opens), "Ask on WhatsApp", the four promises, the
-     specifications sheet, the pincode check and the four folds;
+     specifications sheet (six icon tiles in a few words), the pincode check and the five folds (the second holds
+     the full specifications);
    - the reviews (Pynora.pdpReviews) and "You may also like" (Pynora.related, filled by cards.js when ready);
    - an unknown or missing piece: the "wandered off" message and the new pieces; no catalogue: the page's own words.
    The WhatsApp message always carries the shop's own address for the piece, read from the og:image address that
@@ -79,7 +80,7 @@
       '</div>' +
       '<div class="more pdp__new">' +
         '<div class="hs"><h2 class="t-sub line"><span class="line__in">New in the studio</span></h2><span class="orn-rule" aria-hidden="true"><span class="orn-fan"></span></span></div>' +
-        '<ul class="card-grid" data-cards data-collection="new" data-limit="4" data-reveal="dissolve" data-heading="h3"></ul>' +
+        '<ul class="card-grid" data-cards data-collection="new" data-limit="4" data-reveal="dissolve" data-heading="h3" data-sizes="(max-width: 760px) 44vw, (max-width: 1080px) 27vw, (min-width: 1441px) calc((277px + (100vw - 1440px) * 0.081) * 1.25), 290px"></ul>' +
       '</div>';
     if (moreList) moreList.removeAttribute('data-cards');
   }
@@ -167,18 +168,68 @@
       return '<li><span class="promise__ic">' + icon(x[0]) + '</span><span class="promise__t">' + esc(x[1]) + '</span></li>';
     }).join('') + '</ul>';
   }
-  /* a range with its unit ("125–132 g") stays on one line */
-  function keepRanges(text) { return text.replace(/(\d+(?:\.\d+)?–\d+(?:\.\d+)?\u00a0(?:g|cm|in)\b)/g, '<span class="spec__nw">$1</span>'); }
+  /* ---------- the specifications sheet: six tiles, each an icon, a label and a few words; every detail of the
+     piece stays in the "Full specifications" fold ---------- */
+  var TILE = {
+    metal: ['layers', 'Metal'], material: ['layers', 'Material'], stones: ['gem', 'Stones'], work: ['sparkle', 'Work'],
+    size: ['ruler', 'Size'], weight: ['weight', 'Weight'], closure: ['link', 'Closure'], opening: ['lock-open', 'Opening'],
+    care: ['droplet-off', 'Care'], carry: ['hand', 'Carry'], use: ['flower', 'Use']
+  };
+  var CARE_SHORT = { jewellery: 'Keep dry, store in pouch', bag: 'Keep dry, in its dust bag', decor: 'Dry brush, keep from damp' };
+  /* each piece's sheet in a few words (the catalogue's full wording is in the fold) */
+  var SHEETS = {
+    'shahi-panna-polki-bridal-set': [['metal', 'Brass, antique gold-tone'], ['stones', 'Polki-style and emerald-green glass'], ['size', 'Necklace 34 cm + dori'], ['weight', '185–200 g the set'], ['closure', 'Adjustable silk dori'], ['care']],
+    'anaar-twin-leaf-collar-set': [['metal', 'Brass, polished gold-tone'], ['stones', 'Ruby-red glass, green doublets'], ['size', 'Necklace 38 cm'], ['weight', 'Necklace 120–130 g'], ['closure', 'Hook, 6 cm extender'], ['care']],
+    'hariyali-kundan-hasli': [['metal', 'Brass, antique gold-tone'], ['stones', 'Kundan-style glass, mint beads'], ['size', '12 cm across the inside'], ['weight', '150–165 g'], ['closure', 'Hinged, with a hook'], ['care']],
+    'lehar-spiral-necklace-set': [['metal', 'Brass, brushed gold-tone'], ['work', 'Hand-coiled wire, no stones'], ['size', 'Necklace 42 cm + extender'], ['weight', 'Necklace 68–74 g'], ['closure', 'Lobster clasp'], ['care']],
+    'mehtab-pearl-chandbalis': [['metal', 'Brass, gold-tone'], ['stones', 'Kundan-style glass, shell pearls'], ['size', '8 × 5.5 cm'], ['weight', '22–25 g each'], ['closure', 'Push-back, with ear chain'], ['care']],
+    'gulmohar-kundan-jhumkas': [['metal', 'Brass, gold-tone'], ['stones', 'Kundan-style and ruby-red glass'], ['size', '6 cm long'], ['weight', '16 g each'], ['closure', 'Push-back'], ['care']],
+    'vantara-bhanwra-bee-studs': [['metal', 'Brass, gold-tone'], ['stones', 'Cubic zirconia'], ['size', '3.4 × 2.9 cm'], ['weight', '7–8 g each'], ['closure', 'Push-back, silicone stoppers'], ['care']],
+    'sheesh-mahal-polki-bag': [['material', 'Zardozi satin on a frame'], ['work', 'Polki-style glass, crystals'], ['size', '20 × 15 × 6 cm'], ['weight', '480–520 g'], ['closure', 'Magnetic snap'], ['carry', 'Ring handle + chain']],
+    'mehfil-jadau-potli': [['material', 'Maroon satin, jadau work'], ['work', 'Glass stones, shell pearls'], ['size', '22 × 20 cm'], ['weight', '380–420 g'], ['closure', 'Drawstring, jewelled tassels'], ['carry', 'Beaded ring handle']],
+    'vantara-hiran-nano-bag': [['material', 'Satin, zardozi, box frame'], ['work', 'Zardozi palm, jewelled deer'], ['size', '10 × 7 × 6.5 cm'], ['weight', '210–240 g'], ['closure', 'Hinged lid'], ['carry', 'Bangle handle, 9 cm drop']],
+    'vantara-gaj-sindoor-box': [['material', 'Cast brass, gold-plated'], ['stones', 'Red glass'], ['size', '10 × 5 × 10 cm'], ['weight', '320–360 g'], ['opening', 'Hinged howdah lid'], ['use', 'Sindoor, rings, keepsakes']],
+    'shikhar-temple-sindoor-box': [['material', 'Brass, gold-plated'], ['stones', 'Ruby-red glass'], ['size', '11.5 × 5 × 7 cm'], ['weight', '260–290 g'], ['opening', 'Hinged lid, temple spires'], ['use', 'Sindoor, rings, keepsakes']]
+  };
+  /* a piece without its own sheet: the first words of its catalogue rows */
+  var FROM_SPECS = [['metal', /^base$/i], ['stones', /^(stones|embellishment|work)$/i], ['size', /^size$/i], ['weight', /^weight$/i], ['closure', /^(closure|opening)$/i]];
+  function firstWords(text) {
+    var s = String(text || '').split(';')[0].replace(/\s*\([^)]*\)/g, '').trim();
+    return s.split(/\s+/).length > 6 ? s.split(',')[0] : s;
+  }
+  function sheetOf() {
+    if (SHEETS[p.id]) return SHEETS[p.id];
+    var rows = Array.isArray(p.specs) ? p.specs : [];
+    var out = [];
+    FROM_SPECS.forEach(function (k) {
+      for (var i = 0; i < rows.length; i++) if (k[1].test(rows[i][0])) { out.push([k[0], firstWords(rows[i][1])]); return; }
+    });
+    out.push(['care']);
+    return out;
+  }
+  /* a number keeps its unit, and a size its "×", on one line */
+  function keep(text) { return esc(text).replace(/(\d) (cm|g|mm)\b/g, '$1 $2').replace(/ × /g, ' × '); }
   function specHTML() {
-    if (!Array.isArray(p.specs) || !p.specs.length) return '';
+    var tiles = sheetOf().map(function (t) { return [t[0], t[1] || (t[0] === 'care' ? CARE_SHORT[p.care] : '')]; })
+      .filter(function (t) { return TILE[t[0]] && t[1]; });
+    if (!tiles.length) return '';
     return '<section class="spec" aria-labelledby="spec-title">' +
       '<div class="spec__head"><h2 class="spec__title" id="spec-title">Specifications</h2>' +
         '<span class="orn-rule spec__rule" aria-hidden="true"><span class="orn-fan"></span></span></div>' +
-      '<dl class="spec__list">' + p.specs.map(function (r) {
-        return '<div class="spec__row"><dt>' + esc(r[0]) + '</dt><dd>' + keepRanges(esc(r[1])) + '</dd></div>';
+      '<dl class="spec__grid">' + tiles.map(function (t) {
+        var k = TILE[t[0]];
+        return '<div class="spec__tile"><dt><span class="spec__ic">' + icon(k[0]) + '</span>' + k[1] + '</dt><dd>' + keep(t[1]) + '</dd></div>';
       }).join('') + '</dl>' +
-      (p.code ? '<p class="spec__foot"><span>Piece no. <b>' + esc(p.code) + '</b></span> <span class="spec__dot" aria-hidden="true"></span> <span>Handcrafted in Karnal</span></p>' : '') +
+      '<p class="spec__foot">' + (p.code ? '<span>Piece no. <b>' + esc(p.code) + '</b></span> <span class="spec__dot" aria-hidden="true"></span> ' : '') +
+        '<span>Handcrafted in Karnal</span></p>' +
       '</section>';
+  }
+  /* every row of the catalogue's own sheet, in full, for those who want each measurement */
+  function fullSpecs() {
+    if (!Array.isArray(p.specs) || !p.specs.length) return '';
+    return fold('Full specifications', '<dl class="acc__dl acc__dl--spec">' + p.specs.map(function (r) {
+      return '<div><dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd></div>';
+    }).join('') + '</dl>');
   }
   function pinHTML() {
     return '<form class="pin" novalidate>' +
@@ -201,6 +252,7 @@
     var care = C.blocks.care[p.care] || '';
     return '<div class="acc">' +
       fold('Decode the piece', '<p>' + esc(p.story) + '</p><p class="acc__wear"><b>' + esc(p.wearLabel) + ':</b> ' + esc(p.wearWith) + '</p>', true) +
+      fullSpecs() +
       fold('In the box &amp; care', '<dl class="acc__dl"><div><dt>' + esc(box[0]) + '</dt><dd>' + esc(box[1]) + '</dd></div>' +
         (care ? '<div><dt>Care</dt><dd>' + esc(care) + '</dd></div>' : '') + '</dl>') +
       fold('Delivery &amp; exchange',

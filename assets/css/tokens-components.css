@@ -54,3 +54,16 @@
 @media (max-width: 760px) {
   :root { --gut: 16px; }
 }
+
+/* Wide screens (from 1,441 px): the column widens with the screen (1,920 -> 1,394 px, 2,200 -> 1,484, 2,560 -> 1,600)
+   and the shared text sizes grow a little with it, as the type tokens do */
+@media (min-width: 1441px) {
+  :root {
+    --wrap: clamp(1240px, calc(1240px + (100vw - 1440px) * 0.3214), 1600px);
+    --fs-compact: clamp(1.0625rem, calc(1.0625rem + (100vw - 1440px) * 0.00121), 1.1475rem);        /* 17 -> 18.4 px */
+    --fs-card-name: clamp(1.1875rem, calc(1.1875rem + (100vw - 1440px) * 0.00136), 1.2825rem);      /* 19 -> 20.5 px */
+    --fs-card-price: clamp(1.09375rem, calc(1.09375rem + (100vw - 1440px) * 0.00125), 1.1813rem);   /* 17.5 -> 18.9 px */
+    --fs-card-caption: clamp(1rem, calc(1rem + (100vw - 1440px) * 0.00114), 1.08rem);               /* 16 -> 17.3 px */
+    --fs-pill: clamp(0.84375rem, calc(0.84375rem + (100vw - 1440px) * 0.00072), 0.8944rem);         /* 13.5 -> 14.3 px */
+  }
+}

@@ -1,0 +1,128 @@
+/* Collection: the lower bands.
+   - Loved by our clients (rose plaster wall): Home's reviews band and row, reused as they are (home-reviews.css,
+     review-card.css, rows.css); here only its room on this page.
+   - See it before you decide (emerald velvet, the page's one dark band; prefix cask): the heading set, a WhatsApp
+     button and "Visit us in Karnal"; from 1,280 px a paper card beside them with three ways to see a piece.
+   - Explore the house (sandstone with the palm shade; prefix cex): every collection as a round framed picture in two
+     rows of five (tablets five across, phones two); the current one ringed in maroon and marked "You are here".
+   The still page is the resting state; motion lives in motion-collection-open.css. */
+
+/* ---------- Loved by our clients ---------- */
+.pg--collection .rv .rv__hs { margin-bottom: 40px; }
+@media (max-width: 760px) { .pg--collection .rv .rv__hs { margin-bottom: 28px; } }
+/* fewer than four cards: the row stays still and centred */
+.pg--collection .rv__row .track:is([data-n="1"], [data-n="2"], [data-n="3"]) { justify-content: center; }
+
+/* ---------- See it before you decide ---------- */
+.cask.pg-band > .bg__content { padding-block: clamp(48px, 4.4vw, 64px); }
+.cask .line { padding: 0.14em 0 0.2em; margin: -0.14em 0 -0.2em; }
+.cask .line--btn { padding: 8px 12px 30px; margin: -8px -12px -30px; }      /* room for the buttons' lift and shadow */
+.cask__in {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 470px);
+  gap: clamp(40px, 6vw, 96px);
+  align-items: center;
+}
+.cask__hs > .t-section { margin: 0; }
+.cask .cask__hs > .t-lead { max-width: 28em; margin-top: calc(14px - 0.14em); }
+.cask__hs > .t-lead .line__in { display: block; text-wrap: pretty; }
+.cask .cask__btns { margin-top: 22px; }                                      /* 30 px to the buttons */
+.cask__btns > .line__in { display: flex; flex-wrap: wrap; gap: 14px; }
+
+/* the paper card: three rows between gold hairlines */
+.cask__card {
+  margin: 0;
+  padding: 10px 26px;
+  list-style: none;
+  border-radius: var(--r-card);
+  background: var(--c-paper);
+  color: var(--c-ink);
+  box-shadow: var(--border-double), 0 2px 3px rgba(0, 0, 0, 0.3), 0 34px 60px -28px rgba(0, 0, 0, 0.75);
+}
+.cask__row { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 16px; align-items: center; padding: 15px 0; }
+.cask__row + .cask__row { border-top: 1px solid rgba(171, 142, 98, 0.45); }
+.cask__ic {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--c-champagne);
+  color: var(--c-maroon);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, 0.5);
+}
+.cask__ic .i { font-size: 20px; stroke-width: 1.6; }
+.cask__words b { display: block; font: 400 var(--fs-card)/1.25 var(--font-display); color: var(--c-ink); }
+.cask__words b + span { display: block; margin-top: 4px; font: 400 16px/1.45 var(--font-text); color: var(--c-ink-2); text-wrap: pretty; }
+.cask__keep { white-space: nowrap; }
+.cask__words a { color: var(--c-maroon); text-decoration: underline; text-decoration-color: rgba(125, 8, 35, 0.35); text-underline-offset: 3px; white-space: nowrap; }
+.cask__words a:hover { text-decoration-color: currentColor; }
+
+/* below 1,280 px the band keeps its words and two buttons (the store, hours and phone are in the footer) */
+@media (max-width: 1279px) {
+  .cask__card { display: none; }
+  .cask__in { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 1080px) { .cask.pg-band > .bg__content { padding-block: 48px; } }
+@media (max-width: 760px) {
+  .cask .cask__btns { margin-top: 16px; }
+  .cask__btns .btn { flex: 1 1 100%; }
+}
+
+/* ---------- Explore the house ---------- */
+.cex .line { padding: 0.14em 0 0.2em; margin: -0.14em 0 -0.2em; }
+.cex__hs { margin-bottom: clamp(30px, 3.4vw, 48px); }
+.cex__hs > .t-section { margin: 0; }
+.cex .cex__hs > .t-lead { margin-top: calc(14px - 0.14em); }
+.cex__list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 176px));
+  justify-content: center;
+  gap: 34px clamp(20px, 2.6vw, 40px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cex__li { display: flex; justify-content: center; min-width: 0; }
+.cex__item { position: relative; display: grid; justify-items: center; text-align: center; color: var(--c-ink); text-decoration: none; }
+.cex__pic {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--c-sand);
+  box-shadow: 0 0 0 1px rgba(171, 142, 98, 0.62), 0 0 0 5px var(--c-paper), 0 0 0 6px rgba(171, 142, 98, 0.34), var(--sh-card);
+  transition: translate var(--dur) var(--ease);
+}
+.cex__pic img { display: block; width: 100%; height: 100%; object-fit: cover; transition: scale 1200ms var(--ease); }
+.cex__name { margin-top: 20px; font: 400 var(--fs-card)/1.2 var(--font-display); text-wrap: balance; transition: color var(--dur-fast) var(--ease); }
+.cex__meta { margin-top: 5px; font: 400 15px/1.3 var(--font-text); color: var(--c-ink); }   /* ink: the second ink reads too faintly under the palm shade */
+.cex__short { display: none; }
+.cex__meta.is-here { font-weight: var(--fw-strong); color: var(--c-maroon-text); }
+.cex__item[aria-current="page"] .cex__pic {
+  box-shadow: 0 0 0 1px rgba(171, 142, 98, 0.62), 0 0 0 5px var(--c-paper), 0 0 0 7px var(--c-maroon), var(--sh-card);
+}
+.cex__item:focus-visible { outline: none; }
+.cex__item:focus-visible .cex__pic { outline: 2px solid var(--c-maroon); outline-offset: 9px; }
+@media (hover: hover) and (pointer: fine) {
+  a.cex__item:hover .cex__pic { translate: 0 -4px; }
+  a.cex__item:hover .cex__pic img { scale: 1.06; }
+  a.cex__item:hover .cex__name { color: var(--c-maroon-text); }
+}
+@media (max-width: 1080px) {
+  .cex__list { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 28px 14px; }
+  .cex__pic { width: 100px; height: 100px; }
+}
+@media (max-width: 760px) {
+  .cex__list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 12px; }
+  .cex__pic { width: 88px; height: 88px; }
+  .cex__name { margin-top: 14px; font-size: 1.0625rem; }    /* 17 px */
+  .cex__meta { font-size: 14px; }
+  .cex__long { display: none; }
+  .cex__short { display: inline; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cex__pic, .cex__pic img, .cex__name { transition: none; }
+}

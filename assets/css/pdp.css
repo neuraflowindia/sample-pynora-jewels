@@ -3,23 +3,31 @@
      961 px; one centred column (at most 600 px) on tablets and phones. --stage-top tells the gallery how much of
      the screen sits above its stage (less on short laptop screens), so the whole picture fits the first screen.
    - The panel, in a jeweller's order: tag, name, hook, stars, price, colours, status, the quantity and the two
-     buy buttons, the four promises, the specifications sheet, the pincode check and the four folds.
-   - The specifications sheet: the piece's own card, laid out like a certificate on paper with fine gold rules.
+     buy buttons, the four promises, the specifications sheet, the pincode check and the five folds.
+   - The specifications sheet: the piece's own card in the gallery frame's language (gold line, paper mat, gold
+     hairline), six tiles of a few words, each with a bronze line icon in a champagne medallion; the full wording
+     is in the "Full specifications" fold.
    Shared marks (buttons, pills, tags, stars) come from their own files; the gallery from gallery.css. */
 
 /* ======================================================================= the view band */
-.pdp { --stage-top: 236px; }
+/* --stage-top: the room above the stage plus the niche's foot and a little air below it, so the whole niche fits the
+   first screen: strip 36 + header + the band's top padding (pages.css) + breadcrumb 20 + its gap 32 + niche foot 20 +
+   air 10. It follows the header's height. */
+.pdp { --stage-top: calc(var(--hdr-h) + clamp(24px, 3vw, 44px) + 118px); }
 .pdp .crumbs { margin-bottom: clamp(16px, 2vw, 24px); }
-.pdp__grid { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: clamp(36px, 4.4vw, 64px); align-items: start; }
+.pdp__grid { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: clamp(48px, 5.2vw, 84px); align-items: start; }
 .pdp__panel { min-width: 0; max-width: 540px; --c-maroon-text: var(--c-maroon); }
+@media (min-width: 961px) {
+  .pdp .crumbs { margin-bottom: 32px; }                /* the niche reaches 20 px above the gallery */
+}
 /* short laptop screens (1,366 × 768, 1,280 × 800): less room above, so the whole picture fits the first screen */
 @media (min-width: 961px) and (max-height: 820px) {
-  .pdp { --stage-top: 188px; }
-  .pdp .crumbs { margin-bottom: 12px; }
+  .pdp { --stage-top: calc(var(--hdr-h) + clamp(24px, 3vw, 44px) + 106px); }    /* gap 26, niche foot 16, air 8 */
+  .pdp .crumbs { margin-bottom: 26px; }
 }
 @media (max-width: 960px) {
-  .pdp .crumbs { max-width: 600px; margin-inline: auto; }
-  .pdp__grid { grid-template-columns: minmax(0, 1fr); gap: 28px; justify-items: center; }
+  .pdp .crumbs { max-width: 600px; margin-inline: auto; margin-bottom: 30px; }   /* the shelf starts 16 px above the picture */
+  .pdp__grid { grid-template-columns: minmax(0, 1fr); gap: 40px; justify-items: center; }    /* 22 px below the shelf */
   .pdp__grid > * { width: 100%; max-width: 600px; }
 }
 /* before the piece is known (no script, no catalogue) the panel's own words take the whole column */
@@ -94,7 +102,9 @@ html.js:not(.is-filled) .bg.pdp,
 .buy { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; margin-top: 24px; }
 .buy .pdp__wa { grid-column: 1 / -1; }
 .pdp__add { width: 100%; }
-.qty { display: inline-flex; align-items: center; height: 54px; border-radius: 999px; background: var(--c-paper); box-shadow: inset 0 0 0 1px rgba(171, 142, 98, .62), var(--sh-contact); }
+/* the stepper: a gilt pill like the gallery's capsule (gold line, paper, a gold hairline inside) */
+.qty { display: inline-flex; align-items: center; height: 54px; border-radius: 999px; background: var(--c-paper);
+  box-shadow: inset 0 0 0 1px rgba(156, 124, 76, .78), inset 0 0 0 4px var(--c-paper), inset 0 0 0 4.75px rgba(171, 142, 98, .4), var(--sh-contact), 0 8px 14px -10px rgba(63, 10, 22, .35); }
 .qty__b { display: grid; place-items: center; width: 44px; height: 54px; padding: 0; border: 0; border-radius: 999px; background: none; cursor: pointer; color: var(--c-ink);
   transition: color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease); }
 .qty__b .i { font-size: 16px; stroke-width: 2; }
@@ -126,20 +136,43 @@ html.js:not(.is-filled) .bg.pdp,
 /* her fan, very faint, pressed into the paper like a watermark */
 .spec::after { content: ""; position: absolute; z-index: -1; right: -30px; bottom: -36px; width: 176px; height: 176px; opacity: .055; pointer-events: none;
   background-color: var(--c-gold-antique); -webkit-mask: var(--mask-fan) center / contain no-repeat; mask: var(--mask-fan) center / contain no-repeat; }
-.spec__head { display: grid; justify-items: center; gap: 10px; margin: 0 0 12px; text-align: center; }
+.spec__head { display: grid; justify-items: center; gap: 10px; margin: 0 0 14px; text-align: center; }
 .spec__title { margin: 0; font: 400 22px/1.2 var(--font-display); letter-spacing: .01em; color: var(--c-ink); }
 .spec__rule { width: 120px; gap: 10px; }
 .spec__rule::before,
 .spec__rule::after { width: 40px; }
-/* one label column for every row (about a third of the card, never narrower than its longest label, which never
-   wraps), the values in the rest; a narrow card (a short laptop's panel, a phone) puts each label above its value */
+/* six tiles, two across (three on a wide sheet): each a bronze line icon in a champagne medallion, a small capitals
+   label and a few words, parted by fine gold rules. The tiles of a row share one top line, so the labels across a
+   row stay level when one value takes two lines; the medallion sits beside the label and the first line. A narrow
+   sheet (a phone) sets the medallion above the words. */
 .spec { container: spec / inline-size; }
-.spec__list { display: grid; grid-template-columns: minmax(max-content, 34%) minmax(0, 1fr); column-gap: 18px; margin: 0; }
-.spec__row { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 34%) minmax(0, 1fr); grid-template-columns: subgrid; align-items: baseline;
-  column-gap: 18px; padding: 11.5px 2px; border-top: 1px solid rgba(171, 142, 98, .35); }
-.spec__row dt { margin: 0; font: 600 14px/1.5 var(--font-text); letter-spacing: .04em; white-space: nowrap; color: var(--c-bronze); }
-.spec__row dd { margin: 0; font: 400 16px/1.45 var(--font-text); color: var(--c-ink); font-variant-numeric: lining-nums; text-wrap: pretty; }
-.spec__nw { white-space: nowrap; }
+.spec__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; border-top: 1px solid rgba(171, 142, 98, .4); }
+.spec__tile { position: relative; display: grid; align-content: start; gap: 4px; padding: 16px 12px 15px 62px;
+  border-bottom: 1px solid rgba(171, 142, 98, .3); }
+.spec__tile:nth-child(odd) { border-right: 1px solid rgba(171, 142, 98, .3); }
+.spec__tile:nth-last-child(-n+2):nth-child(odd),
+.spec__tile:last-child { border-bottom: 0; }
+.spec__ic { position: absolute; left: 12px; top: 17px; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%;
+  color: var(--c-bronze); background: radial-gradient(circle at 50% 30%, #FBF4E4, var(--c-champagne) 74%);
+  box-shadow: inset 0 0 0 1px rgba(171, 142, 98, .6), inset 0 0 0 3px rgba(252, 248, 241, .7), 0 1px 2px rgba(63, 10, 22, .14), 0 6px 10px -7px rgba(63, 10, 22, .4); }
+.spec__ic .i { font-size: 19px; stroke-width: 1.5; }
+.spec__tile dt { margin: 0; font: 600 13px/1.2 var(--font-text); letter-spacing: .14em; text-transform: uppercase; color: var(--c-bronze); }
+.spec__tile dd { margin: 0; font: 400 15.5px/1.35 var(--font-text); color: var(--c-ink); font-variant-numeric: lining-nums; text-wrap: balance; }
+@container spec (min-width: 620px) {
+  .spec__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .spec__tile:nth-child(odd) { border-right: 0; }
+  .spec__tile:not(:nth-child(3n)) { border-right: 1px solid rgba(171, 142, 98, .3); }
+  .spec__tile:nth-last-child(-n+2):nth-child(odd) { border-bottom: 1px solid rgba(171, 142, 98, .3); }
+  .spec__tile:nth-last-child(-n+3):nth-child(3n+1),
+  .spec__tile:nth-last-child(-n+3):nth-child(3n+1) ~ .spec__tile { border-bottom: 0; }
+}
+@container spec (max-width: 420px) {
+  .spec__tile { align-content: start; gap: 5px; min-height: 0; padding: 14px 10px 14px 12px; }
+  .spec__ic { position: static; width: 34px; height: 34px; margin: 0 0 6px; }
+  .spec__ic .i { font-size: 17px; }
+  .spec__tile dt { display: grid; justify-items: start; letter-spacing: .12em; }
+  .spec__tile dd { font-size: 15px; }
+}
 /* the foot under a double gold rule, as a certificate closes */
 .spec__foot { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 2px 10px; margin: 4px 0 0; padding-top: 15px;
   font: 400 13.5px/1.4 var(--font-text); color: var(--c-ink-2); text-align: center;
@@ -196,6 +229,8 @@ html.js:not(.is-filled) .bg.pdp,
 .acc__dl > div { display: grid; grid-template-columns: 7.2em minmax(0, 1fr); gap: 14px; }
 .acc__dl dt { font-weight: 600; color: var(--c-ink-2); }
 .acc__dl dd { margin: 0; }
+.acc__dl--spec > div { grid-template-columns: 8.6em minmax(0, 1fr); }
+.acc__dl--spec dd { font-variant-numeric: lining-nums; }
 .acc__body .acc__hi { margin-bottom: 6px; font-size: 24px; color: var(--c-maroon-text); }
 
 /* ======================================================================= phones */
@@ -206,16 +241,9 @@ html.js:not(.is-filled) .bg.pdp,
   .promise { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 18px; }
   .acc__dl > div { grid-template-columns: 6.4em minmax(0, 1fr); }
 }
-@container spec (max-width: 400px) {
-  .spec__row { grid-template-columns: minmax(0, 1fr); row-gap: 4px; padding: 10px 0; }
-  .spec__row dt { white-space: normal; }
-}
 @media (max-width: 560px) {
-  .spec { padding: 20px 18px 16px; }
+  .spec { padding: 20px 14px 16px; }
   .spec__title { font-size: 20px; }
-  .spec__row { grid-template-columns: minmax(0, 1fr); row-gap: 4px; padding: 10px 0; }
-  .spec__row dt { white-space: normal; }
-  .spec__row dd { font-size: 15.5px; }
   .acc__dl > div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
 }
 

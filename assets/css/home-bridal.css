@@ -12,6 +12,14 @@
   --brd-gap: clamp(30px, 3vw, 60px);
   --brd-over: 80px;                                  /* how far the edit card overlaps the portrait */
 }
+/* wide screens (the column grows to 1,394 px at 1,920 and 1,600 at 2,560): the portrait and the card grow with it */
+@media (min-width: 1441px) {
+  .brd {
+    --brd-pw: clamp(460px, calc(460px + (100vw - 1440px) * 0.13), 600px);
+    --brd-ew: clamp(300px, calc(300px + (100vw - 1440px) * 0.05), 356px);
+  }
+  .brd .brd__pics { justify-self: center; }          /* what is left of the wider column falls on both sides */
+}
 
 /* lines of words keep their spacing on the wrapper, so a rising line starts fully hidden (the clip itself is
    layout.css's); the room above and below keeps matras and descenders whole */
@@ -213,18 +221,24 @@
     white-space: nowrap;
     border: 0;
   }
-  .brd__rows {
-    display: flex;
-    gap: 10px;
-    min-height: 132px;
-    padding: 6px 16px 10px;                          /* room for the focus ring */
+  /* the scroller, and the list in it (the part that glides, rows.js) */
+  .brd__sc {
     overflow-x: auto;
+    overflow-y: hidden;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
     scroll-padding-inline: 16px;
     scrollbar-width: none;
   }
-  .brd__rows::-webkit-scrollbar { display: none; }
+  .brd__sc::-webkit-scrollbar { display: none; }
+  .brd__rows {
+    display: flex;
+    gap: 10px;
+    width: max-content;
+    min-width: 100%;
+    min-height: 132px;
+    padding: 6px 16px 10px;                          /* room for the focus ring */
+  }
   .brd__rows > li { flex: 0 0 160px; scroll-snap-align: start; display: flex; }
   .brd__rows > li + li { border-top: 0; }
   .brd__row {

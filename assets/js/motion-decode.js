@@ -7,6 +7,8 @@
      then back to the first, where it stays. The tour stops for good at the visitor's first touch, press, key
      or pointer in the section; it waits while the section is under 60% on screen and goes on from where it
      was; it is never repeated in the same visit.
+   - Phones, where the fact cards glide as a circle (rows.js): the glide is the tour (the card nearest the row's
+     middle is the chosen detail, home-decode.js), so no timed tour runs there.
    - The lens grows from 0.85 to its full size whenever it appears.
    Uses Pynora.decode (home-decode.js) and its events; with less motion nothing here runs. */
 (function () {
@@ -98,8 +100,14 @@
       legEnds = now() + left;
       timer = setTimeout(next, left);
     }
+    /* the fact cards glide (phones): the glide shows the points in turn instead */
+    function gliding() {
+      var sc = P.$('.dec__facts-sc', sec) || P.$('.dec__facts', sec);
+      var l = sc && P.rows && P.rows.loopOf ? P.rows.loopOf(sc) : null;
+      return !!(l && l.active());
+    }
     function startTour() {
-      if (touring || stopped || finished || !P.decode) return;
+      if (touring || stopped || finished || !P.decode || gliding()) return;
       touring = true;
       if (P.motion && typeof P.motion.addMover === 'function') {
         try {
@@ -127,6 +135,7 @@
       if (!dotsAt && share >= 0.5 && picProgress() >= 0.98) openDots();
       if (stopped || finished) return;
       if (touring) {
+        if (gliding()) { stopForGood(); return; }
         if (share < 0.6 || held || doc.hidden) pauseTour();
         else resumeTour();
         return;

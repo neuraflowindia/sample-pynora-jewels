@@ -16,22 +16,81 @@
   align-items: start;
 }
 
-/* ---------- Laptops (from 1,080 px): words left, the picture fills the rest at 760 : 748 ---------- */
+/* ---------- Laptops (from 1,080 px): words left, the picture right at 760 : 748 ----------
+   The first screen is the strip, this band (the header lies over its top) and the jewel ribbon, exactly the height
+   of the screen: the band takes the screen less the strip and the ribbon, and the picture takes the height left
+   under the header (--op-pic-h), as wide as that makes it, up to the width of its column. Where the column is the
+   limit, the spare height is shared above and below the picture. */
 .op__in {
   --op-words: clamp(360px, 31vw, 440px);
+  --op-gap: 40px;
+  --op-pt: 12px;                            /* the picture's top under the header */
+  --op-pb: 30px;                            /* wall under the gilt frame, above the ribbon */
   display: grid;
   grid-template-columns: var(--op-words) minmax(0, 1fr);
   grid-template-areas: "words media";
-  column-gap: 40px;
+  column-gap: var(--op-gap);
   align-items: center;
-  padding-top: calc(var(--hdr-h) + 12px);   /* the header sits over the wall; the picture starts 12 px below it */
-  padding-bottom: 30px;                     /* 22 px of wall under the gilt frame; the ribbon starts below a 1,440 x 900 screen */
+  padding-top: calc(var(--hdr-h) + var(--op-pt));   /* the header sits over the wall */
+  padding-bottom: var(--op-pb);
 }
 
 .op__media {
   grid-area: media;
   position: relative;
   aspect-ratio: 760 / 748;
+}
+
+@media (min-width: 1080px) {
+  .op {
+    --op-h: calc(100vh - var(--strip-h) - var(--rib-h));
+  }
+  @supports (height: 100svh) {
+    .op { --op-h: calc(100svh - var(--strip-h) - var(--rib-h)); }
+  }
+  .op__in {
+    --op-pt: clamp(18px, 2.2vh, 32px);      /* 18 px to 1,440 x 900 screens, 32 px on a 1,440 px tall one */
+    --op-pb: clamp(28px, 3vh, 44px);
+    --op-pic-h: calc(var(--op-h) - var(--hdr-h) - var(--op-pt) - var(--op-pb));
+  }
+  .op__media {
+    justify-self: end;
+    width: min(100%, var(--op-pic-h) * 760 / 748);
+    container: op-pic / inline-size;        /* the price chip takes its size from the picture's width */
+  }
+}
+/* landscape laptops and desktops: the band fills the first screen with the ribbon on the fold */
+@media (min-width: 1080px) and (min-aspect-ratio: 6 / 5) {
+  .op__in {
+    min-height: var(--op-h);
+    align-content: center;
+  }
+}
+/* wide screens: the words column and its gap grow with the column (440 -> 520 px and 40 -> 64 px at 2,560) */
+@media (min-width: 1441px) {
+  .op__in {
+    --op-words: clamp(440px, calc(440px + (100vw - 1440px) * 0.0714), 520px);
+    --op-gap: clamp(40px, calc(40px + (100vw - 1440px) * 0.0214), 64px);
+  }
+}
+/* large screens (from 1,680 x 1,000): the buttons and the reviews line a size up beside the taller picture */
+@media (min-width: 1680px) and (min-height: 1000px) {
+  .op__btn-row .btn { min-height: 56px; padding-inline: 30px; font-size: 1.125rem; }   /* 18 px */
+  .op__rate { font-size: 16px; }
+  .op__star { font-size: 16px; }
+}
+/* very large screens (from 2,200 x 1,300): the words keep their presence beside a 1,000 px picture
+   (Hindi line 38 px, title 76 px, lead 24.5 px, buttons 19 px) */
+@media (min-width: 2200px) and (min-height: 1300px) {
+  .op__hindi { font-size: 2.375rem; }
+  .op__title { font-size: 4.75rem; }
+  .op__lead { margin-top: 26px; font-size: 1.53125rem; }
+  .op__btns { --gap: 46px; }
+  .op__btn-row { gap: 14px; }
+  .op__btn-row .btn { min-height: 60px; padding-inline: 34px; font-size: 1.1875rem; }
+  .op__rate-line { --gap: 28px; }
+  .op__rate { font-size: 17px; }
+  .op__star { font-size: 17px; }
 }
 
 /* the gilt frame every feature picture on the page shares: a gold edge, an ivory reveal, a fainter gold line, then
@@ -212,8 +271,20 @@
   .op__lead { font-size: min(var(--fs-lead), calc((var(--op-words) - 6px) / 19.7)); }
 }
 
-/* 1,080-1,179 px: the picture is about 507-590 px wide, so the chip is drawn a size smaller to stay clear of the cord */
-@media (min-width: 1080px) and (max-width: 1179px) {
+/* A picture 900 px wide or more (large screens): the chip a size up, so it keeps its share of the picture */
+@container op-pic (min-width: 900px) {
+  .op__chip { gap: 14px; min-height: 70px; padding: 12px 14px 12px 12px; border-radius: 18px; }
+  .op__chip-ic { width: 44px; height: 44px; }
+  .op__chip-ic .i { font-size: 21px; }
+  .op__chip-name { font-size: 21px; }
+  .op__chip-line { margin-top: 5px; font-size: 15.5px; }
+  .op__chip-price { font-size: 17px; }
+  .op__chip-go { font-size: 19px; }
+}
+
+/* A picture under 640 px wide (narrow laptops, and short laptop screens where the picture follows the height): the
+   chip is drawn a size smaller and sits further out, to stay clear of the cord */
+@container op-pic (max-width: 639px) {
   /* 10 px above and below, as the larger chip: with 8 px the price's text box reached the chip's inner gold line */
   .op__chip { right: -40px; gap: 10px; min-height: 58px; padding: 10px 10px 10px 8px; border-radius: 14px; }   /* further out: clear of the cord's knot */
   .op__chip-ic { width: 34px; height: 34px; }
@@ -222,6 +293,27 @@
   .op__chip-line { margin-top: 3px; font-size: 13.5px; }
   .op__chip-price { font-size: 15px; }
   .op__chip-go { font-size: 16px; }
+}
+/* under 520 px (very short laptop screens): the chip shows her short name, "Shahi Panna" (the full name is still read
+   aloud), so it stays narrow and clear of the necklace */
+@container op-pic (max-width: 519px) {
+  .op__chip { right: -48px; }
+  .op__chip-rest {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+/* under 460 px (laptop screens about 680 px tall): the chip without its crown and arrow, as on phones */
+@container op-pic (max-width: 459px) {
+  .op__chip { grid-template-columns: minmax(0, 1fr); gap: 0; min-height: 0; padding: 9px 14px 10px; }
+  .op__chip-ic,
+  .op__chip-go { display: none; }
 }
 
 /* ---------- Tablets (761-1,079 px): the picture first, centred, then the words ---------- */

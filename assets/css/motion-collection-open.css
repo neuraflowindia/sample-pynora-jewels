@@ -1,0 +1,110 @@
+/* Collection motion: the opening and the lower bands (the grid and shop bar move by motion-collection-grid.css).
+   - Load (with html.motion-go): the opening's lines rise out of their slots (motion-base.css, numbered by
+     motion-load.js) while the divider draws from the fan (motion-pages.css); the framed portrait settles from 1.04
+     as its frame rises 14 px into place; the price card (or, on phones, the plaque) arrives last, rising 12 px out
+     of a clip. Then the portrait breathes: scale 1 -> 1.03 and a 0.8% pan over 9 s, back and forth, for as long as
+     the page is open; a counted mover (page-collection.js), held when it is off screen or the budget is full, and
+     still under the pointer.
+   - Scroll (on cue): every lower heading's divider draws outward from the fan; the reviews row slides in from the
+     right and its stars fill (motion-moments.js); the emerald card's three rows rise in turn; the Explore circles
+     rise 40 ms apart.
+   Words never fade: they rise, or are revealed by a clip. Everything lives under html.motion / html.motion-scroll,
+   so a visitor who asks for less motion, or a page whose scripts fail, sees the finished, still page. */
+
+/* ---------- Load: the portrait settles, the card arrives last ---------- */
+@keyframes m-cop-frame { from { transform: translateY(14px); opacity: 0; } }
+@keyframes m-cop-settle { from { transform: scale(1.04); } }
+@keyframes m-cop-breathe {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(-0.8%, -0.5%) scale(1.03); }
+}
+@keyframes m-cop-card {
+  from { transform: translateY(12px); clip-path: inset(0 0 100% 0 round 16px); }
+  to { transform: none; clip-path: inset(-30px -40px -70px -40px round 16px); }
+}
+html.motion .cop__frame { animation: m-cop-frame 1000ms var(--ease) 150ms backwards paused; }
+html.motion .cop__img {
+  transform-origin: 50% 45%;
+  animation: m-cop-settle 1600ms var(--ease) 150ms backwards paused,
+    m-cop-breathe 9000ms var(--ease-io) 1750ms infinite alternate paused;
+}
+html.motion :is(.cop__chip, .cop__plaque) { animation: m-cop-card 700ms var(--ease) 1000ms backwards paused; }
+html.motion.motion-go :is(.cop__frame, .cop__img, .cop__chip, .cop__plaque) { animation-play-state: running; }
+/* held by the movers' budget, off screen, or under the pointer: the breathing waits where it is */
+html.motion.motion-go .cop__pic:is(.is-held, .is-looked) .cop__img { animation-play-state: running, paused; }
+/* opened further down the page: the opening is simply there, still breathing */
+html.motion .cop.m-skip :is(.cop__frame, .cop__chip, .cop__plaque) { animation: none; }
+html.motion .cop.m-skip .cop__img { animation: m-cop-breathe 9000ms var(--ease-io) infinite alternate; }
+html.motion .cop.m-skip .cop__pic:is(.is-held, .is-looked) .cop__img { animation-play-state: paused; }
+html.motion .cop__chip { will-change: translate; }
+
+/* ---------- Lower headings: the divider draws outward from the fan on its title's cue ---------- */
+html.motion-scroll :is(.cask, .cex, .pg--collection .rv) .hs > .orn-rule::before { transform: scaleX(0); transform-origin: 100% 50%; }
+html.motion-scroll :is(.cask, .cex, .pg--collection .rv) .hs > .orn-rule::after { transform: scaleX(0); transform-origin: 0 50%; }
+html.motion-scroll :is(.cask, .cex, .pg--collection .rv) .hs > .orn-rule > .orn-fan { scale: 0.6; opacity: 0; }
+html.motion-scroll :is(.cask, .cex, .pg--collection .rv) .hs > .orn-rule::before,
+html.motion-scroll :is(.cask, .cex, .pg--collection .rv) .hs > .orn-rule::after { transition: transform 700ms var(--ease) 150ms; }
+html.motion-scroll :is(.cask, .cex, .pg--collection .rv) .hs > .orn-rule > .orn-fan { transition: scale 700ms var(--ease) 150ms, opacity 700ms var(--ease) 150ms; }
+html.motion-scroll :is(.cask, .cex, .pg--collection .rv) .hs > .orn-rule.is-up::before,
+html.motion-scroll :is(.cask, .cex, .pg--collection .rv) .hs > .orn-rule.is-up::after { transform: none; }
+html.motion-scroll :is(.cask, .cex, .pg--collection .rv) .hs > .orn-rule.is-up > .orn-fan { scale: 1; opacity: 1; }
+
+/* ---------- Loved by our clients: the row slides in from the right; the stars fill once ---------- */
+html.motion-scroll .pg--collection .rv__hs > .orn-rule { --d: 0.02; }
+html.motion-scroll .pg--collection .rv__avg .line__in { --d: 0.08; }
+html.motion .pg--collection .rv__stars.is-waiting .stars__fill { clip-path: inset(0 100% 0 0); }
+html.motion .pg--collection .rv__stars.is-filled .stars__fill { clip-path: inset(0); transition: clip-path 800ms var(--ease); }
+html.motion-scroll .pg--collection .rv__rowwrap {
+  --t: clamp(0, var(--p, 1) / 0.8, 1);
+  --e: calc(1 - (1 - var(--t)) * (1 - var(--t)) * (1 - var(--t)));
+  transform: translateX(calc(120px * var(--om) * (1 - var(--e))));
+}
+html.motion-scroll .pg--collection .rv.is-done .rv__rowwrap { transform: none; }
+@media (min-width: 1081px) {
+  html.motion-scroll .pg--collection .rv__hs .t-section .line__in { --d: 0.24; }
+  html.motion-scroll .pg--collection .rv__hs > .orn-rule { --d: 0.24; }
+  html.motion-scroll .pg--collection .rv__avg .line__in { --d: 0.32; }
+  html.motion-scroll .pg--collection .rv__rowwrap { --t: clamp(0, (var(--p, 1) - 0.25) / 0.6, 1); }
+}
+
+/* ---------- See it before you decide: the words rise, then the card's rows in turn ---------- */
+html.motion-scroll .cask .t-section .line__in { --d: 0.06; }
+html.motion-scroll .cask .hs > .orn-rule { --d: 0.06; }
+html.motion-scroll .cask .t-lead .line__in { --d: 0.12; }
+html.motion-scroll .cask__btns > .line__in { --d: 0.2; }
+html.motion-scroll .cask__row {
+  --d: 0.16;
+  transform: translateY(18px);
+  clip-path: inset(-10px -20px calc(100% + 10px) -20px);
+  transition: transform var(--m-cue-panel) var(--ease), clip-path var(--m-cue-panel) var(--ease);
+}
+html.motion-scroll .cask__row:nth-child(2) { --d: 0.22; }
+html.motion-scroll .cask__row:nth-child(3) { --d: 0.28; }
+html.motion-scroll .cask__row.is-up { transform: none; clip-path: inset(-10px -20px -10px -20px); }
+html.motion-scroll .cask.is-done .cask__row.is-up { clip-path: none; }
+
+/* ---------- Explore the house: the circles rise in turn, 40 ms apart ---------- */
+html.motion-scroll .cex .t-section .line__in { --d: 0.04; }
+html.motion-scroll .cex .hs > .orn-rule { --d: 0.04; }
+html.motion-scroll .cex .t-lead .line__in { --d: 0.1; }
+html.motion-scroll .cex__li {
+  --d: 0.2;
+  transform: translateY(24px);
+  clip-path: inset(-20px -20px calc(100% + 20px) -20px);
+  transition: transform var(--m-cue-panel) var(--ease) calc(var(--k, 0) * 40ms), clip-path var(--m-cue-panel) var(--ease) calc(var(--k, 0) * 40ms);
+}
+html.motion-scroll .cex__li.is-up { transform: none; clip-path: inset(-20px -20px -40px -20px); }
+html.motion-scroll .cex.is-done .cex__li.is-up { clip-path: none; }
+/* phones: two across, so each pair of circles waits for its own moment further down */
+@media (max-width: 760px) {
+  html.motion-scroll .cex__li:nth-child(n + 3) { --d: 0.32; }
+  html.motion-scroll .cex__li:nth-child(n + 5) { --d: 0.44; }
+  html.motion-scroll .cex__li:nth-child(n + 7) { --d: 0.56; }
+  html.motion-scroll .cex__li:nth-child(n + 9) { --d: 0.68; }
+  html.motion-scroll .cex__li { transition-delay: 0ms; }
+  html.motion-scroll .cex__li:nth-child(even) { transition-delay: 40ms; }
+}
+
+/* ---------- "New in the studio" (an unknown collection) leads its own heading ---------- */
+.pg--collection .cgr-band .more[data-row] { --m-lead: 1; }
+html.motion-scroll .pg--collection .cgr-band .more .hs .line__in { --d: 0.1; }

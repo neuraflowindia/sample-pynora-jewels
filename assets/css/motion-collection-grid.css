@@ -1,0 +1,48 @@
+/* Motion of the Collection page's shop bar and grid (collection-bar.js, collection-grid.js).
+   - The bar's chips arrive from 24 px below, unveiled from the top down, 30 ms apart, once the bar is first on
+     screen (with the opening's assembly when it is in the first screen). Words never fade.
+   - Becoming the capsule: its paper and shadow come in behind the words (collection-bar.css).
+   - Filtering and sorting (played by collection-grid.js with the Web Animations API): cards that stay glide to
+     their new places, new cards rise behind a top-down unveiling, cards that go sink behind a bottom-up wipe, the
+     note's old shape wipes out and the new one wipes in. Here: the states those animations need.
+   - Rows of cards arrive with the scroll as on Home ("Just arrived"), from motion-pages.css; a card that arrives
+     because of a filter has already arrived, so the scroll arrival leaves it alone (cgr-new).
+   Everything lives under html.motion, so less motion, or a page whose scripts fail, shows the still page.
+   Load order: after motion-pages.css. */
+
+/* ---------- The chips arrive ---------- */
+html.motion .cbar:not(.is-in) .cbar__cue {
+  transform: translateY(calc(24px * var(--om, 1)));
+  clip-path: inset(-14px -14px calc(100% + 14px) -14px round 999px);
+}
+html.motion .cbar.is-in .cbar__cue {
+  transition: transform 700ms var(--ease), clip-path 700ms var(--ease), background-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+  transition-delay: calc(var(--ci, 0) * 30ms), calc(var(--ci, 0) * 30ms), 0s, 0s, 0s;
+  clip-path: inset(-14px -14px -30px -14px round 999px);
+}
+html.motion .cbar.is-in.is-load .cbar__cue { transition-delay: calc(320ms + var(--ci, 0) * 30ms), calc(320ms + var(--ci, 0) * 30ms), 0s, 0s, 0s; }
+html.motion .cbar.is-in .cbar__cue[aria-expanded="true"] { clip-path: none; }
+
+/* ---------- A card or note that arrived with a filter: the scroll arrival leaves it as it is ---------- */
+html.motion-scroll .pg--collection main .cgr-grid > li[data-row].cgr-new { transform: none; clip-path: none; }
+html.motion-scroll .pg--collection main .cgr-grid > li[data-row].cgr-new .card__pic { transform: none; }
+html.motion-scroll .pg--collection main .cgr-grid > li[data-row].cgr-new .card__tag { transform: none; clip-path: none; transition: none; }
+
+/* ---------- A card or note on its way out: held where it was, out of the flow, under the rest ---------- */
+.cgr-grid > li.cgr-leaving {
+  position: absolute;
+  z-index: 0;
+  display: flex;
+  margin: 0;
+  grid-row: auto;
+  grid-column: auto;
+  pointer-events: none;
+}
+.cgr-grid > li.cgr-leaving > .card { display: flex; flex-direction: column; }
+.cgr-grid > li.cgr-leaving .card__meta { margin-top: auto; }
+.cgr-grid > li.cgr-leaving > .cgr-note { flex: 1 1 auto; }
+
+/* ---------- Less motion: the still page ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html.motion .cbar .cbar__cue { transform: none; clip-path: none; transition: none; }
+}

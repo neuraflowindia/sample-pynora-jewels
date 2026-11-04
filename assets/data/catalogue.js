@@ -150,7 +150,38 @@ window.PYNORA_CATALOGUE = {
         "vantara-hiran-nano-bag",
         "vantara-gaj-sindoor-box",
         "shikhar-temple-sindoor-box"
-      ]
+      ],
+      "portrait": {
+        "home": "opening-shahi-panna-dressing-table",
+        "widths": [
+          760,
+          1140,
+          1520
+        ],
+        "ratio": 1.044,
+        "focal": "60% 50%",
+        "alt": "The Shahi Panna polki-style bridal set on a polished dark dressing table in late jharokha light."
+      },
+      "chip": {
+        "mode": "top-right",
+        "product": "shahi-panna-polki-bridal-set",
+        "icon": "crown",
+        "line": "Founder’s pick"
+      },
+      "note": {
+        "title": "Made in our Karnal studio",
+        "text": "Every piece is set, polished and checked by hand at Kalandri Gate, then packed in our crimson box."
+      },
+      "quote": {
+        "product": "lehar-spiral-necklace-set",
+        "name": "Devika P."
+      },
+      "reviewsOf": "",
+      "ask": null,
+      "medal": {
+        "product": "vantara-gaj-sindoor-box",
+        "n": 1
+      }
     },
     {
       "id": "necklaces-sets",
@@ -162,7 +193,30 @@ window.PYNORA_CATALOGUE = {
         "anaar-twin-leaf-collar-set",
         "hariyali-kundan-hasli",
         "lehar-spiral-necklace-set"
-      ]
+      ],
+      "portrait": {
+        "product": "hariyali-kundan-hasli",
+        "n": 5
+      },
+      "chip": {
+        "mode": "bottom-left",
+        "product": "hariyali-kundan-hasli",
+        "icon": "sparkle"
+      },
+      "note": {
+        "title": "Measured before it reaches you",
+        "text": "Each necklace lists its length and weight, so you know how it will sit, from a close collar to a hasli."
+      },
+      "quote": {
+        "product": "hariyali-kundan-hasli",
+        "name": "Simran K."
+      },
+      "reviewsOf": "of our necklaces and sets",
+      "ask": "necklaces and sets",
+      "medal": {
+        "product": "hariyali-kundan-hasli",
+        "n": 1
+      }
     },
     {
       "id": "earrings",
@@ -173,7 +227,31 @@ window.PYNORA_CATALOGUE = {
         "mehtab-pearl-chandbalis",
         "gulmohar-kundan-jhumkas",
         "vantara-bhanwra-bee-studs"
-      ]
+      ],
+      "portrait": {
+        "product": "mehtab-pearl-chandbalis",
+        "n": 4,
+        "focal": "50% 50%"
+      },
+      "chip": {
+        "mode": "bottom-left",
+        "product": "mehtab-pearl-chandbalis",
+        "icon": "sparkle"
+      },
+      "note": {
+        "title": "Light enough for a long evening",
+        "text": "From a 7\u00a0g bee to a 25\u00a0g chandbali, every earring is weighed, so you know how it will feel by midnight."
+      },
+      "quote": {
+        "product": "mehtab-pearl-chandbalis",
+        "name": "Aditi V."
+      },
+      "reviewsOf": "of our earrings",
+      "ask": "earrings",
+      "medal": {
+        "product": "mehtab-pearl-chandbalis",
+        "n": 1
+      }
     },
     {
       "id": "bags",
@@ -184,7 +262,31 @@ window.PYNORA_CATALOGUE = {
         "sheesh-mahal-polki-bag",
         "mehfil-jadau-potli",
         "vantara-hiran-nano-bag"
-      ]
+      ],
+      "portrait": {
+        "product": "sheesh-mahal-polki-bag",
+        "n": 4
+      },
+      "chip": {
+        "mode": "pictured",
+        "product": "sheesh-mahal-polki-bag",
+        "icon": "crown",
+        "line": "Only 2 left"
+      },
+      "note": {
+        "title": "Room for what matters",
+        "text": "Each bag says what it holds: the Sheesh Mahal takes a phone up to 6.1\u00a0in; the nano bag, a lipstick and cards."
+      },
+      "quote": {
+        "product": "sheesh-mahal-polki-bag",
+        "name": "Sakshi P."
+      },
+      "reviewsOf": "of our bags",
+      "ask": "bags",
+      "medal": {
+        "product": "sheesh-mahal-polki-bag",
+        "n": 1
+      }
     },
     {
       "id": "decor",
@@ -194,7 +296,30 @@ window.PYNORA_CATALOGUE = {
       "productIds": [
         "vantara-gaj-sindoor-box",
         "shikhar-temple-sindoor-box"
-      ]
+      ],
+      "portrait": {
+        "product": "shikhar-temple-sindoor-box",
+        "n": 4
+      },
+      "chip": {
+        "mode": "pictured",
+        "product": "shikhar-temple-sindoor-box",
+        "icon": "sparkle"
+      },
+      "note": {
+        "title": "Heavy, gilded and hinged",
+        "text": "Both boxes are gold-plated brass with hinged lids, made to sit proudly on a dressing table for years."
+      },
+      "quote": {
+        "product": "vantara-gaj-sindoor-box",
+        "name": "Prachi S."
+      },
+      "reviewsOf": "of our décor",
+      "ask": "décor",
+      "medal": {
+        "product": "shikhar-temple-sindoor-box",
+        "n": 1
+      }
     },
     {
       "id": "vantara",
@@ -205,7 +330,33 @@ window.PYNORA_CATALOGUE = {
         "vantara-bhanwra-bee-studs",
         "vantara-hiran-nano-bag",
         "vantara-gaj-sindoor-box"
-      ]
+      ],
+      "portrait": {
+        "product": "vantara-hiran-nano-bag",
+        "n": 7,
+        "focal": "50% 62%"
+      },
+      "chip": {
+        "mode": "pictured",
+        "product": "vantara-hiran-nano-bag",
+        "icon": "spool",
+        "line": "Made to order",
+        "colour": "Ivory"
+      },
+      "note": {
+        "title": "Made only when you order",
+        "text": "Each Vantara piece is made for you in 10\u00a0days to 3\u00a0weeks, and we send you a photo before it leaves."
+      },
+      "quote": {
+        "product": "vantara-hiran-nano-bag",
+        "name": "Anushka B."
+      },
+      "reviewsOf": "of Vantara pieces",
+      "ask": "Vantara collection",
+      "medal": {
+        "product": "vantara-hiran-nano-bag",
+        "n": 1
+      }
     },
     {
       "id": "bridal-edit",
@@ -218,7 +369,32 @@ window.PYNORA_CATALOGUE = {
         "mehtab-pearl-chandbalis",
         "mehfil-jadau-potli",
         "shikhar-temple-sindoor-box"
-      ]
+      ],
+      "portrait": {
+        "product": "shahi-panna-polki-bridal-set",
+        "n": 4,
+        "focal": "50% 30%"
+      },
+      "chip": {
+        "mode": "bottom-left",
+        "product": "shahi-panna-polki-bridal-set",
+        "icon": "crown",
+        "line": "Founder’s pick"
+      },
+      "note": {
+        "title": "Wear one, or all five",
+        "text": "The set, the hasli, the chandbalis, the potli and the sindoor box are chosen to sit together on the day."
+      },
+      "quote": {
+        "product": "shahi-panna-polki-bridal-set",
+        "name": "Aanya M."
+      },
+      "reviewsOf": "of the Bridal Edit",
+      "ask": "Bridal Edit",
+      "medal": {
+        "product": "shahi-panna-polki-bridal-set",
+        "n": 1
+      }
     },
     {
       "id": "gifting",
@@ -233,7 +409,39 @@ window.PYNORA_CATALOGUE = {
         "lehar-spiral-necklace-set",
         "vantara-gaj-sindoor-box",
         "shikhar-temple-sindoor-box"
-      ]
+      ],
+      "portrait": {
+        "home": "gift-crimson-box-open",
+        "widths": [
+          560,
+          840,
+          1100
+        ],
+        "ratio": 0.8,
+        "focal": "50% 50%",
+        "alt": "Our crimson Pynora gift box, the lid lifted to show a satin insert, a note card and a velvet pouch."
+      },
+      "chip": {
+        "mode": "bottom-left",
+        "text": "Our crimson gift box",
+        "href": "#care/shipping",
+        "icon": "gift",
+        "line": "Free with every piece"
+      },
+      "note": {
+        "title": "Wrapped before it reaches you",
+        "text": "Every piece arrives in our crimson box with a soft pouch and a care card. A handwritten note is free."
+      },
+      "quote": {
+        "product": "vantara-bhanwra-bee-studs",
+        "name": "Ananya T."
+      },
+      "reviewsOf": "of our gifts",
+      "ask": "gifting edit",
+      "medal": {
+        "product": "vantara-bhanwra-bee-studs",
+        "n": 1
+      }
     },
     {
       "id": "new",
@@ -245,7 +453,31 @@ window.PYNORA_CATALOGUE = {
         "lehar-spiral-necklace-set",
         "gulmohar-kundan-jhumkas",
         "mehfil-jadau-potli"
-      ]
+      ],
+      "portrait": {
+        "product": "mehfil-jadau-potli",
+        "n": 4
+      },
+      "chip": {
+        "mode": "bottom-left",
+        "product": "mehfil-jadau-potli",
+        "icon": "sparkle",
+        "line": "New"
+      },
+      "note": {
+        "title": "Fresh from the workbench",
+        "text": "Four pieces finished this festive season, and every one of them leaves Karnal within 48\u00a0hours."
+      },
+      "quote": {
+        "product": "gulmohar-kundan-jhumkas",
+        "name": "Rhea N."
+      },
+      "reviewsOf": "of our new pieces",
+      "ask": "new pieces",
+      "medal": {
+        "product": "lehar-spiral-necklace-set",
+        "n": 1
+      }
     },
     {
       "id": "ready-to-ship",
@@ -260,7 +492,40 @@ window.PYNORA_CATALOGUE = {
         "sheesh-mahal-polki-bag",
         "mehfil-jadau-potli",
         "shikhar-temple-sindoor-box"
-      ]
+      ],
+      "portrait": {
+        "home": "store-sage-niche",
+        "widths": [
+          400,
+          760,
+          1100
+        ],
+        "ratio": 0.8,
+        "focal": "50% 40%",
+        "alt": "A sage arched niche in our Karnal store, lit warm from within, with a necklace on a crimson stand."
+      },
+      "chip": {
+        "mode": "bottom-left",
+        "text": "Our store at Kalandri Gate",
+        "short": "Our store in Karnal",
+        "href": "index.html#visit",
+        "icon": "pin",
+        "line": "Visit us in Karnal"
+      },
+      "note": {
+        "title": "Packed within 48 hours",
+        "text": "Order today and it leaves our studio within 48\u00a0hours, arriving in 3–6\u00a0working days. Shipping is free."
+      },
+      "quote": {
+        "product": "lehar-spiral-necklace-set",
+        "name": "Mehak S."
+      },
+      "reviewsOf": "of pieces that ship in 48\u00a0hrs",
+      "ask": "ready-to-ship pieces",
+      "medal": {
+        "product": "anaar-twin-leaf-collar-set",
+        "n": 1
+      }
     }
   ],
   "products": [

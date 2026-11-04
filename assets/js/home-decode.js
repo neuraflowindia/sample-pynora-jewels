@@ -4,8 +4,11 @@
    - A press on a numbered point or on a fact chooses that detail: the point turns maroon, the fact is pressed
      and the lens rests on the point. Pressing the chosen fact again lets it go. ← → (and Home, End) move
      between the facts and move the lens with them.
-   - Phones: tapping a point shows the lens there and brings its fact card into view; swiping the fact cards
-     chooses the card that comes to rest at the start of the row.
+   - Phones: tapping a point shows the lens there and brings its fact card into view. Where the fact cards glide
+     as a circle (rows.js, with motion), the card nearest the row's middle is the chosen detail: as the row glides
+     (or the visitor swipes it) the lens visits each point in turn; a tapped point's card is brought to the
+     middle and rests there. Without the glide, swiping chooses the card that comes to rest at the row's start.
+     The copies of the cards (the glide's) answer a tap like the cards they repeat and show the same choice.
    - The 2,400 px picture behind the lens starts loading when the section is one screen away.
    Pynora.decode.show(n, { glide: true }) moves the lens to detail n (1-5), gliding from where it is;
    Pynora.decode.hide() lets the detail go. Events: decode:show { n, from }, decode:hide, decode:press
@@ -28,7 +31,7 @@
     var lens = P.$('.dec__lens', root);
     var dots = P.$$('.dec__dot', root);
     var facts = P.$$('.dec__fbtn', root);
-    var row = P.$('.dec__facts', root);
+    var row = P.$('.dec__facts-sc', root) || P.$('.dec__facts', root);    /* the facts' scroller on phones */
     if (!pic || !lens || !facts.length) return null;
 
     var count = facts.length;
@@ -146,8 +149,14 @@
     function mark(n) {
       chosen = n;
       dots.forEach(function (d, i) { d.classList.toggle('is-active', i + 1 === n); });
-      facts.forEach(function (f, i) { f.setAttribute('aria-pressed', i + 1 === n ? 'true' : 'false'); });
+      P.$$('.dec__fbtn', root).forEach(function (f) {                  /* the cards and their copies */
+        f.setAttribute('aria-pressed', Number(f.getAttribute('data-fact')) === n ? 'true' : 'false');
+      });
     }
+
+    /* the facts' glide on phones (rows.js), when it runs */
+    function loop() { return row && P.rows && P.rows.loopOf ? P.rows.loopOf(row) : null; }
+    function looping() { var l = loop(); return !!(l && l.active()); }
 
     /* where fact card n starts, in the row's own scroll coordinates */
     function cardStart(n) {
@@ -156,7 +165,10 @@
     }
 
     var steering = false, steerTimer = 0;
+    var lastNear = 0;
     function bringCard(n) {
+      var l = loop();
+      if (l && l.active()) { lastNear = n; l.bring(n - 1); return; }
       if (!row || row.scrollWidth <= row.clientWidth + 1) return;
       var pad = parseFloat(getComputedStyle(row).scrollPaddingLeft) || 0;
       var max = row.scrollWidth - row.clientWidth;
@@ -193,12 +205,16 @@
       show(n, { from: how, card: how !== 'swipe' });
     }
 
-    /* ---------- facts: press, and ← → between them ---------- */
+    /* ---------- facts: press (a card or its copy), and ← → between them ---------- */
+    root.addEventListener('click', function (e) {
+      var f = e.target && e.target.closest ? e.target.closest('.dec__fbtn') : null;
+      if (!f || !root.contains(f)) return;
+      var n = Number(f.getAttribute('data-fact'));
+      if (!(n >= 1 && n <= count)) return;
+      if (chosen === n) { P.emit('decode:press', { n: 0, how: 'fact' }); hide(); return; }
+      choose(n, 'fact');
+    });
     facts.forEach(function (f, i) {
-      f.addEventListener('click', function () {
-        if (chosen === i + 1) { P.emit('decode:press', { n: 0, how: 'fact' }); hide(); return; }
-        choose(i + 1, 'fact');
-      });
       f.addEventListener('keydown', function (e) {
         var to = null;
         if (e.key === 'ArrowRight') to = Math.min(count, i + 2);
@@ -261,14 +277,43 @@
         if (n !== chosen) choose(n, 'swipe');
       };
       row.addEventListener('scroll', function () {
+        if (looping()) return;
         clearTimeout(settle);
         settle = setTimeout(settled, 140);
       }, { passive: true });
       row.addEventListener('scrollend', function () {
+        if (looping()) return;
         if (steering) { steering = false; clearTimeout(steerTimer); return; }
         clearTimeout(settle);
         settled();
       });
+
+      /* the glide: the card nearest the middle is chosen whenever it changes (a few looks a second, only while
+         the row glides or rests under the visitor's finger, on screen, once the points have opened) */
+      var inView = false;
+      var follow = function () {
+        var l = loop();
+        if (!inView || document.hidden || !l || !l.active()) return;
+        if (root.classList.contains('is-dots-waiting') && !root.classList.contains('is-dots')) return;
+        var st = l.state();
+        if (st !== 'glide' && st !== 'touch') return;
+        var near = l.nearest();
+        var b = near && near.el.querySelector('[data-fact]');
+        var n = b ? Number(b.getAttribute('data-fact')) : 0;
+        if (!n || n === lastNear) return;
+        lastNear = n;
+        if (n === chosen) return;
+        if (st === 'touch') choose(n, 'swipe');
+        else show(n, { glide: true, card: false, from: 'glide' });
+      };
+      var ticker = 0;
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (es) {
+          inView = es[es.length - 1].isIntersecting;
+          clearInterval(ticker);
+          if (inView) ticker = setInterval(follow, 250);
+        }, { threshold: 0 }).observe(row);
+      }
     }
 
     /* ---------- sizes ---------- */
