@@ -84,8 +84,9 @@
       row.classList.toggle('is-scrollable', can);
       if (holder) holder.hidden = !can;
       var x = scroller.scrollLeft;
-      setOff(prev, !can || x <= 1);
-      setOff(next, !can || x >= m - 1);
+      var circle = row.classList.contains('is-looping');   /* a gliding row has no ends: both arrows stay on */
+      setOff(prev, !can || (!circle && x <= 1));
+      setOff(next, !can || (!circle && x >= m - 1));
     }
 
     var queued = false;
