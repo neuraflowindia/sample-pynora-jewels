@@ -19,8 +19,8 @@
    Paper frame with the fine double gold edge; lifts 4 px on hover while the worn picture comes into view in one of
    five ways, so that neighbours never repeat (cards.js gives each card its class): card--hv-veil rises behind a
    soft top edge, card--hv-dissolve melts in, card--hv-curtain draws across from the left behind a feathered edge,
-   card--hv-iris opens as a circle from the piece's centre, card--hv-sweep crosses from the top-left corner with a
-   faint gold gleam on its edge. A card without a class shows the veil. On touch screens
+   card--hv-iris opens as a soft-edged circle from the piece's centre, card--hv-sweep crosses from the top-left
+   corner with a faint gold gleam on its edge. A card without a class shows the veil. On touch screens
    a card in a grid swipes through its pictures; a card in a sideways row never swipes (the row does) and steps
    through them when its dots are tapped. Stars wait for the product page on cards narrower than 210 px. */
 
@@ -143,6 +143,13 @@
 }
 .card__status { margin: 12px 6px 0; align-self: flex-start; }
 
+/* the iris's radius (below): registered so that it can move smoothly */
+@property --iris {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
 /* ---------- Laptops: lift, the worn picture, a slow push-in ---------- */
 @media (hover: hover) and (pointer: fine) {
   .card:hover { transform: translateY(-4px); box-shadow: var(--border-double), var(--sh-lift); }
@@ -228,13 +235,17 @@
     transition-duration: 620ms;
   }
 
-  /* The iris: opens as a circle from the piece's centre while the picture settles from 1.05 to 1.02 */
+  /* The iris: opens as a circle from the piece's centre while the picture settles from 1.05 to 1.02. The circle is
+     a round mask with an 18 px feathered edge; its radius runs from nothing to the farthest corner plus the feather,
+     so that the open picture is wholly clear */
   .card--hv-iris .card__veil {
-    clip-path: circle(0% at 50% 55%);
-    transition: clip-path 420ms var(--ease);
+    --iris: 0%;
+    -webkit-mask-image: radial-gradient(circle farthest-corner at 50% 55%, #000 calc(var(--iris) - 18px), transparent var(--iris));
+    mask-image: radial-gradient(circle farthest-corner at 50% 55%, #000 calc(var(--iris) - 18px), transparent var(--iris));
+    transition: --iris 420ms var(--ease);
   }
   .card--hv-iris .card__veil > .card__img { transform: scale(1.05); transition: opacity 450ms var(--ease), transform 700ms var(--ease); }
-  .card.card--hv-iris:hover:not(.is-picking) .card__veil { clip-path: circle(75% at 50% 55%); transition-duration: 650ms; }
+  .card.card--hv-iris:hover:not(.is-picking) .card__veil { --iris: calc(100% + 18px); transition-duration: 650ms; }
   .card.card--hv-iris:hover:not(.is-picking) .card__veil > .card__img { transform: scale(1.02); transition-duration: 450ms, 1100ms; }
 
   /* The sweep: the same feathered mask, laid on the diagonal, crosses from the top-left corner to the bottom-right;

@@ -9,7 +9,8 @@
    - <html data-view="ok | missing | nocat">: the id is known; the id is missing or unknown; the catalogue did not load.
      <html data-hindi="none">: a known collection without a Hindi line (its reserved line takes no room).
      <html data-cop="bottom-left | top-right | pictured">: how the opening names the piece in its portrait.
-     <html data-cv-room> and --cv-r4 / --cv-r3 / --cv-r2: the rows the collection's pieces fill (see reserve below).
+     <html data-cv-room | data-cv-tags | data-cv-end>, --cv-r4 / --cv-r3 / --cv-r2 and --cv-b4 / --cv-b3 / --cv-b2: the
+     room the collection's pieces will take with the address's filters (see reserve below).
    - document.title, the description and the link-preview words follow the collection or the piece.
    - window.PYNORA_PAGE = {
        kind:  "collection" | "product",
@@ -21,8 +22,12 @@
               preload link below and by the gallery's own <img>, so the browser asks for it exactly once:
               {src, srcset, sizes, n, alt, focal}; otherwise null,
        portrait: collection pages with a known collection: the opening's framed picture, computed the same way
-              and used by page-collection.js: {src, srcset, sizes, alt, focal, focalPhone}; otherwise null
+              and used by page-collection.js: {src, srcset, sizes, alt, focal, focalPhone}; otherwise null,
+       facts: collection pages with a known collection: the opening's three facts (markup), written early (see
+              early below) and again by page-collection.js; otherwise "",
+       pictured: the same for the "Pictured: …" line (collections whose piece fills the frame); otherwise ""
      }
+   - The opening's words of a known collection are written before the first paint (see early below).
    - A safety timer shows the address-dependent words after 2.5 s whatever happens (html.is-filled). */
 (function () {
   'use strict';
@@ -150,17 +155,52 @@
     doc.head.appendChild(link);
   }
 
-  /* The rows the collection's pieces fill at 4, 3 and 2 across (--cv-r4, --cv-r3, --cv-r2), for the grid's
-     reserved room. A price filter from the address with nothing in it is data-cv-room="empty"; an unknown
-     collection (the four new pieces under their heading) "lead"; without the catalogue one row. */
+  /* The address's other filters, read as collection-state.js reads them (known values only; within a facet the
+     choices widen, between facets they narrow), so the reserved room holds exactly the pieces the grid will show */
+  var FACETS = {
+    type: ['necklaces-sets', 'earrings', 'bags', 'decor'],
+    occ: ['bridal', 'festive', 'cocktail', 'everyday', 'gifting', 'home'],
+    tone: ['green', 'red', 'pearl', 'gold', 'white', 'black', 'ivory']
+  };
+  function facet(name) {
+    var out = [];
+    String(param(name) || '').split(',').forEach(function (v) {
+      v = v.trim().toLowerCase();
+      if (v && FACETS[name].indexOf(v) > -1 && out.indexOf(v) < 0) out.push(v);
+    });
+    return out;
+  }
+  function filters() {
+    return { ready: param('ready') === '1', type: facet('type'), occ: facet('occ'), tone: facet('tone') };
+  }
+  function overlaps(list, chosen) {
+    if (!chosen.length) return true;
+    for (var i = 0; i < chosen.length; i++) if ((list || []).indexOf(chosen[i]) > -1) return true;
+    return false;
+  }
+  function shows(p, f) {
+    if (page.band && !(p.price >= page.band.min && p.price <= page.band.max)) return false;
+    if (f.ready && !(p.availability && p.availability.type === 'ready')) return false;
+    if (f.type.length && f.type.indexOf(p.category) < 0) return false;
+    return overlaps(p.occasions, f.occ) && overlaps(p.tones, f.tone);
+  }
+
+  /* The room the collection's pieces will take, for the grid band's reserved room (collection-grid.css):
+     --cv-r4 / --cv-r3 / --cv-r2 the rows of cards at 4, 3 and 2 across; --cv-b4 / --cv-b3 / --cv-b2 1 when the
+     studio note then takes a whole row of its own (the pieces fill their last row), else 0.
+     <html data-cv-room>: "grid"; "empty" when the address's filters hold nothing; "lead" for an unknown
+     collection (the four new pieces under their heading); without the catalogue one row.
+     <html data-cv-tags>: the address has filters in use (the bar shows them in a row beneath it).
+     <html data-cv-end="one">: the end line has no "See all" link beneath it (Shop all). */
   function reserve(col) {
     var n = 4, room = 'grid';
+    var f = filters();
     if (col) {
       var ids = col.productIds || [];
       n = 0;
       for (var i = 0; i < ids.length; i++) {
         var p = find(cat.products, ids[i]);
-        if (p && (!page.band || (p.price >= page.band.min && p.price <= page.band.max))) n++;
+        if (p && shows(p, f)) n++;
       }
       if (!n) room = 'empty';
     } else if (cat) {
@@ -169,12 +209,91 @@
       room = 'lead';
     }
     html.setAttribute('data-cv-room', room);
-    html.style.setProperty('--cv-r4', String(Math.ceil(n / 4)));
-    html.style.setProperty('--cv-r3', String(Math.ceil(n / 3)));
-    html.style.setProperty('--cv-r2', String(Math.ceil(n / 2)));
+    if (page.band || f.ready || f.type.length || f.occ.length || f.tone.length) html.setAttribute('data-cv-tags', '');
+    if (page.id === 'all') html.setAttribute('data-cv-end', 'one');
+    [4, 3, 2].forEach(function (c) {
+      html.style.setProperty('--cv-r' + c, String(Math.ceil(n / c)));
+      html.style.setProperty('--cv-b' + c, n && n % c === 0 ? '1' : '0');
+    });
   }
 
-  var page = { kind: kind, id: '', price: null, band: null, ok: false, stage: null, portrait: null };
+  /* ---------- The opening's words, written as the opening is parsed ----------
+     The page's own markup holds Shop all's words. For another collection the title, the Hindi line, the intro, the
+     breadcrumb, the three facts and the "Pictured" line are written here as soon as the parser has passed them (the frame's box, the
+     opening's last part, has arrived), before the first paint, so the opening is never drawn at Shop all's height
+     and then grows. page-collection.js writes the same words again and uses page.facts and page.pictured. */
+  function rupees(n) {                   /* as Pynora.inr: "₹22,400" */
+    n = Math.round(Number(n));
+    if (!isFinite(n)) return '';
+    try { return '₹' + new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(n); } catch (e) { /* by hand */ }
+    var s = String(Math.abs(n)), last = s.slice(-3), rest = s.slice(0, -3).replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+    return (n < 0 ? '-' : '') + '₹' + (rest ? rest + ',' : '') + last;
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function icon(n, cls) { return '<svg class="i' + (cls ? ' ' + cls : '') + '" aria-hidden="true" focusable="false"><use href="#i-' + n + '"/></svg>'; }
+  /* the three facts of the collection's pieces: how many, the lowest price, the review-weighted rating */
+  function factsHTML(col) {
+    var pieces = (col.productIds || []).map(function (id) { return find(cat.products, id); }).filter(Boolean);
+    if (!pieces.length) return '';
+    var from = Infinity, count = 0, sum = 0;
+    pieces.forEach(function (p) {
+      from = Math.min(from, Number(p.price) || Infinity);
+      var r = p.reviews || {};
+      count += r.count || 0;
+      sum += (r.average || 0) * (r.count || 0);
+    });
+    return '<li class="cop__fact">' + icon('sparkle') + '<span><b>' + pieces.length + '</b> ' + (pieces.length === 1 ? 'piece' : 'pieces') + '</span></li>' +
+      '<li class="cop__fact">' + icon('banknote') + '<span>From <b>' + esc(rupees(from)) + '</b></span></li>' +
+      (count ? '<li class="cop__fact"><a class="cop__rate" href="#reviews">' + icon('star', 'i--fill') +
+        '<span><span class="vh">Rated </span><b>' + (sum / count).toFixed(1) + '</b> · ' + count + ' ' + (count === 1 ? 'review' : 'reviews') + '</span></a></li>' : '');
+  }
+  /* where the piece fills the frame: "Pictured: <name> in <colour> · <price>" under the facts (laptops) */
+  function picturedHTML(col) {
+    var ch = col.chip || {};
+    if (ch.mode !== 'pictured' || !page.portrait) return '';
+    var p = ch.product ? find(cat.products, ch.product) : null;
+    var root = html.getAttribute('data-root') || '';
+    var to = ch.href || 'index.html';      /* a text chip's own address, as Pynora.url builds it */
+    var href = p ? root + 'product.html?p=' + encodeURIComponent(p.id)
+      : /^(?:[a-z][a-z0-9+.-]*:|\/\/|#|\/)/i.test(to) ? to : root + to.replace(/^\.\//, '');
+    var name = p ? p.name : ch.text || '';
+    var price = p ? rupees(p.price) : '';
+    return '<span class="line__in">Pictured: <a href="' + esc(href) + '">' + esc(name) + '</a>' +
+      (p && ch.colour ? ' in ' + esc(ch.colour) : '') + (price ? ' · <b>' + esc(price) + '</b>' : '') + icon('arrow') + '</span>';
+  }
+  function writeOpening(col) {
+    var q = function (s) { return doc.querySelector(s); };
+    var title = col.id === 'all' ? 'All pieces' : col.title;
+    var set = function (el, words) { if (el && el.textContent !== words) el.textContent = words; };
+    set(q('.cop__crumbs [aria-current="page"]'), title);
+    if (col.hindi) set(q('[data-fill="hindi"] .line__in'), col.hindi);
+    set(q('[data-fill="title"]'), title);
+    set(q('[data-fill="intro"]'), col.intro || '');
+    var facts = q('[data-fill="facts"]');
+    if (facts && !facts.firstChild) facts.innerHTML = page.facts;
+    var pictured = q('[data-fill="pictured"]');
+    if (pictured && page.pictured && !pictured.firstChild) { pictured.innerHTML = page.pictured; pictured.hidden = false; }
+  }
+  function early(col) {
+    page.facts = factsHTML(col);
+    page.pictured = picturedHTML(col);
+    var done = false;
+    var go = function () {
+      if (done || !doc.querySelector('[data-fill="pics"]')) return false;
+      done = true;
+      writeOpening(col);
+      return true;
+    };
+    if (go()) return;
+    var mo = null;
+    if (window.MutationObserver) {
+      mo = new MutationObserver(function () { if (go()) mo.disconnect(); });
+      mo.observe(html, { childList: true, subtree: true });
+    }
+    doc.addEventListener('DOMContentLoaded', function () { if (mo) mo.disconnect(); go(); });
+  }
+
+  var page = { kind: kind, id: '', price: null, band: null, ok: false, stage: null, portrait: null, facts: '', pictured: '' };
 
   if (kind === 'product') {
     page.id = param('p') || '';
@@ -207,6 +326,7 @@
       if (page.portrait) preload(page.portrait);
       var title = c === 'all' ? 'All pieces' : col.title;
       setWords(page.band ? title + ' ' + page.band.words : title, col.intro);
+      early(col);
     } else if (cat) {
       setWords('Collection not found', '');
     }

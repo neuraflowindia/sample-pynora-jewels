@@ -13,6 +13,49 @@
    they are (its own content never sets the row's height; it is sized as a container instead), so a row stays
    one even line. */
 
+/* ---------- The room kept before the pieces arrive ----------
+   Until collection-grid.js fills it (in one go with the shop bar and the end line), the empty grid box holds the
+   room all three will take, so nothing below ever paints in the first screen and moves. The counts come from the
+   address (page-early.js): --cv-r* rows of cards and --cv-b* a whole-row studio note at 4, 3 and 2 across,
+   data-cv-tags (the bar's row of filters in use), data-cv-end="one" (no "See all" link), data-cv-room="empty".
+   A card is its 4:5 picture plus its words (one-line or two-line names, ~141 px); the gaps and the bar are the
+   grid's and the bar's own. The end line's top margin is already there in the empty box. */
+html.js[data-view="ok"] [data-collection-grid]:empty {
+  container-type: inline-size;
+  --rs-c: 4; --rs-r: var(--cv-r4, 1); --rs-b: var(--cv-b4, 0);
+  --rs-gap: 28px;                                 /* between rows */
+  --rs-cgap: var(--rs-gap);                       /* between columns */
+  --rs-words: 141px;
+  --rs-band: 287px;                               /* the studio note across a whole row */
+  --rs-bar: 84px;                                 /* the bar and its gap to the grid */
+  --rs-tags: 50px;                                /* the row of filters in use beneath it */
+  --rs-end: 80px;                                 /* the end line with its "See all" link */
+  --rs-empty: 279px;                              /* the empty result, less the end line's margin */
+}
+html.js[data-view="ok"]:not([data-cv-tags]) [data-collection-grid]:empty { --rs-tags: 0px; }
+html.js[data-view="ok"][data-cv-end="one"] [data-collection-grid]:empty { --rs-end: 51px; }
+/* the bar's room above the box (so the box itself starts where the grid will), the grid's and the end line's in it */
+html.js[data-view="ok"] [data-collection-grid]:empty { margin-top: calc(var(--rs-bar) + var(--rs-tags)); }
+html.js[data-view="ok"] .wrap:has(> [data-collection-grid]:empty) { display: flow-root; }   /* that margin stays the box's own */
+html.js[data-view="ok"] [data-collection-grid]:empty::before {
+  content: "";
+  display: block;
+  height: calc(var(--rs-end) +
+    var(--rs-r) * ((100cqw - (var(--rs-c) - 1) * var(--rs-cgap)) / var(--rs-c) * 1.25 + var(--rs-words)) +
+    var(--rs-b) * var(--rs-band) + (var(--rs-r) + var(--rs-b) - 1) * var(--rs-gap));
+}
+html.js[data-view="ok"][data-cv-room="empty"] [data-collection-grid]:empty::before { height: var(--rs-empty); }
+@media (min-width: 1600px) { html.js[data-view="ok"] [data-collection-grid]:empty { --rs-band: 262px; } }
+/* narrow laptops: narrower cards, so more names take three lines */
+@media (min-width: 1081px) and (max-width: 1279px) { html.js[data-view="ok"] [data-collection-grid]:empty { --rs-gap: 20px; --rs-words: 155px; --rs-band: 307px; --rs-empty: 286px; } }
+@media (max-width: 1080px) {
+  html.js[data-view="ok"] [data-collection-grid]:empty { --rs-c: 3; --rs-r: var(--cv-r3, 1); --rs-b: var(--cv-b3, 0); --rs-gap: 22px; --rs-band: 280px; --rs-bar: 80px; --rs-tags: 52px; --rs-empty: 294px; }
+}
+@media (max-width: 760px) {
+  html.js[data-view="ok"] [data-collection-grid]:empty { --rs-c: 2; --rs-r: var(--cv-r2, 1); --rs-b: var(--cv-b2, 0); --rs-cgap: 12px; --rs-band: 470px; --rs-bar: 76px; --rs-empty: 357px; }
+  html.js[data-view="ok"][data-cv-end="one"] [data-collection-grid]:empty { --rs-end: 50px; }
+}
+
 /* ---------- The grid ---------- */
 .cgr-grid { position: relative; }
 @media (min-width: 1081px) and (max-width: 1279px) { .cgr-grid { gap: 20px; } }

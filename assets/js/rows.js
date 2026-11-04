@@ -157,7 +157,7 @@
      data-loop="phone" (the default) glides on phones (up to 760 px) and touch tablets (up to 1,079 px);
      data-loop="always" glides at every width. A row glides only while it really scrolls sideways at that width
      and its pieces do not all fit; a reviews row needs four cards or more.
-     data-loop-speed="24 22": px a second on wider screens, then on phones (reviews: 32 and 26).
+     data-loop-speed="24 22": px a second on wider screens, then on phones (reviews: 50 and 40).
      data-loop-label="Pause the gifts": its pause button's name (reviews: "Pause the reviews").
      The scroller is [data-loop-scroller] (else .row__scroller) inside the row, and the list its first element.
    - The list is copied as often as needed (copies are hidden from screen readers and from the keyboard, and
@@ -170,6 +170,13 @@
    - It rests while the mouse is over it, while the keyboard is inside it, while under 60% of it is on screen,
      while the page is hidden or a drawer or menu is open, and while its pause button is pressed (then it comes
      to rest on the nearest piece and snapping returns). It never snaps while it glides.
+   - A row that keeps time (the clock option; every reviews row) glides from the moment its list is there and
+     rests only when the visitor asks: the mouse over it, the keyboard inside it, a finger, its pause button,
+     less motion. Off screen, in a hidden tab, under a drawer and beyond the three-movers budget it glides on,
+     so its place follows the clock: a visitor who comes back later finds it further along, in the same order.
+     It starts spread: its copies are made at once and its first piece sits at the row's left edge (where the
+     row reaches the screen's edge), and its pieces stand one gap apart all round the circle; it never shows
+     the empty start of its list.
    - The three-movers rule never holds a gliding row the visitor is looking at (it counts, so others wait).
    - Visitors who ask for less motion get still rows they scroll by hand, and no pause buttons.
    Pynora.rows.loop(root, options) makes a loop by script (the jewel ribbon); Pynora.rows.loopOf(el) returns the
@@ -190,7 +197,8 @@
   var ROOM = 1000;            /* px of the circle kept on either side of a resting row */
   var EDGE = 300;             /* px: a row scrolled this near either end by the visitor is moved back to the middle */
   var SEEN = 0.6;             /* share of a row on screen before it glides */
-  var REVIEWS = { mode: 'always', speed: [32, 26], label: 'Pause the reviews', min: 4, cls: 'row__pause rv__pause' };
+  var REVIEWS = { mode: 'always', speed: [50, 40], label: 'Pause the reviews', min: 4, cls: 'row__pause rv__pause', clock: true };
+  var CLOCK_IGNORES = { off: 1, hidden: 1, overlay: 1, budget: 1 };   /* reasons a row that keeps time never rests for */
 
   function mq(q) { return window.matchMedia ? window.matchMedia(q) : null; }
   var PHONE = mq('(max-width: 760px)');
@@ -244,10 +252,13 @@
 
   function Loop(root, o) {
     var scroller = o.scroller, track = o.track, watch = o.watch || root;
-    var reasons = { off: true };
+    var reasons = o.clock ? {} : { off: true };
     if (o.wait) reasons.wait = true;
     var on = false, made = false, folded = true, offAll = false;
     var period = 0, speed = 0, sets = 1, mid = 1, n = 0;
+    /* lead: a row that keeps time glides and rests between lead and lead + one period (lead = the list's own
+       left padding), so its left edge always shows pieces, never the list's empty start; 0 for other rows */
+    var lead = 0, spreadDue = false, quickStart = false;
     var btn = null, down = false, lastPress = -1e9, mover = null;
     var restTimer = 0, idleTimer = 0, steerTimer = 0, snapTimer = 0, rampRaf = 0, checkRaf = 0, refreshTimer = 0;
     var selfUntil = 0;
@@ -270,8 +281,8 @@
 
     function norm(x) {
       if (!period) return x;
-      x = x % period;
-      return x < 0 ? x + period : x;
+      x = (x - lead) % period;
+      return (x < 0 ? x + period : x) + lead;
     }
     /* the row's own scroll position, set at once (never smoothly) */
     function setScroll(x) {
@@ -305,13 +316,14 @@
       made = false;
       period = 0;
     }
-    /* each set of copies starts after the same empty space as the list's own side padding, rounded so that one
-       period is a whole number of pixels: the frame one period on is pixel for pixel the frame at the start */
+    /* each set of copies starts after the same empty space as the list's own side padding (a row that keeps
+       time: one gap, as between its pieces), rounded so that one period is a whole number of pixels: the frame
+       one period on is pixel for pixel the frame at the start */
     function spacer() {
       var firsts = Array.prototype.filter.call(track.children, function (c) { return c.hasAttribute('data-copy-first'); });
       if (!firsts.length) return;
       var cs = getComputedStyle(track);
-      var base = Math.max(0, (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.columnGap) || 0));
+      var base = o.clock ? 0 : Math.max(0, (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.columnGap) || 0));
       firsts.forEach(function (c) { c.style.marginLeft = base.toFixed(3) + 'px'; });
       var raw = firsts[0].getBoundingClientRect().left - track.children[0].getBoundingClientRect().left;
       var m = (base + (Math.ceil(raw - 0.001) - raw)).toFixed(3) + 'px';
@@ -326,8 +338,9 @@
       var p = copy.getBoundingClientRect().left - first.getBoundingClientRect().left;
       if (p < 1) return;
       var vw = scroller.clientWidth;
+      var a = o.clock ? (parseFloat(getComputedStyle(track).paddingLeft) || 0) : 0;
       var m = Math.max(1, Math.ceil(ROOM / p));
-      var need = m + 1 + Math.ceil((ROOM + vw) / p);
+      var need = m + 1 + Math.ceil((ROOM + vw + a) / p);
       if (need > sets) {
         while (sets < need) addSet();
         spacer();
@@ -335,12 +348,15 @@
       }
       mid = m;
       var s = phone() ? o.speed[1] : o.speed[0];
-      if (Math.abs(p - period) < 0.01 && s === speed) return;
+      if (Math.abs(p - period) < 0.01 && s === speed && Math.abs(a - lead) < 0.01) return;
       var at = folded ? 0 : offsetOf(track);
       period = p;
       speed = s;
+      lead = a;
       track.style.setProperty('--loop-d', period.toFixed(3) + 'px');
+      if (o.clock) track.style.setProperty('--loop-a', lead.toFixed(3) + 'px');
       if (!folded) start(at, false);
+      else if (o.clock && !reasons.focus && scroller.scrollLeft < lead - 0.5) setScroll(norm(scroller.scrollLeft));
     }
 
     /* ---------- the glide ---------- */
@@ -366,7 +382,7 @@
       cancelAnimationFrame(rampRaf);
       track.style.animation = 'none';
       void track.offsetWidth;
-      track.style.animation = 'm-loop ' + (period / speed).toFixed(3) + 's linear ' + (-at / speed).toFixed(3) + 's infinite';
+      track.style.animation = 'm-loop ' + (period / speed).toFixed(3) + 's linear ' + (-(at - lead) / speed).toFixed(3) + 's infinite';
       track.style.animationPlayState = '';
       track.classList.add('is-gliding');
       if (ramp) rampUp();
@@ -392,7 +408,8 @@
       var at = norm(scroller.scrollLeft + (folded ? 0 : offsetOf(track)));
       setScroll(0);
       folded = false;
-      start(at, true);
+      start(at, !quickStart);      /* the first glide of a row that keeps time is at full speed from its first frame */
+      quickStart = false;
     }
     /* a row resting under a finger is moved back to the middle of its copies (the same picture: the move is a
        whole number of periods): when its scrolling stops, when the finger comes down again, and at once when a
@@ -426,7 +443,7 @@
       root.classList.toggle('is-stopped', !!reasons.user);
     }
     function set(name, v) {
-      v = !!v;
+      v = !!v && !(o.clock && CLOCK_IGNORES[name]);
       if (!!reasons[name] === v) return;
       reasons[name] = v;
       /* while the keyboard is inside, a piece already on screen is "in view": no padding to bring it past */
@@ -479,6 +496,9 @@
         if (d < dist) { dist = d; best = x; }
       });
       clearTimeout(snapTimer);
+      /* a row that keeps time rests on the same piece one period on rather than show its list's empty start
+         (moved there first by one whole period, the same picture) */
+      if (best != null && o.clock && period && best < lead - 0.5) { setScroll(scroller.scrollLeft + period); best += period; }
       if (best == null || dist < 1) { scroller.style.scrollSnapType = ''; return; }
       scroller.scrollTo({ left: Math.max(0, best), behavior: 'smooth' });
       var back = function () {
@@ -551,21 +571,22 @@
       scroller.addEventListener('wheel', function (e) { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) nudged(); }, { passive: true });
       P.$$('[data-row-prev], [data-row-next]', root).forEach(function (b) { b.addEventListener('click', nudged, true); });
 
-      /* on screen (sideways overflow ignored) */
-      if ('IntersectionObserver' in window) {
-        var steps = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.55, 0.6, 0.65, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99, 1];
-        new IntersectionObserver(function (es) {
-          var e = es[es.length - 1];
-          var vh = e.rootBounds ? e.rootBounds.height : window.innerHeight;
-          var h = Math.max(1, Math.min(e.boundingClientRect.height, vh));
-          set('off', !(e.isIntersecting && e.intersectionRect.height >= o.need * h - 2));
-        }, { rootMargin: '0px 400px 0px 400px', threshold: steps }).observe(watch);
-      } else reasons.off = false;
-
-      doc.addEventListener('visibilitychange', function () { set('hidden', doc.hidden); });
-      /* a drawer, a menu or a panel open over the page */
-      P.on('overlay:open', function () { set('overlay', true); });
-      P.on('overlay:close', function (d) { if (!(d && d.switching)) set('overlay', false); });
+      /* on screen (sideways overflow ignored), the page hidden, a drawer, a menu or a panel open over the page
+         (a row that keeps time glides on through all of these) */
+      if (!o.clock) {
+        if ('IntersectionObserver' in window) {
+          var steps = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.55, 0.6, 0.65, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99, 1];
+          new IntersectionObserver(function (es) {
+            var e = es[es.length - 1];
+            var vh = e.rootBounds ? e.rootBounds.height : window.innerHeight;
+            var h = Math.max(1, Math.min(e.boundingClientRect.height, vh));
+            set('off', !(e.isIntersecting && e.intersectionRect.height >= o.need * h - 2));
+          }, { rootMargin: '0px 400px 0px 400px', threshold: steps }).observe(watch);
+        } else reasons.off = false;
+        doc.addEventListener('visibilitychange', function () { set('hidden', doc.hidden); });
+        P.on('overlay:open', function () { set('overlay', true); });
+        P.on('overlay:close', function (d) { if (!(d && d.switching)) set('overlay', false); });
+      }
       /* "less motion" chosen while the page is open: a still row to scroll by hand, no button */
       P.on('motion:off', function () { offAll = true; set('off-all', true); if (btn) btn.hidden = true; });
       P.on('motion:on', function () { offAll = false; if (btn) btn.hidden = !on; set('off-all', false); });
@@ -588,7 +609,8 @@
             clearCopies();
             setScroll(0);
           }
-          queue();
+          /* a row that keeps time is made at once, before the list is first drawn */
+          if (o.clock) check(); else queue();
         }).observe(track, { childList: true });
       }
     }
@@ -596,10 +618,11 @@
     function addMover() {
       if (mover || !P.motion || typeof P.motion.addMover !== 'function') return;
       try {
-        /* forced: never held while on screen; it still counts, so the lowest of the others wait */
+        /* forced: never held while on screen; it still counts, so the lowest of the others wait (a row that
+           keeps time glides before the page's movers are released, so it counts from the start) */
         mover = P.motion.addMover({
           id: o.name, el: watch, rank: 'marquee', need: 1, forced: true,
-          wants: function () { return on && !reasons.user && !reasons.focus && P.motion.released !== false; },
+          wants: function () { return on && !reasons.user && !reasons.focus && (o.clock || P.motion.released !== false); },
           pause: function () { set('budget', true); },
           resume: function () { set('budget', false); }
         });
@@ -615,6 +638,7 @@
         addSet();
         addSet();
         refreshMotion();
+        if (o.clock) spreadDue = true;
       }
       if (w !== on) {
         on = w;
@@ -623,6 +647,7 @@
           if (!btn) makeButton();
           addMover();
           scroller.style.scrollSnapType = reasons.user ? '' : 'none';
+          if (o.clock) spreadDue = true;
         } else {
           if (!folded) stopGlide();
           folded = true;
@@ -632,7 +657,14 @@
         if (btn) btn.hidden = !on || offAll;
       }
       if (on) measure();
+      /* a row that keeps time starts spread: its first piece at the row's left edge */
+      if (on && spreadDue && period) {
+        spreadDue = false;
+        quickStart = true;
+        if (folded) setScroll(lead);
+      }
       apply();
+      quickStart = false;
     }
     function queue() { if (!checkRaf) checkRaf = requestAnimationFrame(check); }
 
@@ -685,7 +717,7 @@
     root._pyLoop = api;
 
     wire();
-    queue();
+    if (o.clock) check(); else queue();
     return api;
   }
 
@@ -705,6 +737,7 @@
       label: root.getAttribute('data-loop-label') || rv.label || 'Pause the row',
       min: parseInt(root.getAttribute('data-loop-min'), 10) || rv.min || 2,
       cls: rv.cls,
+      clock: !!rv.clock,
       ownFocus: !root.classList.contains('row')       /* rows.js keeps a .row's focused card in view itself */
     });
   }
@@ -712,7 +745,8 @@
   function armed() { return html.classList.contains('motion') && !P.reduced(); }
 
   /* Pynora.rows.loop(root, { scroller, track, mode, speed: [wide, phone], label, min, need, cls, place(button),
-     wait (glides only after release()), ownFocus, watch, name }) */
+     wait (glides only after release()), clock (keeps time, starts spread; see the note above), ownFocus, watch,
+     name }) */
   function loop(root, o) {
     if (!root || !armed()) return null;
     if (root._pyLoop) return root._pyLoop;
@@ -730,6 +764,7 @@
       cls: o.cls,
       place: o.place,
       wait: !!o.wait,
+      clock: !!o.clock,
       ownFocus: !!o.ownFocus,
       name: o.name || root.id || ('row-loop-' + (++count))
     });

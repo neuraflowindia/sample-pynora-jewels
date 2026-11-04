@@ -12,7 +12,8 @@
    - The prints: each a miniature of the same frame (gilt edge, ivory reveal, gold fillet). Hover lifts a print a
      little; the chosen one steps forward towards the stage, larger, with a sharper, deeper shadow, and its maroon
      ring draws in as its picture lands.
-   - Controls are gilt pills: the heart, and one capsule holding the arrows and the counter. On laptops with a fine
+   - Controls are gilt pills: the heart, and one capsule holding the arrows and the counter (on tablets and phones a
+     row of dots says which picture is shown, and the capsule steps aside). On laptops with a fine
      pointer the picture is a jeweller's loupe: a round, gilt-rimmed lens follows the pointer and shows the detail at
      twice the size (gallery.js); a small pill says so until it is first used.
    - The turn (gallery.js): the card rises as it turns, its gilt edge catches the light at the half-way point, its
@@ -31,7 +32,7 @@
   --gal-r: 24px;                                      /* the frame's outer corner */
   --gal-r-mid: 14px;                                  /* the reveal's corner (frame corner less the moulding) */
   --gal-r-in: 7px;                                    /* the picture's corner */
-  --gal-fan: 40px;                                    /* the box each corner fan is drawn in */
+  --gal-fan: 53px;                                    /* the box each corner fan is drawn in */
   --gal-over: 30px;                                   /* overlays: 12 px inside the picture */
   --gal-lens: 210px;                                  /* the loupe's glass (read by gallery.js) */
   --niche-x: 22px;                                    /* how far the rose niche reaches round the gallery */
@@ -577,9 +578,7 @@
   .gal__thumb:hover { translate: none; scale: none; }
   .gal__thumb[aria-current="true"] { translate: 0 -3px; scale: 1.07; }
   .gal__face--back, .gal__well { display: none; }
-  .gal__nav { height: 34px; padding: 0; left: var(--gal-over); right: auto; }
-  .gal__nav button { display: none; }
-  .gal__count { height: 34px; padding: 0 13px; border: 0; font-size: 14px; }
+  .gal__nav { display: none; }                        /* the dots say which picture this is; no arrows on touch */
   .gal__strip {
     position: absolute;
     inset: var(--gal-in);
@@ -603,12 +602,18 @@
     transition: opacity 360ms var(--ease);
   }
   .gal__strip img.is-wait { opacity: 0; transition: none; }
+  /* the dots: 6 px each, 6 px apart, the chosen one drawn out to 16 px. Each sits in its own place (--k, from
+     gallery.js) and only moves: those after the chosen one (--on) slide 10 px along, and the chosen one is uncovered
+     to its full length (a clip), so nothing is laid out again as the picture changes */
   .gal__dots {
+    --dot-step: 12px;
     position: absolute;
     left: 50%;
     bottom: calc(var(--gal-over) + 5px);
-    display: flex;
-    gap: 6px;
+    display: block;
+    box-sizing: content-box;
+    width: calc(var(--n, 1) * var(--dot-step) + 4px);
+    height: 6px;
     padding: 7px 9px;
     border-radius: 999px;
     background: rgba(252, 248, 241, .86);
@@ -618,12 +623,33 @@
     transform: translateX(-50%);
     pointer-events: none;
   }
-  .gal__dots i { width: 6px; height: 6px; border-radius: 99px; background: rgba(42, 26, 30, .3); transition: width 260ms var(--ease), background-color 260ms var(--ease); }
-  .gal__dots i.on { width: 16px; background: var(--c-maroon); }
+  .gal__dots i {
+    position: absolute;
+    top: 7px;
+    left: 9px;
+    width: 16px;
+    height: 6px;
+    border-radius: 99px;
+    background: rgba(42, 26, 30, .3);
+    clip-path: inset(0 10px 0 0 round 3px);
+    transform: translateX(calc(var(--k, 0) * var(--dot-step) + clamp(0px, (var(--k, 0) - var(--on, 0)) * 10px, 10px)));
+    transition: transform 260ms var(--ease), clip-path 260ms var(--ease);
+  }
+  .gal__dots i::after {                               /* the chosen one's maroon, faded in over the grey */
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--c-maroon);
+    opacity: 0;
+    transition: opacity 260ms var(--ease);
+  }
+  .gal__dots i.on { clip-path: inset(0 0 0 0 round 3px); }
+  .gal__dots i.on::after { opacity: 1; }
 }
 
 /* ======================================================================= less motion */
 @media (prefers-reduced-motion: reduce) {
-  .gal__thumb, .gal__thumb img, .gal__thumb::before, .gal__thumb::after, .gal__img, .gal__strip img, .gal__dots i,
+  .gal__thumb, .gal__thumb img, .gal__thumb::before, .gal__thumb::after, .gal__img, .gal__strip img, .gal__dots i, .gal__dots i::after,
   .gal__nav button, .gal__glass, .gal__hint { transition: none; }
 }

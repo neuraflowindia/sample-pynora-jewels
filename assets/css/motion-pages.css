@@ -14,10 +14,8 @@
    Load order: after motion-base.css and motion-micro.css. */
 
 /* ---------- Which parts lead with their own progress (read by motion-core.js) ----------
-   Every card's list item arrives with its own row, on laptops too; on the Collection page the block under the
-   grid ("You may also like", or "New in the studio" for an unknown collection) leads its own heading. */
-:is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li[data-row],
-.pg--collection .cv-grid .more[data-row] { --m-lead: 1; }
+   Every card's list item arrives with its own row, on laptops too. */
+:is(.pg--collection, .pg--product, .pg--notfound) main [data-cards] > li[data-row] { --m-lead: 1; }
 
 /* ---------- The first band: her divider draws outward from the fan while the lines rise ---------- */
 @keyframes m-pg-rule { from { transform: scaleX(0); } }
@@ -44,20 +42,17 @@ html.motion :is(.pg--collection, .pg--product, .pg--notfound) .m-load.m-skip .hs
 
 /* ---------- Lower headings: the words rise on cue; the divider draws outward as the band arrives ----------
    Shares of the band's progress (laptops: 560 px from the band's top crossing 92% of the screen; tablets and
-   phones: 0.6 of the screen height), set so each heading starts rising when its top is about 88% down the screen.
-   On the Collection page the block under the grid leads its own heading (0.45 of the screen height). */
+   phones: 0.6 of the screen height), set so each heading starts rising when its top is about 88% down the screen. */
 html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more) .hs .line__in { --d: 0.2; }
 html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more) .hs > .orn-rule { --d: 0.18; }
-html.motion-scroll .pg--collection .cv-grid .more .hs .line__in { --d: 0.1; }
-html.motion-scroll .pg--collection .cv-grid .more .hs > .orn-rule { --d: 0.08; }
-html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more, .cv-grid .more) .hs > .orn-rule {
+html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more) .hs > .orn-rule {
   --s: 0.35;
   --t: clamp(0, (var(--p, 1) - var(--d, 0)) / var(--s), 1);
   --e: calc(1 - (1 - var(--t)) * (1 - var(--t)) * (1 - var(--t)));
 }
-html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more, .cv-grid .more) .hs > .orn-rule::before { transform: scaleX(var(--e)); transform-origin: 100% 50%; }
-html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more, .cv-grid .more) .hs > .orn-rule::after { transform: scaleX(var(--e)); transform-origin: 0 50%; }
-html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more, .cv-grid .more) .hs > .orn-rule > .orn-fan { scale: calc(0.6 + 0.4 * var(--e)); opacity: var(--e); }
+html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more) .hs > .orn-rule::before { transform: scaleX(var(--e)); transform-origin: 100% 50%; }
+html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more) .hs > .orn-rule::after { transform: scaleX(var(--e)); transform-origin: 0 50%; }
+html.motion-scroll :is(.pdp-rv, .pdp-more, .nf-more) .hs > .orn-rule > .orn-fan { scale: calc(0.6 + 0.4 * var(--e)); opacity: var(--e); }
 
 /* ---------- Rows of cards: each card rises 40 px from a little smaller, unveiled from the top down ----------
    The unveiling is done by 60% of the card's span, so its name and price are whole while it settles; the clip

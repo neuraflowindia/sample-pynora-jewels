@@ -151,10 +151,15 @@
       cardsOf(list).forEach(function (c, n) { if (!HV.test(c.className)) setHover(c, wayFor(list, n, off)); });
     });
   }
-  var assignTimer = 0;
+  /* straight after the script that placed the cards (a microtask), so they never paint without their way: a way
+     given after a paint moves the veil's box, which the browser counts as a layout shift */
+  var assignWaiting = false;
+  var soon = typeof queueMicrotask === 'function' ? function (f) { queueMicrotask(f); }
+    : function (f) { Promise.resolve().then(f); };
   function assignSoon() {
-    if (assignTimer) return;
-    assignTimer = setTimeout(function () { assignTimer = 0; assignAll(); }, 0);
+    if (assignWaiting) return;
+    assignWaiting = true;
+    soon(function () { assignWaiting = false; assignAll(); });
   }
 
   /* ---------- The card ---------- */

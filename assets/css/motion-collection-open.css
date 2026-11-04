@@ -5,9 +5,9 @@
      of a clip. Then the portrait breathes: scale 1 -> 1.03 and a 0.8% pan over 9 s, back and forth, for as long as
      the page is open; a counted mover (page-collection.js), held when it is off screen or the budget is full, and
      still under the pointer.
-   - Scroll (on cue): every lower heading's divider draws outward from the fan; the reviews row slides in from the
-     right and its stars fill (motion-moments.js); the emerald card's three rows rise in turn; the Explore circles
-     rise 40 ms apart.
+   - Scroll (on cue): every lower heading's divider draws outward from the fan; the reviews row rises gently into
+     place, spread from edge to edge, and its stars fill (motion-moments.js); the emerald card's three rows rise in
+     turn; the Explore circles rise 40 ms apart.
    Words never fade: they rise, or are revealed by a clip. Everything lives under html.motion / html.motion-scroll,
    so a visitor who asks for less motion, or a page whose scripts fail, sees the finished, still page. */
 
@@ -49,7 +49,7 @@ html.motion-scroll :is(.cask, .cex, .pg--collection .rv) .hs > .orn-rule.is-up::
 html.motion-scroll :is(.cask, .cex, .pg--collection .rv) .hs > .orn-rule.is-up::after { transform: none; }
 html.motion-scroll :is(.cask, .cex, .pg--collection .rv) .hs > .orn-rule.is-up > .orn-fan { scale: 1; opacity: 1; }
 
-/* ---------- Loved by our clients: the row slides in from the right; the stars fill once ---------- */
+/* ---------- Loved by our clients: the row rises into place (never sideways); the stars fill once ---------- */
 html.motion-scroll .pg--collection .rv__hs > .orn-rule { --d: 0.02; }
 html.motion-scroll .pg--collection .rv__avg .line__in { --d: 0.08; }
 html.motion .pg--collection .rv__stars.is-waiting .stars__fill { clip-path: inset(0 100% 0 0); }
@@ -57,7 +57,7 @@ html.motion .pg--collection .rv__stars.is-filled .stars__fill { clip-path: inset
 html.motion-scroll .pg--collection .rv__rowwrap {
   --t: clamp(0, var(--p, 1) / 0.8, 1);
   --e: calc(1 - (1 - var(--t)) * (1 - var(--t)) * (1 - var(--t)));
-  transform: translateX(calc(120px * var(--om) * (1 - var(--e))));
+  transform: translateY(calc(24px * var(--om) * (1 - var(--e))));
 }
 html.motion-scroll .pg--collection .rv.is-done .rv__rowwrap { transform: none; }
 @media (min-width: 1081px) {

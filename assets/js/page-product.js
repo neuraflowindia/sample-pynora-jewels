@@ -80,7 +80,7 @@
       '</div>' +
       '<div class="more pdp__new">' +
         '<div class="hs"><h2 class="t-sub line"><span class="line__in">New in the studio</span></h2><span class="orn-rule" aria-hidden="true"><span class="orn-fan"></span></span></div>' +
-        '<ul class="card-grid" data-cards data-collection="new" data-limit="4" data-reveal="dissolve" data-heading="h3" data-sizes="(max-width: 760px) 44vw, (max-width: 1080px) 27vw, (min-width: 1441px) calc((277px + (100vw - 1440px) * 0.081) * 1.25), 290px"></ul>' +
+        '<ul class="card-grid" data-cards data-collection="new" data-limit="4" data-reveal="dissolve" data-heading="h3" data-sizes="(max-width: 760px) 44vw, (max-width: 1080px) 27vw, (min-width: 1441px) calc((277px + (100vw - 1440px) * 0.081) * 1.25), 335px"></ul>' +
       '</div>';
     if (moreList) moreList.removeAttribute('data-cards');
   }
@@ -207,8 +207,11 @@
     out.push(['care']);
     return out;
   }
-  /* a number keeps its unit, and a size its "×", on one line */
-  function keep(text) { return esc(text).replace(/(\d) (cm|g|mm)\b/g, '$1 $2').replace(/ × /g, ' × '); }
+  /* a number keeps its unit, a size its "×", and a joined word ("emerald-green") its hyphen, on one line */
+  function keep(text) {
+    return esc(text).replace(/(\d) (cm|g|mm)\b/g, '$1 $2').replace(/ × /g, ' × ')
+      .replace(/[A-Za-z]+(?:-[A-Za-z]+)+/g, '<span style="white-space:nowrap">$&</span>');
+  }
   function specHTML() {
     var tiles = sheetOf().map(function (t) { return [t[0], t[1] || (t[0] === 'care' ? CARE_SHORT[p.care] : '')]; })
       .filter(function (t) { return TILE[t[0]] && t[1]; });

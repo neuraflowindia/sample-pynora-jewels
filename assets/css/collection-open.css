@@ -275,8 +275,8 @@
 html[data-hindi="none"] .cop [data-fill="hindi"] { display: none; }
 /* the portrait's room is kept while the page script writes it */
 html.js[data-view="ok"] .cop__pics:empty { width: calc(var(--pic-h) * 0.8); height: var(--pic-h); }
-@media (max-width: 760px) { html.js[data-view="ok"] .cop__pics:empty { width: 140px; height: 210px; } }
-
+/* phones: the 140 × 175 px frame, the 10 px gap and the plaque's one line (5 + 4 px padding, 13.5 px / 1.15) */
+@media (max-width: 760px) { html.js[data-view="ok"] .cop__pics:empty { width: 140px; height: calc(175px + 10px + 9px + 13.5px * 1.15); } }
 /* ---------- An unknown collection: the not-found words, centred, in place of the opening ---------- */
 .cop__in.is-missing { display: block; max-width: 760px; }
 .cop__in.is-missing .cop__crumbs ol { justify-content: center; }

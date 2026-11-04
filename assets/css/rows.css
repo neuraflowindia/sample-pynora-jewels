@@ -91,12 +91,13 @@
 /* ---------- Gliding rows (rows.js, only with motion) ----------
    A row marked data-loop (and every reviews row) is copied and glides as a circle while is-looping is on; at
    every other moment (a width where it does not glide, less motion) its copies are not there. One period is
-   --loop-d, written by the script. */
+   --loop-d, written by the script; --loop-a, where the circle starts (a row that keeps time: its list's left
+   padding, so its left edge always shows pieces; 0 for the others). */
 [data-loop]:not(.is-looping) [data-copy],
 .row--reviews:not(.is-looping) [data-copy] { display: none !important; }
 @keyframes m-loop {
-  from { transform: translateX(0); }
-  to { transform: translateX(calc(-1 * var(--loop-d, 0px))); }
+  from { transform: translateX(calc(-1 * var(--loop-a, 0px))); }
+  to { transform: translateX(calc(-1 * (var(--loop-a, 0px) + var(--loop-d, 0px)))); }
 }
 
 /* its pause button (motion-micro.css draws it): beside the arrows with a mouse, shown on hover, on focus and
@@ -111,7 +112,8 @@
 @media (hover: none), (pointer: coarse) {
   .row__pause { opacity: 1; }
 }
-/* phones (touch): above the row's right end, taking no room (a row can place it otherwise in its own file) */
+/* phones (touch): above the row's left end, taking no room and clear of the floating WhatsApp button at the
+   screen's bottom right (a row can place it otherwise in its own file) */
 @media (max-width: 760px) and (hover: none), (max-width: 760px) and (pointer: coarse) {
-  .row__bar > .row__pause { position: absolute; z-index: 2; right: 5px; bottom: 100%; margin: 0 0 1px; }
+  .row__bar > .row__pause { position: absolute; z-index: 2; left: 5px; right: auto; bottom: 100%; margin: 0 0 1px; }
 }

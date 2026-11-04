@@ -321,8 +321,8 @@
   }
 
   /* ---------- Gold lines catch the light now and then ----------
-     Each divider inside a band gets <i class="orn-gleam"><i></i></i>; each gilt frame gets two, thin strips on
-     the top and bottom edges of its mount line (thin, so a pass costs the screen almost nothing). Every GLEAM_TICK
+     Each divider inside a band gets <i class="orn-gleam"><i></i></i>; each gilt frame gets two narrow strips on
+     the top and bottom edges of its mount line (each its own layer while live, so a pass costs almost nothing). Every GLEAM_TICK
      the most overdue line that is wholly arrived on screen gets one pass, if the last pass on the page began at
      least GLEAM_GAP ago (so two never run together). A line then waits 7-11 s before its next pass. */
   var GLEAM_TICK = 500;
@@ -353,7 +353,7 @@
     gleams.push({ els: els, host: host, ring: ring, band: host.closest('[data-bg]'), last: clock(), wait: 1500 + Math.random() * 3000, seen: -1, anims: [] });
   }
   /* a frame's two strips sit exactly on its own mount line (its ::after), between the rounded corners, at every
-     size: 2 px tall, centred on the 1 px line */
+     size: each strip (its height set by ornament.css) centred on the 1 px line */
   function fitRing(g) {
     var cs = window.getComputedStyle(g.host, '::after');
     if (!cs || cs.content === 'none' || cs.position !== 'absolute') return;
@@ -362,8 +362,9 @@
     var top = g.els[0].style, bot = g.els[1].style;
     top.left = bot.left = l;
     top.right = bot.right = r;
-    top.top = (parseFloat(cs.top) - 0.5) + 'px';
-    bot.bottom = (parseFloat(cs.bottom) - 0.5) + 'px';
+    var half = (g.els[0].offsetHeight || 2) / 2 - 0.5;
+    top.top = (parseFloat(cs.top) - half) + 'px';
+    bot.bottom = (parseFloat(cs.bottom) - half) + 'px';
   }
   if (Element.prototype.animate && Element.prototype.closest) {
     Array.prototype.forEach.call(doc.querySelectorAll('[data-bg] .orn-rule'), function (r) { addGleam(r, false); });

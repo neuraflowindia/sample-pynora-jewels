@@ -246,8 +246,11 @@
     g.stripColour = g.colour;
     g.strip.scrollLeft = 0;
   }
+  /* each dot knows its place (--k) and the row its length (--n); gallery.css moves them by transform alone */
   function drawDots(g) {
-    g.dots.innerHTML = g.ims.map(function () { return '<i></i>'; }).join('');
+    g.dots.style.setProperty('--n', String(g.ims.length));
+    g.dots.style.setProperty('--on', String(g.index || 0));
+    g.dots.innerHTML = g.ims.map(function (im, k) { return '<i style="--k:' + k + '"' + (k === g.index ? ' class="on"' : '') + '></i>'; }).join('');
     g.dotEls = P.$$('i', g.dots);
   }
   /* a strip picture gets its address only when it is about to be seen */
@@ -266,6 +269,7 @@
   /* ---------- the chosen picture ---------- */
   /* the counter and dots on the picture: they change with the picture, at the turn's half-way point */
   function setFace(g, i) {
+    g.dots.style.setProperty('--on', String(i));
     g.dotEls.forEach(function (d, k) { d.classList.toggle('on', k === i); });
     g.count.textContent = (i + 1) + ' / ' + g.ims.length;
   }

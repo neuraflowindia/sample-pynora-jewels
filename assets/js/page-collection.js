@@ -52,14 +52,6 @@
   }
 
   /* ---------- The opening ---------- */
-  function facts(pieces, t) {
-    var from = Math.min.apply(null, pieces.map(function (p) { return Number(p.price) || Infinity; }));
-    return '<li class="cop__fact">' + icon('sparkle') + '<span><b>' + pieces.length + '</b> ' + (pieces.length === 1 ? 'piece' : 'pieces') + '</span></li>' +
-      '<li class="cop__fact">' + icon('banknote') + '<span>From <b>' + esc(P.inr(from)) + '</b></span></li>' +
-      (t.count ? '<li class="cop__fact"><a class="cop__rate" href="#reviews">' + icon('star', 'i--fill') +
-        '<span><span class="vh">Rated </span><b>' + t.avg.toFixed(1) + '</b> · ' + plural(t.count, 'review', 'reviews') + '</span></a></li>' : '');
-  }
-
   function portraitImg(pt) {
     return '<img class="cop__img" src="' + esc(pt.src) + '" srcset="' + esc(pt.srcset) + '" sizes="' + esc(pt.sizes) + '" alt="' + esc(pt.alt) + '"' +
       ' style="--focal:' + esc(pt.focal) + ';--focal-phone:' + esc(pt.focalPhone) + '" fetchpriority="high" decoding="async">';
@@ -88,7 +80,7 @@
     return '<p class="cop__plaque"><a href="' + esc(c.href) + '">' + esc(c.short) + '</a>' + (c.price ? ' · <b>' + esc(c.price) + '</b>' : '') + '</p>';
   }
 
-  function opening(col, pieces, t) {
+  function opening(col) {
     var title = col.id === 'all' ? 'All pieces' : col.title;
     fill('crumbs', crumbs(title));
     var hindi = $('[data-fill="hindi"]');
@@ -98,7 +90,7 @@
     }
     $('[data-fill="title"]').textContent = title;
     $('[data-fill="intro"]').textContent = col.intro || '';
-    fill('facts', facts(pieces, t));
+    fill('facts', page.facts || '');              /* the three facts, built once by page-early.js */
 
     var pt = page.portrait;
     var ch = col.chip || {};
@@ -110,9 +102,8 @@
     }
     var pictured = $('[data-fill="pictured"]');
     if (pictured) {
-      if (ch.mode === 'pictured' && pt) {
-        pictured.innerHTML = '<span class="line__in">Pictured: <a href="' + esc(c.href) + '">' + esc(c.name) + '</a>' +
-          (c.colour ? ' in ' + esc(c.colour) : '') + (c.price ? ' · <b>' + esc(c.price) + '</b>' : '') + icon('arrow') + '</span>';
+      if (page.pictured) {               /* built once by page-early.js (where the piece fills the frame) */
+        pictured.innerHTML = page.pictured;
         pictured.hidden = false;
       } else pictured.remove();
     }
@@ -239,8 +230,7 @@
   function draw() {
     var col = P.collectionInfo(page.id);
     var pieces = P.collection(page.id);
-    var t = tally(pieces);
-    opening(col, pieces, t);
+    opening(col);
     reviews(col, pieces);
     askWords(col);
     exploreList(col.id);
